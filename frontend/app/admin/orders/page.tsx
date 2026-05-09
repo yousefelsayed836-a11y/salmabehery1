@@ -357,7 +357,7 @@ export default function OrdersPage() {
                   ["City", selectedOrder.city || "-"],
                   selectedOrder.governorate ? ["Governorate", selectedOrder.governorate] : null,
                   selectedOrder.notes ? ["Notes", selectedOrder.notes] : null,
-                ].filter(Boolean).map(([label, val], i) => (
+                ].filter((x): x is string[] => Boolean(x)).map(([label, val], i) => (
                   <div key={i} style={{ display: "flex", gap: 10, padding: "8px 0", borderBottom: "1px solid #eee" }}>
                     <span style={{ color: "#888", fontSize: 13, minWidth: 90 }}>{label}</span>
                     <span style={{ fontWeight: 600, fontSize: 13, color: label === "WhatsApp" ? "#25d366" : "#1a1a2e" }}>{val}</span>
