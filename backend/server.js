@@ -13,7 +13,13 @@ const app = express();
 
 // ✅ CORS
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://salmabehery1-57ct.vercel.app',
+    'https://salmabehery1.vercel.app',
+    'https://salmabehery1-3zy6.vercel.app'
+  ],
   credentials: true
 }));
 
@@ -49,7 +55,7 @@ app.use('/api/users', require('./routes/users'));
 const bulkUploadRoutes = require('./routes/admin/bulkUpload');
 app.use('/api/admin/products/bulk-upload', upload.single('csv'), bulkUploadRoutes);
 
-// ✅ Single image upload - returns FULL URL (FIXED!)
+// ✅ Single image upload
 app.post('/api/upload', upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
@@ -65,8 +71,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     const filepath = path.join(uploadsDir, filename);
     fs.writeFileSync(filepath, req.file.buffer);
 
-    // ✅ FIXED: return full URL so frontend can display image
-    const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const BASE_URL = process.env.BASE_URL || `https://salma-backend-4imp.onrender.com`;
     res.json({
       success: true,
       url: `${BASE_URL}/uploads/${filename}`
@@ -77,7 +82,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   }
 });
 
-// ✅ Multiple images upload - returns FULL URLs (FIXED!)
+// ✅ Multiple images upload
 app.post('/api/upload/multiple', upload.array('images', 10), (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -89,14 +94,13 @@ app.post('/api/upload/multiple', upload.array('images', 10), (req, res) => {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
-    const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const BASE_URL = process.env.BASE_URL || `https://salma-backend-4imp.onrender.com`;
     const urls = [];
 
     for (const file of req.files) {
       const filename = Date.now() + '-' + file.originalname.replace(/\s+/g, '-');
       const filepath = path.join(uploadsDir, filename);
       fs.writeFileSync(filepath, file.buffer);
-      // ✅ FIXED: full URL
       urls.push(`${BASE_URL}/uploads/${filename}`);
     }
 
@@ -107,7 +111,7 @@ app.post('/api/upload/multiple', upload.array('images', 10), (req, res) => {
   }
 });
 
-// ✅ SSE (Server-Sent Events)
+// ✅ SSE
 const clients = new Set();
 app.get('/api/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
