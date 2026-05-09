@@ -401,7 +401,7 @@ export default function BraceletPage() {
                   {filteredProducts.map((product) => {
                     const imageUrl = getProductImage(product);
                     const hasDiscount = product.old_price && product.old_price > product.price;
-                    const discountPercent = hasDiscount ? Math.round((1 - product.price / product.old_price) * 100) : 0;
+                    const discountPercent = hasDiscount && product.old_price ? Math.round((1 - product.price / product.old_price) * 100) : 0;
                     const qty = quantities[product.id] || 1;
 
                     return (
