@@ -19,6 +19,7 @@ interface Product {
   category_name?: string;
   category_slug?: string;
   handle?: string;
+  stock?: number;
   is_active: boolean;
 }
 
