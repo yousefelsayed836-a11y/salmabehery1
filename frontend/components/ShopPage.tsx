@@ -28,7 +28,6 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("newest");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showCart, setShowCart] = useState(false);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [addedId, setAddedId] = useState<string | null>(null);
@@ -142,15 +141,19 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                 const added = addedId === p.id;
                 return (
                   <div key={p.id} className="pc" style={{ opacity: oos ? 0.65 : 1 }}>
-                    <div style={{ position: "relative", height: 260, background: "#fafafa", overflow: "hidden", cursor: "pointer" }} onClick={() => setSelectedProduct(p)}>
+                    <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
+                    <div style={{ position: "relative", height: 200, background: "#fafafa", overflow: "hidden" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi" loading="lazy" onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
                       {hasD && <span style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>-{disc}%</span>}
                       {oos && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#6b7280", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>Out of stock</span>}
                       {low && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>Only {p.stock} left!</span>}
                       {!oos && !low && p.stock !== undefined && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#22c55e", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>In stock: {p.stock}</span>}
                     </div>
+                    </Link>
                     <div style={{ padding: "14px 14px 16px" }}>
-                      <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.3, cursor: "pointer" }} onClick={() => setSelectedProduct(p)}>{p.name_en}</h3>
+                      <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
+                      <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.3, cursor: "pointer" }}>{p.name_en}</h3>
+                      </Link>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                         <span style={{ fontSize: 18, fontWeight: 800, color: "#fda1b7" }}>{p.price} EGP</span>
                         {hasD && <span style={{ fontSize: 12, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
@@ -176,36 +179,6 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
           </>
         )}
       </div>
-
-      {/* Modal */}
-      {selectedProduct && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.7)", padding: 20 }} onClick={() => setSelectedProduct(null)}>
-          <div style={{ background: "#fff", borderRadius: 20, width: 860, maxWidth: "95vw", maxHeight: "90vh", overflowY: "auto", display: "grid", gridTemplateColumns: "1fr 1fr" }} onClick={e => e.stopPropagation()}>
-            <div style={{ background: "#fafafa", minHeight: 380 }}><img src={getImg(selectedProduct)} alt={selectedProduct.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", minHeight: 380 }} /></div>
-            <div style={{ padding: 28, display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1a2e" }}>{selectedProduct.name_en}</h2>
-                <button onClick={() => setSelectedProduct(null)} style={{ background: "none", border: "none", fontSize: 26, cursor: "pointer", color: "#aaa" }}>×</button>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 26, fontWeight: 800, color: "#fda1b7" }}>{selectedProduct.price} EGP</span>
-                {selectedProduct.old_price && selectedProduct.old_price > selectedProduct.price && <span style={{ fontSize: 16, color: "#bbb", textDecoration: "line-through" }}>{selectedProduct.old_price} EGP</span>}
-              </div>
-              {selectedProduct.description_en && <div style={{ fontSize: 13, lineHeight: 1.7, color: "#666" }} dangerouslySetInnerHTML={{ __html: selectedProduct.description_en }} />}
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {selectedProduct.material && <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#fda1b718", color: "#fda1b7", fontWeight: 700 }}>✨ {selectedProduct.material}</span>}
-                {(selectedProduct.stock ?? 1) === 0 ? <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#fee2e2", color: "#991b1b", fontWeight: 700 }}>❌ Out of stock</span>
-                  : (selectedProduct.stock ?? 99) <= 3 ? <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#fee2e2", color: "#991b1b", fontWeight: 700 }}>🔥 Only {selectedProduct.stock} left!</span>
-                  : selectedProduct.stock !== undefined ? <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#dcfce7", color: "#166534", fontWeight: 700 }}>✅ In stock: {selectedProduct.stock}</span> : null}
-              </div>
-              <button onClick={() => { handleAdd(selectedProduct, 1); setSelectedProduct(null); }} disabled={(selectedProduct.stock ?? 1) === 0}
-                style={{ width: "100%", padding: 14, borderRadius: 12, border: "none", background: (selectedProduct.stock ?? 1) === 0 ? "#e5e7eb" : "linear-gradient(135deg,#fda1b7,#f78fa3)", color: (selectedProduct.stock ?? 1) === 0 ? "#9ca3af" : "#fff", fontSize: 15, fontWeight: 700, cursor: (selectedProduct.stock ?? 1) === 0 ? "not-allowed" : "pointer", marginTop: "auto" }}>
-                {(selectedProduct.stock ?? 1) === 0 ? "Out of Stock" : "🛒 Add to Cart"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <style jsx global>{`
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}

@@ -195,7 +195,7 @@ function ShopContent() {
           <div className="products-grid">
             {[1,2,3,4,5,6,7,8].map(i => (
               <div key={i} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 10px rgba(253,161,183,0.1)" }}>
-                <div style={{ height: 260, background: "#fff", animation: "pulse 1.5s infinite" }} />
+                <div style={{ height: 200, background: "#fff", animation: "pulse 1.5s infinite" }} />
                 <div style={{ padding: 14 }}>
                   <div style={{ height: 16, background: "#fff", borderRadius: 4, marginBottom: 8, width: "70%", animation: "pulse 1.5s infinite" }} />
                   <div style={{ height: 14, background: "#fff", borderRadius: 4, width: "40%", animation: "pulse 1.5s infinite" }} />
@@ -222,7 +222,7 @@ function ShopContent() {
                 return (
                   <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(253,161,183,0.1)", transition: "transform 0.2s, box-shadow 0.2s" }}>
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
-                    <div className="product-image-wrapper" style={{ position: "relative", height: 260, background: "#fff", overflow: "hidden", cursor: "pointer" }}>
+                    <div className="product-image-wrapper" style={{ position: "relative", height: 200, background: "#fff", overflow: "hidden", cursor: "pointer" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="product-image" loading="lazy"
                         onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`; }} />
                       {hasDiscount && <span style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>-{discount}%</span>}
