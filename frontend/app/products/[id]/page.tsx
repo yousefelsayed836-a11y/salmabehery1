@@ -24,13 +24,6 @@ interface Product {
   category_slug?: string;
 }
 
-interface Review {
-  id: string;
-  customer_name: string;
-  review_text: string;
-  rating: number;
-  created_at: string;
-}
 
 function getImg(p: Product, idx = 0): string {
   const imgs = p.images && p.images.length > 0 ? p.images : p.main_image ? [p.main_image] : [];
@@ -50,16 +43,6 @@ export default function ProductPage() {
   const [added, setAdded] = useState(false);
   const [similar, setSimilar] = useState<Product[]>([]);
 
-  // Reviews
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [currentRev, setCurrentRev] = useState(0);
-  const [showForm, setShowForm] = useState(false);
-  const [formName, setFormName] = useState("");
-  const [formText, setFormText] = useState("");
-  const [formRating, setFormRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [thankYou, setThankYou] = useState(false);
 
   useEffect(() => {
     if (!productId) return;
@@ -82,10 +65,6 @@ export default function ProductPage() {
       })
       .catch(() => setLoading(false));
 
-    fetch(`${API}/reviews?product_id=${productId}`)
-      .then(r => r.json())
-      .then(d => { if (d.reviews) setReviews(d.reviews); })
-      .catch(() => {});
   }, [productId]);
 
   const addToCart = (p: Product, count = 1) => {
@@ -105,37 +84,6 @@ export default function ProductPage() {
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const submitReview = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formRating) return alert("Please select a rating");
-    setSubmitting(true);
-    try {
-      const res = await fetch(`${API}/reviews`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product_id: productId, customer_name: formName, review_text: formText, rating: formRating }),
-      });
-      const data = await res.json();
-      if (data.review) {
-        setReviews(prev => [data.review, ...prev]);
-        setCurrentRev(0);
-      }
-      setFormName(""); setFormText(""); setFormRating(0);
-      setThankYou(true);
-      setShowForm(false);
-      setTimeout(() => setThankYou(false), 4000);
-    } catch {}
-    finally { setSubmitting(false); }
-  };
-
-  const DEFAULT_REVIEWS: Review[] = [
-    { id: "d1", customer_name: "سارة م.", review_text: "Wallahi el quality 3alya gedan! el piece tela3et a7la mn el sora bketeeer 😍", rating: 5, created_at: "" },
-    { id: "d2", customer_name: "نور أ.", review_text: "El shipping was super fast w el packaging 7elw awi. ha order tany 100%", rating: 5, created_at: "" },
-    { id: "d3", customer_name: "مريم ك.", review_text: "Worth every penny! el details mafhouma w el quality 3alya. highly recommend!", rating: 5, created_at: "" },
-  ];
-
-  const allReviews = reviews.length > 0 ? reviews : DEFAULT_REVIEWS;
-  const rev = allReviews[currentRev] || allReviews[0];
   const images = product
     ? product.images && product.images.length > 0 ? product.images : product.main_image ? [product.main_image] : []
     : [];
@@ -249,12 +197,6 @@ export default function ProductPage() {
               {product.name_en}
             </h1>
 
-            {/* Stars summary */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#fda1b7", fontSize: 17, letterSpacing: 2 }}>{"★".repeat(5)}</span>
-              <span style={{ fontSize: 13, color: "#999" }}>({allReviews.length} reviews)</span>
-            </div>
-
             {/* Price */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ fontSize: 28, fontWeight: 800, color: "#fda1b7" }}>{product.price} EGP</span>
@@ -319,94 +261,6 @@ export default function ProductPage() {
               <span style={{ fontSize: 12, color: "#777", display: "flex", alignItems: "center", gap: 6 }}>🔄 Easy returns</span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* ── Reviews Section ── */}
-      <div style={{ background: "#fafafa", borderTop: "1px solid #f0e0e6", padding: "52px 20px" }}>
-        <div style={{ maxWidth: 560, margin: "0 auto", textAlign: "center", fontFamily: "sans-serif" }}>
-
-          <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
-          <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 24, fontWeight: 600, marginBottom: 32, color: "#333" }}>
-            What Our Customers Are Saying
-          </h2>
-
-          {/* Review card */}
-          <div style={{ background: "#fff", borderRadius: 20, padding: "32px 28px", boxShadow: "0 4px 24px rgba(253,161,183,0.12)", border: "1px solid #f5e6ea", minHeight: 180, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s" }}>
-            <div style={{ color: "#fda1b7", fontSize: 22, marginBottom: 14, letterSpacing: 3 }}>
-              {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
-            </div>
-            <p style={{ fontSize: 16, color: "#444", lineHeight: 1.7, margin: "0 0 16px", fontStyle: "italic" }}>
-              "{rev.review_text}"
-            </p>
-            <div style={{ fontSize: 13, color: "#aaa", fontWeight: 700 }}>— {rev.customer_name}</div>
-            {rev.created_at && (
-              <div style={{ fontSize: 11, color: "#ccc", marginTop: 4 }}>
-                {new Date(rev.created_at).toLocaleDateString("en-EG", { year: "numeric", month: "short", day: "numeric" })}
-              </div>
-            )}
-          </div>
-
-          {/* Navigation */}
-          <div style={{ marginTop: 20, display: "flex", justifyContent: "center", alignItems: "center", gap: 16 }}>
-            <button onClick={() => setCurrentRev(i => (i - 1 + allReviews.length) % allReviews.length)}
-              style={{ background: "#fda1b7", color: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 16, cursor: "pointer" }}>❮</button>
-            <span style={{ fontSize: 13, color: "#aaa" }}>{currentRev + 1} / {allReviews.length}</span>
-            <button onClick={() => setCurrentRev(i => (i + 1) % allReviews.length)}
-              style={{ background: "#fda1b7", color: "#fff", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 16, cursor: "pointer" }}>❯</button>
-          </div>
-
-          {/* Dots */}
-          <div style={{ marginTop: 14, display: "flex", justifyContent: "center", gap: 7 }}>
-            {allReviews.map((_, i) => (
-              <span key={i} onClick={() => setCurrentRev(i)}
-                style={{ width: 8, height: 8, borderRadius: "50%", background: i === currentRev ? "#fda1b7" : "#ddd", cursor: "pointer", display: "inline-block", transition: "background 0.3s" }} />
-            ))}
-          </div>
-
-          {/* Thank you */}
-          {thankYou && (
-            <div style={{ marginTop: 20, padding: "12px 20px", borderRadius: 12, background: "#dcfce7", color: "#166534", fontWeight: 600, fontSize: 14, display: "inline-block" }}>
-              ✅ شكراً على تقييمك! ❤️
-            </div>
-          )}
-
-          {/* Toggle form */}
-          <button onClick={() => setShowForm(s => !s)}
-            style={{ marginTop: 28, background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", border: "none",
-              padding: "13px 30px", fontSize: 15, borderRadius: 10, cursor: "pointer", fontWeight: 700, boxShadow: "0 4px 16px rgba(253,161,183,0.3)" }}>
-            {showForm ? "✕ Close" : "✍️ Write a Review"}
-          </button>
-
-          {/* Review form */}
-          {showForm && (
-            <div style={{ marginTop: 28, background: "#fff", padding: "28px 24px", borderRadius: 20, border: "1px solid #f5e6ea", textAlign: "left", boxShadow: "0 4px 20px rgba(253,161,183,0.1)" }}>
-              <h3 style={{ margin: "0 0 20px", color: "#1a1a2e", fontSize: 18, fontWeight: 700 }}>Share Your Experience</h3>
-              <form onSubmit={submitReview} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Your Name *" required
-                  style={{ padding: "12px 14px", border: "1.5px solid #f0d4dc", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", color: "#333" }} />
-                <textarea value={formText} onChange={e => setFormText(e.target.value)} placeholder="Write your review... *" required rows={4}
-                  style={{ padding: "12px 14px", border: "1.5px solid #f0d4dc", borderRadius: 10, fontFamily: "inherit", fontSize: 14, resize: "vertical", outline: "none", color: "#333" }} />
-                {/* Star picker */}
-                <div>
-                  <div style={{ fontSize: 13, color: "#888", marginBottom: 8 }}>Your Rating *</div>
-                  <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <span key={star} onClick={() => setFormRating(star)}
-                        onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
-                        style={{ fontSize: 34, color: star <= (hoverRating || formRating) ? "#fda1b7" : "#ddd", cursor: "pointer", transition: "color 0.15s" }}>★</span>
-                    ))}
-                  </div>
-                </div>
-                <button type="submit" disabled={submitting}
-                  style={{ padding: "13px", borderRadius: 10, border: "none",
-                    background: submitting ? "#fce4ec" : "linear-gradient(135deg,#fda1b7,#f78fa3)",
-                    color: "#fff", fontSize: 15, fontWeight: 700, cursor: submitting ? "not-allowed" : "pointer" }}>
-                  {submitting ? "Sending..." : "Submit Review ✓"}
-                </button>
-              </form>
-            </div>
-          )}
         </div>
       </div>
 
