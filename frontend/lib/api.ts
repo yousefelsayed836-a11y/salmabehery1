@@ -1,4 +1,4 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 // ✅ Converts relative /uploads/... paths to full URLs
@@ -16,7 +16,7 @@ export async function fetchProducts(params?: {
   page?: number;
   limit?: number;
 }) {
-  const url = new URL(`${API_BASE}/products`);
+  const url = new URL(`${API_BASE}/api/products`);
   if (params?.category) url.searchParams.set('collection', params.category);
   if (params?.search) url.searchParams.set('search', params.search);
   if (params?.is_active !== undefined) url.searchParams.set('is_active', String(params.is_active));
@@ -30,21 +30,21 @@ export async function fetchProducts(params?: {
 
 // ✅ Get single product
 export async function fetchProduct(id: string) {
-  const res = await fetch(`${API_BASE}/products/${id}`, { cache: 'no-store' });
+  const res = await fetch(`${API_BASE}/api/products/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch product');
   return res.json();
 }
 
 // ✅ Get all categories
 export async function fetchCategories() {
-  const res = await fetch(`${API_BASE}/categories`, { cache: 'no-store' });
+  const res = await fetch(`${API_BASE}/api/categories`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch categories');
   return res.json();
 }
 
 // ✅ Get category with products
 export async function fetchCategory(slug: string) {
-  const res = await fetch(`${API_BASE}/categories/${slug}`, { cache: 'no-store' });
+  const res = await fetch(`${API_BASE}/api/categories/${slug}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch category');
   return res.json();
 }
@@ -64,7 +64,7 @@ export async function uploadImage(file: File): Promise<string> {
 
 // ✅ Create order (COD)
 export async function createOrder(orderData: any) {
-  const res = await fetch(`${API_BASE}/orders`, {
+  const res = await fetch(`${API_BASE}/api/orders`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(orderData),
@@ -75,7 +75,7 @@ export async function createOrder(orderData: any) {
 
 // ✅ Add product
 export async function addProduct(data: any) {
-  const res = await fetch(`${API_BASE}/products`, {
+  const res = await fetch(`${API_BASE}/api/products`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -86,7 +86,7 @@ export async function addProduct(data: any) {
 
 // ✅ Update product
 export async function updateProduct(id: string, data: any) {
-  const res = await fetch(`${API_BASE}/products/${id}`, {
+  const res = await fetch(`${API_BASE}/api/products/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -97,7 +97,7 @@ export async function updateProduct(id: string, data: any) {
 
 // ✅ Delete product
 export async function deleteProduct(id: string) {
-  const res = await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete product');
   return res.json();
 }
