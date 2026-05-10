@@ -6,7 +6,7 @@ async function initReviewsTable() {
   await db.query(`
     CREATE TABLE IF NOT EXISTS product_reviews (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      product_id UUID NOT NULL,
+      product_id UUID,
       customer_name VARCHAR(100) NOT NULL,
       review_text TEXT NOT NULL,
       rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
@@ -16,15 +16,21 @@ async function initReviewsTable() {
 }
 initReviewsTable().catch(console.error);
 
-// GET /api/reviews?product_id=xxx
+// GET /api/reviews  or  GET /api/reviews?product_id=xxx
 router.get('/', async (req, res) => {
   try {
     const { product_id } = req.query;
-    if (!product_id) return res.status(400).json({ error: 'product_id required' });
-    const result = await db.query(
-      'SELECT * FROM product_reviews WHERE product_id = $1 ORDER BY created_at DESC',
-      [product_id]
-    );
+    let result;
+    if (product_id) {
+      result = await db.query(
+        'SELECT * FROM product_reviews WHERE product_id = $1 ORDER BY created_at DESC',
+        [product_id]
+      );
+    } else {
+      result = await db.query(
+        'SELECT * FROM product_reviews ORDER BY created_at DESC'
+      );
+    }
     res.json({ success: true, reviews: result.rows });
   } catch (error) {
     console.error('Get reviews error:', error);
@@ -36,13 +42,13 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { product_id, customer_name, review_text, rating } = req.body;
-    if (!product_id || !customer_name || !review_text || !rating) {
-      return res.status(400).json({ error: 'All fields required' });
+    if (!customer_name || !review_text || !rating) {
+      return res.status(400).json({ error: 'name, review and rating are required' });
     }
     const result = await db.query(`
       INSERT INTO product_reviews (product_id, customer_name, review_text, rating)
       VALUES ($1, $2, $3, $4) RETURNING *
-    `, [product_id, customer_name.trim(), review_text.trim(), parseInt(rating)]);
+    `, [product_id || null, customer_name.trim(), review_text.trim(), parseInt(rating)]);
     res.json({ success: true, review: result.rows[0] });
   } catch (error) {
     console.error('Add review error:', error);

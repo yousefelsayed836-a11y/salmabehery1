@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -25,14 +25,6 @@ interface Product {
   category_slug?: string;
 }
 
-interface Review {
-  id: string;
-  customer_name: string;
-  review_text: string;
-  rating: number;
-  created_at: string;
-}
-
 function getImg(p: Product, idx = 0): string {
   const imgs = p.images && p.images.length > 0 ? p.images : p.main_image ? [p.main_image] : [];
   const img = imgs[idx] || imgs[0] || "";
@@ -50,74 +42,47 @@ export default function ProductPage() {
   const [activeImg, setActiveImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-
-  // Reviews state
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [currentReview, setCurrentReview] = useState(0);
-  const [showForm, setShowForm] = useState(false);
-  const [formName, setFormName] = useState("");
-  const [formText, setFormText] = useState("");
-  const [formRating, setFormRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [thankYou, setThankYou] = useState(false);
+  const [similar, setSimilar] = useState<Product[]>([]);
 
   useEffect(() => {
     if (!productId) return;
+    setLoading(true);
     fetch(`${API}/products/${productId}`, { cache: "no-store" })
       .then(r => r.json())
-      .then(d => { setProduct(d.product || d); setLoading(false); })
+      .then(d => {
+        const p = d.product || d;
+        setProduct(p);
+        setLoading(false);
+        if (p.category_slug) {
+          fetch(`${API}/products?collection=${p.category_slug}&limit=8`)
+            .then(r => r.json())
+            .then(data => {
+              const all: Product[] = data.products || data.data || [];
+              setSimilar(all.filter(x => x.id !== productId).slice(0, 4));
+            })
+            .catch(() => {});
+        }
+      })
       .catch(() => setLoading(false));
-    fetch(`${API}/reviews?product_id=${productId}`)
-      .then(r => r.json())
-      .then(d => { if (d.reviews) setReviews(d.reviews); })
-      .catch(() => {});
   }, [productId]);
 
-  const addToCart = () => {
-    if (!product) return;
-    const img = getImg(product);
+  const addToCart = (p: Product, count = 1) => {
+    const img = getImg(p);
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const idx = cart.findIndex((i: any) => i.product.id === product.id);
-    if (idx >= 0) cart[idx].qty = Math.min(10, cart[idx].qty + qty);
-    else cart.push({ product: { id: product.id, name_en: product.name_en, price: product.price, image_url: img }, qty, size: product.size_info || "One Size" });
+    const idx = cart.findIndex((i: any) => i.product.id === p.id);
+    if (idx >= 0) cart[idx].qty = Math.min(10, cart[idx].qty + count);
+    else cart.push({ product: { id: p.id, name_en: p.name_en, price: p.price, image_url: img }, qty: count, size: p.size_info || "One Size" });
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
+  };
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart(product, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const submitReview = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formRating) return alert("Please select a rating");
-    setSubmitting(true);
-    try {
-      const res = await fetch(`${API}/reviews`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ product_id: productId, customer_name: formName, review_text: formText, rating: formRating }),
-      });
-      const data = await res.json();
-      if (data.review) {
-        setReviews(prev => [data.review, ...prev]);
-        setCurrentReview(0);
-      }
-      setFormName(""); setFormText(""); setFormRating(0);
-      setThankYou(true);
-      setTimeout(() => { setThankYou(false); setShowForm(false); }, 3000);
-    } catch {}
-    finally { setSubmitting(false); }
-  };
-
-  const allReviews = reviews.length > 0 ? reviews : [
-    { id: "s1", customer_name: "سارة", review_text: "Wallahi el quality 3alya gedan! el fabric na3em khaleees w el size perfect. ha order tany 100%", rating: 5, created_at: "" },
-    { id: "s2", customer_name: "نور", review_text: "El shipping was super fast w el customer service mo7tarma gedan. el colors a7la mn el sora bketeeer!", rating: 5, created_at: "" },
-    { id: "s3", customer_name: "مريم", review_text: "A7la purchase 3amltaha el sana di! el details mafhouma w el piece tela3et a7la mn el ma3ared. worth kol penny!", rating: 5, created_at: "" },
-    { id: "s4", customer_name: "فاطمة", review_text: "El quality 7elw awi lel price. ghasaltaha kaza mara w lessa zay el fol!", rating: 5, created_at: "" },
-    { id: "s5", customer_name: "هدير", review_text: "Dih el makan el ba3mel meno shopping kol mara. kol mara beywafro styles gdeda w as3ar 7elwa!", rating: 5, created_at: "" },
-  ];
-
-  const rev = allReviews[currentReview] || allReviews[0];
   const images = product ? (product.images && product.images.length > 0 ? product.images : product.main_image ? [product.main_image] : []) : [];
 
   if (loading) return (
@@ -196,13 +161,6 @@ export default function ProductPage() {
 
             <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1a2e", margin: "10px 0 8px", lineHeight: 1.3 }}>{product.name_en}</h1>
 
-            {allReviews.length > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <span style={{ color: "#fda1b7", fontSize: 16 }}>{"★".repeat(5)}</span>
-                <span style={{ fontSize: 13, color: "#888" }}>({allReviews.length} reviews)</span>
-              </div>
-            )}
-
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
               <span style={{ fontSize: 30, fontWeight: 800, color: "#fda1b7" }}>{product.price} EGP</span>
               {hasDiscount && <span style={{ fontSize: 18, color: "#bbb", textDecoration: "line-through" }}>{product.old_price} EGP</span>}
@@ -231,7 +189,7 @@ export default function ProductPage() {
                 <span style={{ width: 40, textAlign: "center", fontWeight: 700, fontSize: 16 }}>{qty}</span>
                 <button onClick={() => setQty(q => Math.min(10, q + 1))} style={{ width: 38, height: 46, border: "none", background: "#fff", fontSize: 18, fontWeight: 700, color: "#fda1b7", cursor: "pointer" }}>+</button>
               </div>
-              <button onClick={addToCart} disabled={product.stock === 0}
+              <button onClick={handleAddToCart} disabled={product.stock === 0}
                 style={{ flex: 1, height: 46, borderRadius: 10, border: "none", background: added ? "#22c55e" : "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: product.stock === 0 ? "not-allowed" : "pointer", transition: "all 0.3s" }}>
                 {product.stock === 0 ? "Out of Stock" : added ? "✓ Added!" : "🛒 Add to Cart"}
               </button>
@@ -249,76 +207,44 @@ export default function ProductPage() {
         </div>
       </div>
 
-      {/* Reviews Section */}
-      <div style={{ background: "#fff", padding: "40px 20px", borderTop: "1px solid #f5e6ea" }}>
-        <div style={{ maxWidth: 500, margin: "0 auto", textAlign: "center", fontFamily: "sans-serif" }}>
-
-          <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 500, marginBottom: 30, color: "#333" }}>
-            What Our Customers Are Saying
-          </h2>
-
-          {/* Review Box */}
-          <div style={{ background: "#f2f2f2", width: 340, aspectRatio: "1/1", margin: "0 auto", padding: 25, borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
-            <p style={{ fontSize: 17, color: "#333", marginBottom: 15, lineHeight: 1.6, direction: "rtl" }}>"{rev.review_text}"</p>
-            <div style={{ fontSize: 14, color: "#777", marginBottom: 10, fontWeight: 600 }}>- {rev.customer_name}</div>
-            <div style={{ color: "#fda1b7", fontSize: 25 }}>{"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}</div>
-          </div>
-
-          {/* Navigation */}
-          <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 15 }}>
-            <button onClick={() => setCurrentReview(i => (i - 1 + allReviews.length) % allReviews.length)}
-              style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❮</button>
-            <button onClick={() => setCurrentReview(i => (i + 1) % allReviews.length)}
-              style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❯</button>
-          </div>
-
-          {/* Dots */}
-          <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 8 }}>
-            {allReviews.map((_, i) => (
-              <span key={i} onClick={() => setCurrentReview(i)}
-                style={{ width: 10, height: 10, borderRadius: "50%", background: i === currentReview ? "#fda1b7" : "#ddd", cursor: "pointer", display: "inline-block", transition: "all 0.3s ease" }} />
-            ))}
-          </div>
-
-          {/* Add Review Button */}
-          <button onClick={() => setShowForm(s => !s)}
-            style={{ marginTop: 25, background: "#fda1b7", color: "white", border: "none", padding: "14px 28px", fontSize: 16, borderRadius: 8, cursor: "pointer", transition: "all 0.3s ease" }}>
-            Add Your Review
-          </button>
-
-          {/* Review Form */}
-          {showForm && (
-            <div style={{ marginTop: 35, background: "#fafafa", padding: 25, borderRadius: 12, maxWidth: 400, marginLeft: "auto", marginRight: "auto" }}>
-              <h3 style={{ marginBottom: 20, color: "#333" }}>Share Your Experience</h3>
-
-              {thankYou ? (
-                <p style={{ color: "#28a745", fontWeight: "bold", fontSize: 16 }}>Thank you for your review ❤️</p>
-              ) : (
-                <form onSubmit={submitReview}>
-                  <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Your Name" required
-                    style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, boxSizing: "border-box" }} />
-
-                  <textarea value={formText} onChange={e => setFormText(e.target.value)} placeholder="Write your review..." required rows={4}
-                    style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }} />
-
-                  {/* Star Rating */}
-                  <div style={{ display: "flex", flexDirection: "row-reverse", justifyContent: "center", margin: "15px 0", gap: 4 }}>
-                    {[5, 4, 3, 2, 1].map(star => (
-                      <span key={star} onClick={() => setFormRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
-                        style={{ fontSize: 30, color: star <= (hoverRating || formRating) ? "#fda1b7" : "#ccc", cursor: "pointer", padding: "0 3px", transition: "color 0.2s" }}>★</span>
-                    ))}
-                  </div>
-
-                  <button type="submit" disabled={submitting}
-                    style={{ background: "#fda1b7", color: "white", border: "none", padding: "12px 24px", borderRadius: 6, cursor: "pointer", fontSize: 16, marginTop: 10, opacity: submitting ? 0.7 : 1 }}>
-                    {submitting ? "Submitting..." : "Submit Review"}
-                  </button>
-                </form>
-              )}
+      {/* Similar Products */}
+      {similar.length > 0 && (
+        <div style={{ background: "#fdf9fb", padding: "48px 20px", borderTop: "1px solid #f5e6ea" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: "#1a1a2e", marginBottom: 28, textAlign: "center" }}>Similar Products</h2>
+            <div className="similar-grid">
+              {similar.map(p => {
+                const img = getImg(p);
+                const disc = p.old_price && p.old_price > p.price ? Math.round((1 - p.price / p.old_price) * 100) : 0;
+                return (
+                  <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                    <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(253,161,183,0.10)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 28px rgba(253,161,183,0.20)"; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 12px rgba(253,161,183,0.10)"; }}>
+                      <div style={{ position: "relative", aspectRatio: "1/1", background: "#f9f0f3" }}>
+                        {disc > 0 && <span style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", padding: "3px 9px", borderRadius: 20, fontSize: 11, fontWeight: 700, zIndex: 2 }}>-{disc}%</span>}
+                        <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=??`; }} />
+                      </div>
+                      <div style={{ padding: "14px 16px" }}>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e", margin: "0 0 8px", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>{p.name_en}</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 16 }}>{p.price} EGP</span>
+                          {p.old_price && p.old_price > p.price && <span style={{ fontSize: 13, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
+                        </div>
+                        <button onClick={e => { e.preventDefault(); addToCart(p, 1); }}
+                          style={{ marginTop: 10, width: "100%", padding: "9px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       <style jsx global>{`
         .product-layout {
@@ -327,10 +253,14 @@ export default function ProductPage() {
           gap: 48px;
           align-items: start;
         }
-        .product-images {}
-        .product-info {}
+        .similar-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
         @media (max-width: 768px) {
           .product-layout { grid-template-columns: 1fr; gap: 24px; }
+          .similar-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
         }
       `}</style>
     </div>

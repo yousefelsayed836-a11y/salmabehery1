@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
+
+const API = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
 const CATEGORY_CARDS = [
   {
@@ -55,16 +57,16 @@ const CATEGORY_CARDS = [
   },
 ];
 
-const REVIEWS = [
-  { text: "Wallahi el quality 3alya gedan! el fabric na3em khaleees w el size perfect. ha order tany 100%", name: "سارة", stars: 5 },
-  { text: "El shipping was super fast w el customer service mo7tarma gedan. el colors a7la mn el sora bketeeer!", name: "نور", stars: 5 },
-  { text: "A7la purchase 3amltaha el sana di! el details mafhouma w el piece tela3et a7la mn el ma3ared.", name: "مريم", stars: 5 },
-  { text: "El quality 7elw awi lel price. ghasaltaha kaza mara w lessa zay el fol! ma3mletsh color wala 7aga", name: "فاطمة", stars: 5 },
-  { text: "Dih el makan el ba3mel meno shopping kol mara. kol mara beywafro styles gdeda w as3ar 7elwa.", name: "هدير", stars: 5 },
-  { text: "Ana meshtreya menhom 3 marat w kol mara bey3jboni aktar. el packaging 7elw w el delivery 3ala tool!", name: "ياسمين", stars: 5 },
-  { text: "El piece el gdeda di 3amltaha l fr7ty w kol s7aby sa2aloni menen. 7elw awi w quality mosh tab3eya!", name: "ليلى", stars: 5 },
-  { text: "Ba7eb ashtry menhom 3ashan homa wa7deen elly bywafro el styles el 3asrya di b as3ar montazama.", name: "رنا", stars: 5 },
-  { text: "El fabric 7elw awi w el tafseel perfect. 3amlt order w gali bokra! ma3ndhomsh delay wala 7aga", name: "دينا", stars: 5 },
+const DEFAULT_REVIEWS = [
+  { id: "d1", review_text: "Wallahi el quality 3alya gedan! el fabric na3em khaleees w el size perfect. ha order tany 100%", customer_name: "سارة", rating: 5 },
+  { id: "d2", review_text: "El shipping was super fast w el customer service mo7tarma gedan. el colors a7la mn el sora bketeeer!", customer_name: "نور", rating: 5 },
+  { id: "d3", review_text: "A7la purchase 3amltaha el sana di! el details mafhouma w el piece tela3et a7la mn el ma3ared.", customer_name: "مريم", rating: 5 },
+  { id: "d4", review_text: "El quality 7elw awi lel price. ghasaltaha kaza mara w lessa zay el fol! ma3mletsh color wala 7aga", customer_name: "فاطمة", rating: 5 },
+  { id: "d5", review_text: "Dih el makan el ba3mel meno shopping kol mara. kol mara beywafro styles gdeda w as3ar 7elwa.", customer_name: "هدير", rating: 5 },
+  { id: "d6", review_text: "Ana meshtreya menhom 3 marat w kol mara bey3jboni aktar. el packaging 7elw w el delivery 3ala tool!", customer_name: "ياسمين", rating: 5 },
+  { id: "d7", review_text: "El piece el gdeda di 3amltaha l fr7ty w kol s7aby sa2aloni menen. 7elw awi w quality mosh tab3eya!", customer_name: "ليلى", rating: 5 },
+  { id: "d8", review_text: "Ba7eb ashtry menhom 3ashan homa wa7deen elly bywafro el styles el 3asrya di b as3ar montazama.", customer_name: "رنا", rating: 5 },
+  { id: "d9", review_text: "El fabric 7elw awi w el tafseel perfect. 3amlt order w gali bokra! ma3ndhomsh delay wala 7aga", customer_name: "دينا", rating: 5 },
 ];
 
 
@@ -73,22 +75,43 @@ const REVIEWS = [
 export default function HomePage() {
   const [currentReview, setCurrentReview] = useState(0);
   const [showForm, setShowForm] = useState(false);
-  const [allReviews, setAllReviews] = useState(REVIEWS);
-  const [newReview, setNewReview] = useState({ text: "", name: "" });
+  const [allReviews, setAllReviews] = useState(DEFAULT_REVIEWS as any[]);
+  const [formName, setFormName] = useState("");
+  const [formText, setFormText] = useState("");
+  const [formRating, setFormRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API}/reviews`)
+      .then(r => r.json())
+      .then(d => { if (d.reviews && d.reviews.length > 0) setAllReviews(d.reviews); })
+      .catch(() => {});
+  }, []);
 
   const nextReview = () => setCurrentReview((p) => (p + 1) % allReviews.length);
   const prevReview = () => setCurrentReview((p) => (p - 1 + allReviews.length) % allReviews.length);
 
-  const submitReview = () => {
-    if (!newReview.text.trim() || !newReview.name.trim()) return;
-    const review = { text: newReview.text.trim(), name: newReview.name.trim(), stars: 5 };
-    setAllReviews(prev => [review, ...prev]);
-    setNewReview({ text: "", name: "" });
-    setSubmitted(true);
-    setShowForm(false);
-    setCurrentReview(0);
-    setTimeout(() => setSubmitted(false), 3000);
+  const submitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formRating) return alert("Please select a rating");
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer_name: formName, review_text: formText, rating: formRating }),
+      });
+      const data = await res.json();
+      if (data.review) setAllReviews(prev => [data.review, ...prev]);
+      setFormName(""); setFormText(""); setFormRating(0);
+      setSubmitted(true);
+      setShowForm(false);
+      setCurrentReview(0);
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch {}
+    finally { setSubmitting(false); }
   };
 
   return (
@@ -202,81 +225,74 @@ export default function HomePage() {
       </section>
 
       {/* ── REVIEWS ── */}
-      <section style={{ textAlign: "center", padding: "52px 20px", background: "#fff", borderTop: "1px solid #eee" }}>
-        <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Testimonials</p>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 600, marginBottom: 32, color: "#1a1a2e" }}>
-          What Our Customers Say
+      <section style={{ textAlign: "center", padding: "52px 20px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
+        <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 500, marginBottom: 30, color: "#333" }}>
+          What Our Customers Are Saying
         </h2>
 
-        <div style={{
-          background: "#fff", border: "1.5px solid #fde8ee",
-          width: 340, maxWidth: "90%", aspectRatio: "1/1", margin: "0 auto",
-          padding: 28, borderRadius: 20, display: "flex", flexDirection: "column",
-          justifyContent: "center", boxShadow: "0 8px 32px rgba(253,161,183,0.12)", transition: "all 0.3s ease",
-        }}>
-          <div style={{ color: "#fda1b7", fontSize: 22, marginBottom: 14, letterSpacing: 3 }}>{"★".repeat(allReviews[currentReview].stars)}</div>
-          <p style={{ fontSize: 15, color: "#444", marginBottom: 16, lineHeight: 1.7, direction: "rtl", fontStyle: "italic" }}>
-            "{allReviews[currentReview].text}"
+        {/* Review Box */}
+        <div style={{ background: "#f2f2f2", width: 340, aspectRatio: "1/1", margin: "0 auto", padding: 25, borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
+          <p style={{ fontSize: 17, color: "#333", marginBottom: 15, lineHeight: 1.6, direction: "rtl" }}>
+            "{allReviews[currentReview]?.review_text || allReviews[currentReview]?.text}"
           </p>
-          <div style={{ fontSize: 14, color: "#fda1b7", fontWeight: 700 }}>— {allReviews[currentReview].name}</div>
+          <div style={{ fontSize: 14, color: "#777", marginBottom: 10, fontWeight: 600 }}>
+            - {allReviews[currentReview]?.customer_name || allReviews[currentReview]?.name}
+          </div>
+          <div style={{ color: "#fda1b7", fontSize: 25 }}>
+            {"★".repeat(allReviews[currentReview]?.rating || allReviews[currentReview]?.stars || 5)}
+          </div>
         </div>
 
-        <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 12 }}>
-          {[prevReview, nextReview].map((fn, i) => (
-            <button key={i} onClick={fn} style={{
-              background: "#fda1b7", color: "#fff", border: "none",
-              width: 40, height: 40, borderRadius: "50%", fontSize: 16, cursor: "pointer", transition: "all 0.2s",
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#f78fa3"; (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fda1b7"; (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}>
-              {i === 0 ? "❮" : "❯"}
-            </button>
-          ))}
+        {/* Navigation */}
+        <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 15 }}>
+          <button onClick={prevReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❮</button>
+          <button onClick={nextReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❯</button>
         </div>
 
-        <div style={{ marginTop: 14, display: "flex", justifyContent: "center", gap: 6 }}>
+        {/* Dots */}
+        <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 8 }}>
           {allReviews.map((_, i) => (
-            <button key={i} onClick={() => setCurrentReview(i)} style={{
-              width: i === currentReview ? 20 : 8, height: 8, borderRadius: 4, border: "none", cursor: "pointer",
-              background: i === currentReview ? "#fda1b7" : "#f0d4dc", transition: "all 0.3s ease", padding: 0,
-            }} />
+            <span key={i} onClick={() => setCurrentReview(i)}
+              style={{ width: 10, height: 10, borderRadius: "50%", background: i === currentReview ? "#fda1b7" : "#ddd", cursor: "pointer", display: "inline-block", transition: "all 0.3s ease" }} />
           ))}
         </div>
 
-        {/* ✅ Success toast */}
         {submitted && (
           <div style={{ marginTop: 16, padding: "10px 20px", borderRadius: 10, background: "#dcfce7", color: "#166534", fontWeight: 600, fontSize: 14, display: "inline-block" }}>
-            ✅ Your review has been added!
+            ✅ Thank you for your review! ❤️
           </div>
         )}
 
-        {submitted && (
-          <div style={{ marginTop: 16, padding: "10px 20px", borderRadius: 10, background: "#dcfce7", color: "#166534", fontWeight: 600, fontSize: 14, display: "inline-block" }}>
-            ✅ Your review has been added!
-          </div>
-        )}
+        {/* Add Review Button */}
+        <button onClick={() => setShowForm(s => !s)}
+          style={{ marginTop: 25, background: "#fda1b7", color: "white", border: "none", padding: "14px 28px", fontSize: 16, borderRadius: 8, cursor: "pointer", transition: "all 0.3s ease" }}>
+          Add Your Review
+        </button>
 
-        {/* Add Review */}
-        <div style={{ marginTop: 32 }}>
-          <button onClick={() => setShowForm(!showForm)} style={{
-            padding: "12px 28px", borderRadius: 50, border: "1.5px solid #fda1b7",
-            background: "#fff", color: "#fda1b7", fontWeight: 700, cursor: "pointer", fontSize: 14, transition: "all 0.2s",
-          }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fda1b7"; (e.currentTarget as HTMLButtonElement).style.color = "#fff"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; (e.currentTarget as HTMLButtonElement).style.color = "#fda1b7"; }}>
-            ✍️ Add Your Review
-          </button>
-
-          {showForm && (
-            <div style={{ maxWidth: 400, margin: "20px auto 0", padding: 24, borderRadius: 16, border: "1px solid #fde8ee", background: "#fff", boxShadow: "0 4px 20px rgba(253,161,183,0.1)" }}>
-              <textarea value={newReview.text} onChange={e => setNewReview(p => ({ ...p, text: e.target.value }))} placeholder="Share your experience..." rows={3} style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid #f0d4dc", fontSize: 14, resize: "vertical", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
-              <input value={newReview.name} onChange={e => setNewReview(p => ({ ...p, name: e.target.value }))} placeholder="Your name" style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid #f0d4dc", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
-              <button onClick={submitReview} style={{ width: "100%", padding: 12, borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
-                Submit Review ✓
+        {/* Form */}
+        {showForm && (
+          <div style={{ marginTop: 35, background: "#fafafa", padding: 25, borderRadius: 12, maxWidth: 400, marginLeft: "auto", marginRight: "auto" }}>
+            <h3 style={{ marginBottom: 20, color: "#333" }}>Share Your Experience</h3>
+            <form onSubmit={submitReview}>
+              <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Your Name" required
+                style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, boxSizing: "border-box" }} />
+              <textarea value={formText} onChange={e => setFormText(e.target.value)} placeholder="Write your review..." required rows={4}
+                style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }} />
+              {/* Stars */}
+              <div style={{ display: "flex", flexDirection: "row-reverse", justifyContent: "center", margin: "15px 0", gap: 4 }}>
+                {[5, 4, 3, 2, 1].map(star => (
+                  <span key={star} onClick={() => setFormRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
+                    style={{ fontSize: 30, color: star <= (hoverRating || formRating) ? "#fda1b7" : "#ccc", cursor: "pointer", padding: "0 3px", transition: "color 0.2s" }}>★</span>
+                ))}
+              </div>
+              <button type="submit" disabled={submitting}
+                style={{ background: "#fda1b7", color: "white", border: "none", padding: "12px 24px", borderRadius: 6, cursor: "pointer", fontSize: 16, marginTop: 10, opacity: submitting ? 0.7 : 1 }}>
+                {submitting ? "Submitting..." : "Submit Review"}
               </button>
-            </div>
-          )}
-        </div>
+            </form>
+          </div>
+        )}
       </section>
 
       {/* ── YOUR EVERYDAY SPARKLE ── */}
