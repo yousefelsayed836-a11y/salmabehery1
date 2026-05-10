@@ -1,5 +1,5 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+export const API_BASE = 'https://salma-backend-4imp.onrender.com';
+export const BACKEND_URL = 'https://salma-backend-4imp.onrender.com';
 
 // ✅ Converts relative /uploads/... paths to full URLs
 export function getImageUrl(path?: string | null): string {
