@@ -1,0 +1,9 @@
+DATABASE_URL=postgresql://user:2255@host:5432/dbname
+
+JWT_SECRET=openssl rand -hex 32
+
+BASE_URL=https://salma-backend-4imp.onrender.com
+
+FRONTEND_URL=https://salmabehery1-57ct.vercel.app/
+
+PORT=5000
