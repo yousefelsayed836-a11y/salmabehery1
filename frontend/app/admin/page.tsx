@@ -20,7 +20,7 @@ interface Product {
   is_active: boolean;
 }
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);

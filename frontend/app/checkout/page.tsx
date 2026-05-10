@@ -9,7 +9,7 @@ interface CartItem {
   size: string;
 }
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
 // كل المحافظات والمدن المصرية
 const EGYPT_DATA: Record<string, { nameAr: string; cities: string[] }> = {

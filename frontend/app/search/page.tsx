@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
 interface Product {
   id: string;
@@ -23,7 +23,7 @@ function getImg(p: Product) {
   const img = p.main_image || (p.images && p.images[0]);
   if (!img) return `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`;
   if (img.startsWith("http")) return img;
-  return `http://localhost:5000${img}`;
+  return `${process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com"}${img}`;
 }
 
 function SearchResults() {
