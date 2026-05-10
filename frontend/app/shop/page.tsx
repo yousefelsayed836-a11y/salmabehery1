@@ -50,6 +50,7 @@ function ShopContent() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     try {
@@ -87,7 +88,8 @@ function ShopContent() {
       if (idx >= 0) { const c = [...prev]; c[idx] = { ...c[idx], qty: Math.min(10, c[idx].qty + qty) }; return c; }
       return [...prev, { product: { id: product.id, name_en: product.name_en, price: product.price, image_url: getProductImage(product) }, qty, size }];
     });
-    setShowCart(true);
+    setToast(`✓ ${product.name_en.slice(0, 20)} added to cart`);
+    setTimeout(() => setToast(""), 2000);
   };
 
   const cartTotal = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -102,6 +104,13 @@ function ShopContent() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "'Inter', sans-serif" }}>
+
+      {/* Toast notification */}
+      {toast && (
+        <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", background: "#1a1a2e", color: "#fff", padding: "10px 20px", borderRadius: 30, fontSize: 13, fontWeight: 600, zIndex: 500, whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
+          {toast}
+        </div>
+      )}
 
       {/* Floating Cart */}
       <button onClick={() => setShowCart(true)} style={{ position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", border: "none", fontSize: 24, cursor: "pointer", zIndex: 100, boxShadow: "0 4px 16px rgba(253,161,183,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -144,7 +153,7 @@ function ShopContent() {
                 <div style={{ borderTop: "2px solid #eee", paddingTop: 16, marginTop: 16 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}><span>Subtotal:</span><span style={{ fontWeight: 700 }}>{cartTotal} EGP</span></div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16, fontSize: 12, color: "#888" }}><span>Shipping:</span><span>{cartTotal >= 900 ? "FREE 🎉" : "50 EGP"}</span></div>
-                  <a href="/cart" style={{ display: "block", width: "100%", padding: 14, borderRadius: 12, background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", textAlign: "center", textDecoration: "none" }}>View Full Cart →</a>
+                  <a href="/checkout" style={{ display: "block", width: "100%", padding: 14, borderRadius: 12, background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", textAlign: "center", textDecoration: "none" }}>Checkout →</a>
                 </div>
               </>
             )}

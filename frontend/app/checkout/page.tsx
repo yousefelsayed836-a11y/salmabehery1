@@ -169,131 +169,54 @@ export default function CheckoutPage() {
   );
 
   return (
-    <div style={{ background: "#fff", minHeight: "100vh", padding: "32px 16px", fontFamily: "'Inter', sans-serif" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1a2e", margin: "0 0 24px" }}>🛒 Checkout</h1>
+    <div style={{ background: "#f9f0f3", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "20px 16px 40px" }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", margin: "0 0 20px" }}>🛒 Checkout</h1>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 24 }}>
-          {/* Form */}
-          <div style={{ background: "#fff", borderRadius: 20, padding: 28, boxShadow: "0 4px 20px rgba(253,161,183,0.1)" }}>
-            <h2 style={{ margin: "0 0 20px", fontSize: 18, fontWeight: 700, color: "#1a1a2e" }}>📋 Delivery Details</h2>
+        <div className="checkout-grid">
 
-            {errorMsg && <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 10, padding: 12, marginBottom: 16, color: "#ef4444", fontWeight: 600 }}>⚠️ {errorMsg}</div>}
-
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <div>
-                  <label style={labelStyle}>Full Name *</label>
-                  <input value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} placeholder="Your full name" style={inputStyle} required />
-                </div>
-                <div>
-                  <label style={labelStyle}>Phone *</label>
-                  <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, "") }))} placeholder="01XXXXXXXXX" style={inputStyle} required maxLength={11} />
-                </div>
-              </div>
-
-              <div>
-                <label style={labelStyle}>WhatsApp Number * <span style={{ color: "#fda1b7", fontSize: 11 }}>(for deposit confirmation)</span></label>
-                <input value={form.phone2} onChange={e => setForm(p => ({ ...p, phone2: e.target.value.replace(/\D/g, "") }))} placeholder="WhatsApp number for deposit confirmation" style={inputStyle} maxLength={11} required />
-              </div>
-
-              {/* ✅ Governorate + City */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <div>
-                  <label style={labelStyle}>Governorate *</label>
-                  <select value={form.governorate} onChange={e => setForm(p => ({ ...p, governorate: e.target.value, city: "" }))} style={{ ...inputStyle, cursor: "pointer" }} required>
-                    <option value="">Select Governorate</option>
-                    {Object.entries(EGYPT_DATA).map(([key, val]) => (
-                      <option key={key} value={key}>{key} — {val.nameAr}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={labelStyle}>City *</label>
-                  <select value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} style={{ ...inputStyle, cursor: "pointer" }} required disabled={!form.governorate}>
-                    <option value="">Select City</option>
-                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              {/* Shipping cost indicator */}
-              {form.governorate && (
-                <div style={{ background: freeShipping ? "#dcfce7" : "#fef4f0", borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, border: `1px solid ${freeShipping ? "#bbf7d0" : "#f0d4dc"}` }}>
-                  <span style={{ fontSize: 18 }}>{freeShipping ? "🎉" : "🚚"}</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: freeShipping ? "#166534" : "#555" }}>
-                    {freeShipping ? "Free shipping!" : `Shipping to ${form.governorate}: ${govShipping} EGP`}
-                  </span>
-                </div>
-              )}
-
-              <div>
-                <label style={labelStyle}>Street Address *</label>
-                <input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="Street, building, apartment..." style={inputStyle} required />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Notes (optional)</label>
-                <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Any special instructions..." rows={3} style={{ ...inputStyle, resize: "vertical" }} />
-              </div>
-
-              <button type="submit" disabled={submitting || cart.length === 0}
-                style={{ padding: "16px", borderRadius: 14, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 16, fontWeight: 700, cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.7 : 1 }}>
-                {submitting ? "Placing Order..." : `Place Order — ${finalTotal} EGP`}
-              </button>
-            </form>
-          </div>
-
-          {/* Order Summary */}
-          <div>
-            <div style={{ background: "#fff", borderRadius: 20, padding: 24, boxShadow: "0 4px 20px rgba(253,161,183,0.1)", position: "sticky", top: 80 }}>
-              <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700, color: "#1a1a2e" }}>📦 Order Summary</h3>
-
+          {/* Order Summary - يظهر فوق في الموبايل */}
+          <div className="checkout-summary">
+            <div style={{ background: "#fff", borderRadius: 20, padding: 20, boxShadow: "0 2px 12px rgba(253,161,183,0.1)" }}>
+              <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 700, color: "#1a1a2e" }}>📦 Order Summary</h3>
               {cart.length === 0 ? (
-                <div style={{ textAlign: "center", padding: 24, color: "#aaa" }}>
-                  <div style={{ fontSize: 40 }}>🛒</div>
-                  <p>Cart is empty</p>
-                  <Link href="/shop" style={{ color: "#fda1b7", fontWeight: 600, textDecoration: "none" }}>← Go Shopping</Link>
+                <div style={{ textAlign: "center", padding: 20, color: "#aaa" }}>
+                  <div style={{ fontSize: 36 }}>🛒</div>
+                  <p style={{ margin: "8px 0" }}>Cart is empty</p>
+                  <Link href="/shop" style={{ color: "#fda1b7", fontWeight: 600, textDecoration: "none", fontSize: 14 }}>← Go Shopping</Link>
                 </div>
               ) : (
                 <>
-                  <div style={{ maxHeight: 280, overflowY: "auto", marginBottom: 16 }}>
+                  <div style={{ maxHeight: 200, overflowY: "auto", marginBottom: 12 }}>
                     {cart.map((item, i) => (
-                      <div key={i} style={{ display: "flex", gap: 10, padding: "10px 0", borderBottom: "1px solid #fdf0f3" }}>
-                        <div style={{ width: 52, height: 52, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#fff" }}>
-                          {item.product.image_url ? (
-                            <img src={item.product.image_url} alt={item.product.name_en} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                          ) : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>💍</div>}
+                      <div key={i} style={{ display: "flex", gap: 10, padding: "8px 0", borderBottom: "1px solid #fdf0f3", alignItems: "center" }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#fdf0f3" }}>
+                          {item.product.image_url
+                            ? <img src={item.product.image_url} alt={item.product.name_en} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                            : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>💍</div>}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product.name_en}</div>
-                          <div style={{ fontSize: 12, color: "#888" }}>Qty: {item.qty}</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product.name_en}</div>
+                          <div style={{ fontSize: 11, color: "#aaa" }}>x{item.qty}</div>
                         </div>
-                        <div style={{ fontWeight: 700, color: "#fda1b7", fontSize: 13, flexShrink: 0 }}>{item.product.price * item.qty} EGP</div>
+                        <div style={{ fontWeight: 700, color: "#fda1b7", fontSize: 13 }}>{item.product.price * item.qty} EGP</div>
                       </div>
                     ))}
                   </div>
-
-                  <div style={{ borderTop: "2px solid #fdf0f3", paddingTop: 14 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                      <span style={{ color: "#888", fontSize: 14 }}>Subtotal</span>
+                  <div style={{ borderTop: "1px solid #fdf0f3", paddingTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                      <span style={{ color: "#888" }}>Subtotal</span>
                       <span style={{ fontWeight: 600 }}>{subtotal} EGP</span>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>
-                      <span style={{ color: "#888", fontSize: 14 }}>Shipping {form.governorate ? `(${form.governorate})` : ""}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                      <span style={{ color: "#888" }}>Shipping {form.governorate ? `(${form.governorate})` : ""}</span>
                       <span style={{ fontWeight: 600, color: freeShipping ? "#22c55e" : "#333" }}>{freeShipping ? "FREE 🎉" : `${shippingCost} EGP`}</span>
                     </div>
-                    {!freeShipping && subtotal > 0 && (
-                      <div style={{ background: "#fff", borderRadius: 8, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: "#888", textAlign: "center" }}>
-                        Add {freeThreshold - subtotal} EGP more for free shipping!
-                      </div>
-                    )}
-                    <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderTop: "2px solid #fda1b7" }}>
-                      <span style={{ fontWeight: 800, fontSize: 16 }}>Total</span>
-                      <span style={{ fontWeight: 800, fontSize: 20, color: "#fda1b7" }}>{finalTotal} EGP</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "2px solid #fda1b7", marginTop: 4 }}>
+                      <span style={{ fontWeight: 800, fontSize: 15 }}>Total</span>
+                      <span style={{ fontWeight: 800, fontSize: 18, color: "#fda1b7" }}>{finalTotal} EGP</span>
                     </div>
-                    <div style={{ background: "#fef3c7", borderRadius: 10, padding: "10px 14px", marginTop: 8, textAlign: "center", fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+                    <div style={{ background: "#fef3c7", borderRadius: 8, padding: "8px 12px", textAlign: "center", fontSize: 12, fontWeight: 600, color: "#92400e" }}>
                       💵 Cash on Delivery
                     </div>
                   </div>
@@ -301,13 +224,97 @@ export default function CheckoutPage() {
               )}
             </div>
           </div>
+
+          {/* Form */}
+          <div className="checkout-form">
+            <div style={{ background: "#fff", borderRadius: 20, padding: 20, boxShadow: "0 2px 12px rgba(253,161,183,0.1)" }}>
+              <h2 style={{ margin: "0 0 18px", fontSize: 16, fontWeight: 700, color: "#1a1a2e" }}>📋 Delivery Details</h2>
+
+              {errorMsg && <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 10, padding: 12, marginBottom: 14, color: "#ef4444", fontWeight: 600, fontSize: 13 }}>⚠️ {errorMsg}</div>}
+
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+                <div className="form-row">
+                  <div>
+                    <label style={labelStyle}>Full Name *</label>
+                    <input value={form.fullName} onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} placeholder="Your full name" style={inputStyle} required />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Phone *</label>
+                    <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, "") }))} placeholder="01XXXXXXXXX" style={inputStyle} required maxLength={11} inputMode="numeric" />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>WhatsApp Number * <span style={{ color: "#fda1b7", fontSize: 11 }}>(for order confirmation)</span></label>
+                  <input value={form.phone2} onChange={e => setForm(p => ({ ...p, phone2: e.target.value.replace(/\D/g, "") }))} placeholder="01XXXXXXXXX" style={inputStyle} maxLength={11} required inputMode="numeric" />
+                </div>
+
+                <div className="form-row">
+                  <div>
+                    <label style={labelStyle}>Governorate *</label>
+                    <select value={form.governorate} onChange={e => setForm(p => ({ ...p, governorate: e.target.value, city: "" }))} style={{ ...inputStyle, cursor: "pointer" }} required>
+                      <option value="">Select Governorate</option>
+                      {Object.entries(EGYPT_DATA).map(([key, val]) => (
+                        <option key={key} value={key}>{key} — {val.nameAr}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>City *</label>
+                    <select value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} style={{ ...inputStyle, cursor: "pointer" }} required disabled={!form.governorate}>
+                      <option value="">Select City</option>
+                      {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {form.governorate && (
+                  <div style={{ background: freeShipping ? "#dcfce7" : "#fef4f0", borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, border: `1px solid ${freeShipping ? "#bbf7d0" : "#f0d4dc"}` }}>
+                    <span>{freeShipping ? "🎉" : "🚚"}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: freeShipping ? "#166534" : "#555" }}>
+                      {freeShipping ? "Free shipping!" : `Shipping to ${form.governorate}: ${govShipping} EGP`}
+                    </span>
+                  </div>
+                )}
+
+                <div>
+                  <label style={labelStyle}>Street Address *</label>
+                  <input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="Street, building, apartment..." style={inputStyle} required />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Notes (optional)</label>
+                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Any special instructions..." rows={3} style={{ ...inputStyle, resize: "vertical" }} />
+                </div>
+
+                <button type="submit" disabled={submitting || cart.length === 0}
+                  style={{ padding: "16px", borderRadius: 14, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 16, fontWeight: 700, cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.7 : 1, marginTop: 4 }}>
+                  {submitting ? "Placing Order..." : `Place Order — ${finalTotal} EGP`}
+                </button>
+              </form>
+            </div>
+          </div>
+
         </div>
       </div>
 
       <style jsx global>{`
-        @media (max-width: 768px) {
-          div[style*="gridTemplateColumns: 1fr 380px"] { grid-template-columns: 1fr !important; }
-          div[style*="gridTemplateColumns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+        .checkout-grid {
+          display: grid;
+          grid-template-columns: 1fr 340px;
+          gap: 20px;
+          align-items: start;
+        }
+        .checkout-summary { order: 2; }
+        .checkout-form { order: 1; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        @media (max-width: 700px) {
+          .checkout-grid { grid-template-columns: 1fr; }
+          .checkout-summary { order: 1; }
+          .checkout-form { order: 2; }
+          .form-row { grid-template-columns: 1fr; }
         }
       `}</style>
     </div>
