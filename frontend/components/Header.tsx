@@ -14,13 +14,13 @@ interface Product {
   category_name?: string;
 }
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
 function getImg(p: Product) {
   const img = p.main_image || (p.images && p.images[0]);
   if (!img) return null;
   if (img.startsWith("http")) return img;
-  return `http://localhost:5000${img}`;
+  return `${process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com"}${img}`;
 }
 
 const NAV_LINKS = [

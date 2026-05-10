@@ -11,13 +11,13 @@ interface Product {
   category_name?: string; water_resistance?: string; size_info?: string;
 }
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
 function getProductImage(p: Product) {
   const img = p.main_image || (p.images && p.images[0]) || p.image_url;
   if (!img) return "https://placehold.co/60x60/fda1b7/fff?text=??";
   if (img.startsWith("http")) return img;
-  return `http://localhost:5000${img}`;
+  return `${process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com"}${img}`;
 }
 
 const emptyForm = {
@@ -73,7 +73,7 @@ export default function ProductsPage() {
     setUploadingImage(true);
     try {
       const fd = new FormData(); fd.append("image", file);
-      const res = await fetch("http://localhost:5000/api/upload", { method: "POST", body: fd });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com"}/api/upload`, { method: "POST", body: fd });
       const data = await res.json();
       if (data.url) setter("main_image", data.url);
     } catch (e: any) { alert("Upload failed: " + e.message); }

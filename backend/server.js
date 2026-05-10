@@ -26,12 +26,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// ✅ Bypass auth for development
-app.use((req, res, next) => {
-  req.user = { id: 'admin', role: 'admin' };
-  next();
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

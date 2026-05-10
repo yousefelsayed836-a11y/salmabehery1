@@ -30,8 +30,8 @@ interface Order {
   items?: OrderItem[];
 }
 
-const API_BASE = "http://localhost:5000/api";
-const BACKEND = "http://localhost:5000";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
 
 // ✅ Fetch real product image from API
 async function fetchProductImage(productId: string): Promise<string | null> {
