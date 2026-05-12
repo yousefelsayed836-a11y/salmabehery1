@@ -152,23 +152,42 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Center: Logo Text with Bodoni Moda */}
+          {/* Center: Logo with special S */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <div 
-              className="logo-text"
-              style={{ 
-                fontSize: 28, 
-                fontWeight: 400, 
-                color: isTransparent ? "#fff" : "#1a1a2e", 
-                letterSpacing: 8, 
-                textTransform: "uppercase",
-                fontFamily: "var(--font-bodoni), 'Bodoni Moda', 'Didot', 'Bodoni MT', serif",
-                transition: "color 0.3s ease",
-                lineHeight: 1,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Salma Behery
+            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+              {/* S - special curved style */}
+              <span 
+                className="logo-s"
+                style={{ 
+                  fontSize: 36, 
+                  fontWeight: 300, 
+                  color: isTransparent ? "#fff" : "#1a1a2e", 
+                  fontFamily: "var(--font-cormorant), 'Cormorant Garamond', 'Playfair Display', serif",
+                  fontStyle: "italic",
+                  letterSpacing: 0,
+                  lineHeight: 1,
+                  transition: "color 0.3s ease",
+                }}
+              >
+                S
+              </span>
+              {/* alma Behery - normal */}
+              <span 
+                className="logo-rest"
+                style={{ 
+                  fontSize: 28, 
+                  fontWeight: 300, 
+                  color: isTransparent ? "#fff" : "#1a1a2e", 
+                  fontFamily: "var(--font-cormorant), 'Cormorant Garamond', 'Playfair Display', serif",
+                  letterSpacing: 4, 
+                  textTransform: "uppercase",
+                  lineHeight: 1,
+                  transition: "color 0.3s ease",
+                  marginLeft: -2,
+                }}
+              >
+                alma Behery
+              </span>
             </div>
           </Link>
 
@@ -293,10 +312,12 @@ export default function Header() {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-text { font-size: 22px !important; letter-spacing: 4px !important; }
+          .logo-s { font-size: 30px !important; }
+          .logo-rest { font-size: 22px !important; letter-spacing: 2px !important; }
         }
         @media (max-width: 480px) {
-          .logo-text { fontSize: 18px !important; letter-spacing: 2px !important; }
+          .logo-s { font-size: 26px !important; }
+          .logo-rest { fontSize: 18px !important; letter-spacing: 1px !important; }
         }
       `}</style>
     </>
