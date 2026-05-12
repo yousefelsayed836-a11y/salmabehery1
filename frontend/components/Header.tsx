@@ -152,13 +152,13 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Center: Logo Image */}
+          {/* Center: Logo Image - BIGGER */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <img 
               src="/images/logo%20(2).png"
               alt="Salma Behery" 
               style={{ 
-                height: isTransparent ? 44 : 40, 
+                height: isTransparent ? 56 : 52,   // ← كبرت من 44/40 لـ 56/52
                 width: "auto",
                 filter: isTransparent ? "brightness(0) invert(1)" : "none",
                 transition: "all 0.3s ease",
