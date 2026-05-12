@@ -28,13 +28,6 @@ const SearchIcon = () => (
   </svg>
 );
 
-const UserIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-  </svg>
-);
-
 const MenuIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <line x1="3" y1="12" x2="21" y2="12"/>
@@ -89,20 +82,21 @@ export default function Header() {
 
   return (
     <>
-      {/* Ticker - only on homepage */}
+      {/* Ticker - white background, black text, no emoji */}
       {isHome && (
         <div style={{ 
-          background: "#fda1b7", 
+          background: "#fff", 
           overflow: "hidden", 
           padding: "9px 0", 
           position: "relative", 
-          zIndex: 101 
+          zIndex: 101,
+          borderBottom: "1px solid #eee",
         }}>
           <div style={{ display: "flex", width: "200%", animation: "tickerScroll 22s linear infinite" }}>
             {[1, 2].map(k => (
               <div key={k} style={{ flex: "0 0 50%", display: "flex", justifyContent: "space-around" }}>
-                {Array(5).fill("🚚 Free Shipping on orders above 900 EGP").map((t, i) => (
-                  <span key={i} style={{ color: "#fff", fontSize: 13, fontWeight: 600, letterSpacing: 1.5, whiteSpace: "nowrap", padding: "0 40px" }}>{t}</span>
+                {Array(5).fill("Free Shipping on orders above 900 EGP").map((t, i) => (
+                  <span key={i} style={{ color: "#1a1a2e", fontSize: 12, fontWeight: 500, letterSpacing: 1.5, whiteSpace: "nowrap", padding: "0 40px", textTransform: "uppercase" }}>{t}</span>
                 ))}
               </div>
             ))}
@@ -158,40 +152,22 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Center: Logo */}
+          {/* Center: Logo Image */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <div style={{ 
-              fontSize: 26, 
-              fontWeight: 300, 
-              color: isTransparent ? "#fff" : "#1a1a2e", 
-              letterSpacing: 4, 
-              textTransform: "uppercase",
-              fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-              transition: "color 0.3s ease",
-            }}>
-              Salma Behery
-            </div>
+            <img 
+              src="/images/logo.png"  // ← حط هنا اسم ملف اللوجو بتاعك
+              alt="Salma Behery" 
+              style={{ 
+                height: isTransparent ? 44 : 40, 
+                width: "auto",
+                filter: isTransparent ? "brightness(0) invert(1)" : "none",  // ← يخلي اللوجو أبيض لما الـ header شفاف
+                transition: "all 0.3s ease",
+              }} 
+            />
           </Link>
 
-          {/* Right: User + Cart */}
+          {/* Right: Cart Only (No User Icon) */}
           <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, justifyContent: "flex-end" }}>
-            <Link 
-              href="/account" 
-              style={{ 
-                color: isTransparent ? "#fff" : "#1a1a2e", 
-                textDecoration: "none", 
-                display: "flex", 
-                alignItems: "center", 
-                padding: "6px 8px", 
-                borderRadius: 10, 
-                transition: "all 0.2s" 
-              }}
-              onMouseEnter={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "#fef4f0")}
-              onMouseLeave={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "transparent")}
-            >
-              <UserIcon />
-            </Link>
-
             <Link 
               href="/checkout" 
               style={{ 
