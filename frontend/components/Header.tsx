@@ -155,12 +155,12 @@ export default function Header() {
           {/* Center: Logo Image */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <img 
-              src="/images/logo.png"  // ← حط هنا اسم ملف اللوجو بتاعك
+              src="/images/logo%20(2).png"
               alt="Salma Behery" 
               style={{ 
                 height: isTransparent ? 44 : 40, 
                 width: "auto",
-                filter: isTransparent ? "brightness(0) invert(1)" : "none",  // ← يخلي اللوجو أبيض لما الـ header شفاف
+                filter: isTransparent ? "brightness(0) invert(1)" : "none",
                 transition: "all 0.3s ease",
               }} 
             />
