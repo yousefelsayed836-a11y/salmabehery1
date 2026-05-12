@@ -161,7 +161,7 @@ export default function HomePage() {
         }
       `}</style>
 
-            {/* ── HERO ── */}
+                {/* ── HERO ── */}
       <section
         className="hero-section"
         style={{
