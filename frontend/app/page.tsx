@@ -169,23 +169,23 @@ export default function HomePage() {
           backgroundPosition: "center", 
           backgroundRepeat: "no-repeat",
           display: "flex", 
-          alignItems: "center", 
+          alignItems: "flex-end", 
           justifyContent: "center",
           textAlign: "center", 
           position: "relative", 
+          paddingBottom: "60px",
         }}
       >
         <div style={{ 
           position: "absolute", 
           inset: 0, 
-          background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.2) 100%)", 
+          background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.2) 100%)", 
           pointerEvents: "none" 
         }} />
         
         <div style={{ 
           position: "relative", 
           padding: "0 20px",
-          marginTop: "60px",
         }}>
           <Link href="/shop" style={{
             display: "inline-block", 
@@ -211,7 +211,7 @@ export default function HomePage() {
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 52px", background: "#fff" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Collections</p>
-          <h2 style={{ fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif", fontSize: 32, fontWeight: 400, color: "#1a1a2e", margin: 0, letterSpacing: 2, textTransform: "uppercase" }}>
+          <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: "#1a1a2e", margin: 0, letterSpacing: 2, textTransform: "uppercase" }}>
             Shop By Category
           </h2>
         </div>
@@ -240,7 +240,7 @@ export default function HomePage() {
       {/* ── REVIEWS ── */}
       <section style={{ textAlign: "center", padding: "52px 20px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
-        <h2 style={{ fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif", fontSize: 28, fontWeight: 400, marginBottom: 30, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
+        <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, marginBottom: 30, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
           What Our Customers Are Saying
         </h2>
 
@@ -305,7 +305,7 @@ export default function HomePage() {
       {/* ── YOUR EVERYDAY SPARKLE ── */}
       <section style={{ padding: "52px 16px", textAlign: "center", background: "#fff", borderTop: "1px solid #eee" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Instagram</p>
-        <h2 style={{ fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif", fontSize: 28, fontWeight: 400, marginBottom: 28, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase" }}>
+        <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, marginBottom: 28, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase" }}>
           Your everyday sparkle
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 3, maxWidth: 680, margin: "0 auto", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(253,161,183,0.15)" }}>
@@ -333,7 +333,7 @@ export default function HomePage() {
                 color: "#1a1a2e", 
                 letterSpacing: 4, 
                 textTransform: "uppercase",
-                fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif",
+                fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif",
                 marginBottom: 10,
               }}>
                 Salma Behery
