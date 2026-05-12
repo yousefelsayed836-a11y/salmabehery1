@@ -152,17 +152,17 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Center: Logo Text with Hello Paris font */}
+          {/* Center: Logo Text with Playfair Display */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <div 
               className="logo-text"
               style={{ 
-                fontSize: 32, 
+                fontSize: 34, 
                 fontWeight: 400, 
                 color: isTransparent ? "#fff" : "#1a1a2e", 
-                letterSpacing: 2, 
+                letterSpacing: 3, 
                 textTransform: "none",
-                fontFamily: "'Hello Paris', 'Playfair Display', 'Cormorant Garamond', serif",
+                fontFamily: "var(--font-playfair), 'Playfair Display', 'Georgia', serif",
                 transition: "color 0.3s ease",
                 lineHeight: 1,
                 whiteSpace: "nowrap",
@@ -293,10 +293,10 @@ export default function Header() {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-text { font-size: 26px !important; }
+          .logo-text { font-size: 28px !important; letter-spacing: 2px !important; }
         }
         @media (max-width: 480px) {
-          .logo-text { font-size: 22px !important; }
+          .logo-text { font-size: 24px !important; letter-spacing: 1px !important; }
         }
       `}</style>
     </>
