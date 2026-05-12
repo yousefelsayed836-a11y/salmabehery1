@@ -161,7 +161,7 @@ export default function HomePage() {
         }
       `}</style>
 
-                {/* ── HERO ── */}
+         {/* ── HERO ── */}
       <section
         className="hero-section"
         style={{
@@ -184,67 +184,31 @@ export default function HomePage() {
         <div style={{ 
           position: "absolute", 
           inset: 0, 
-          background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.3) 100%)", 
+          background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.2) 100%)", 
           pointerEvents: "none" 
         }} />
         
         <div style={{ 
           position: "relative", 
-          color: "#fff", 
-          maxWidth: 600, 
-          padding: "0 20px", 
-          textShadow: "0 2px 8px rgba(0,0,0,0.4)" 
+          padding: "0 20px",
+          marginBottom: 20,
         }}>
-          <p style={{ 
-            fontSize: 12, 
-            letterSpacing: 5, 
-            textTransform: "uppercase", 
-            marginBottom: 10, 
-            opacity: 0, 
-            animation: "fadeUp 0.8s ease 0.2s forwards", 
-            color: "#ffd6e0" 
-          }}>
-            ✦ Salma Behery ✦
-          </p>
-          <h1 style={{ 
-            fontSize: 36, 
-            marginBottom: 16, 
-            fontWeight: 300, 
-            letterSpacing: 2, 
-            opacity: 0, 
-            animation: "fadeUp 0.8s ease 0.5s forwards", 
-            lineHeight: 1.2,
-            fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
-          }}>
-            Elegant Jewelry<br/>Collection
-          </h1>
-          <p style={{ 
-            fontSize: 15, 
-            marginBottom: 28, 
-            opacity: 0, 
-            animation: "fadeUp 0.8s ease 0.8s forwards", 
-            color: "#ffe4ec",
-            fontWeight: 300,
-          }}>
-            Discover timeless pieces crafted to shine with your style.
-          </p>
           <Link href="/shop" style={{
             display: "inline-block", 
-            background: "rgba(255,255,255,0.15)", 
+            background: "rgba(255,255,255,0.2)", 
             backdropFilter: "blur(10px)",
             color: "#fff", 
-            padding: "14px 40px", 
+            padding: "16px 48px", 
             borderRadius: 50, 
             textDecoration: "none",
             fontWeight: 500, 
-            fontSize: 14, 
-            opacity: 0, 
-            animation: "fadeUp 0.8s ease 1.1s forwards",
-            border: "1px solid rgba(255,255,255,0.3)",
-            letterSpacing: 1,
+            fontSize: 15, 
+            border: "1px solid rgba(255,255,255,0.4)",
+            letterSpacing: 2,
+            textTransform: "uppercase",
             transition: "all 0.3s ease",
           }}>
-            Shop Now →
+            Shop Now
           </Link>
         </div>
       </section>
