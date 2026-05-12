@@ -21,12 +21,43 @@ const BagIcon = () => (
   </svg>
 );
 
+const SearchIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const MenuIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
 export default function Header() {
   const pathname = usePathname();
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+  const isHome = pathname === '/';
 
   useEffect(() => {
     const update = () => {
@@ -44,77 +75,229 @@ export default function Header() {
     return () => { window.removeEventListener('cartUpdated', update); window.removeEventListener('storage', update); };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (isDashboard) return null;
+
+  const isTransparent = isHome && !scrolled;
 
   return (
     <>
-      {/* Ticker */}
-      <div style={{ background: "#fda1b7", overflow: "hidden", padding: "9px 0", position: "sticky", top: 0, zIndex: 101 }}>
-        <div style={{ display: "flex", width: "200%", animation: "tickerScroll 22s linear infinite" }}>
-          {[1, 2].map(k => (
-            <div key={k} style={{ flex: "0 0 50%", display: "flex", justifyContent: "space-around" }}>
-              {Array(5).fill("🚚 Free Shipping on orders above 900 EGP").map((t, i) => (
-                <span key={i} style={{ color: "#fff", fontSize: 13, fontWeight: 600, letterSpacing: 1.5, whiteSpace: "nowrap", padding: "0 40px" }}>{t}</span>
-              ))}
-            </div>
-          ))}
+      {/* Ticker - only on homepage */}
+      {isHome && (
+        <div style={{ 
+          background: "#fda1b7", 
+          overflow: "hidden", 
+          padding: "9px 0", 
+          position: "relative", 
+          zIndex: 101 
+        }}>
+          <div style={{ display: "flex", width: "200%", animation: "tickerScroll 22s linear infinite" }}>
+            {[1, 2].map(k => (
+              <div key={k} style={{ flex: "0 0 50%", display: "flex", justifyContent: "space-around" }}>
+                {Array(5).fill("🚚 Free Shipping on orders above 900 EGP").map((t, i) => (
+                  <span key={i} style={{ color: "#fff", fontSize: 13, fontWeight: 600, letterSpacing: 1.5, whiteSpace: "nowrap", padding: "0 40px" }}>{t}</span>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Header */}
-      <header style={{ position: "sticky", top: "38px", zIndex: 100, background: "#fff", borderBottom: "1px solid #f5e6ea", boxShadow: "0 2px 12px rgba(253,161,183,0.08)", padding: "12px 24px" }}>
+      <header style={{ 
+        position: isHome ? "absolute" : "sticky", 
+        top: isHome ? "38px" : "0", 
+        left: 0, 
+        right: 0, 
+        zIndex: 100, 
+        background: isTransparent ? "transparent" : "#fff", 
+        borderBottom: isTransparent ? "none" : "1px solid #f5e6ea", 
+        boxShadow: isTransparent ? "none" : "0 2px 12px rgba(253,161,183,0.08)", 
+        padding: "14px 24px",
+        transition: "all 0.3s ease",
+      }}>
         <div style={{ maxWidth: 1300, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
 
-          {/* Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-            <img src="https://assets.wuiltstore.com/cmmghekwr0oa601k44qqgca21__D8_AA_D8_B5_D9_85_D9_8A_D9_85__D8_A8_D8_AF_D9_88_D9_86__D8_B9_D9_86_D9_88_D8_A7_D9_86__2_.webp"
-              alt="Salma Behery" style={{ height: 46, width: "auto" }} />
+          {/* Left: Menu + Search */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="mobile-nav"
+              style={{ 
+                background: "none", 
+                border: "none", 
+                cursor: "pointer", 
+                color: isTransparent ? "#fff" : "#1a1a2e", 
+                display: "none",
+                padding: 4,
+              }}
+            >
+              {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+
+            <button 
+              className="desktop-icon"
+              style={{ 
+                background: "none", 
+                border: "none", 
+                cursor: "pointer", 
+                color: isTransparent ? "#fff" : "#1a1a2e",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <SearchIcon />
+            </button>
+          </div>
+
+          {/* Center: Logo */}
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
+            <div style={{ 
+              fontSize: 26, 
+              fontWeight: 300, 
+              color: isTransparent ? "#fff" : "#1a1a2e", 
+              letterSpacing: 4, 
+              textTransform: "uppercase",
+              fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
+              transition: "color 0.3s ease",
+            }}>
+              Salma Behery
+            </div>
           </Link>
 
-          {/* Nav - desktop */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 2 }} className="desktop-nav">
-            {NAV_LINKS.map(item => (
-              <Link key={item.href} href={item.href} style={{
-                padding: "7px 13px", borderRadius: 20, textDecoration: "none",
-                fontSize: 13, fontWeight: 500, whiteSpace: "nowrap",
-                color: pathname === item.href ? "#fda1b7" : "#555",
-                background: pathname === item.href ? "#fef4f0" : "transparent",
-                transition: "all 0.2s",
+          {/* Right: User + Cart */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, justifyContent: "flex-end" }}>
+            <Link 
+              href="/account" 
+              style={{ 
+                color: isTransparent ? "#fff" : "#1a1a2e", 
+                textDecoration: "none", 
+                display: "flex", 
+                alignItems: "center", 
+                padding: "6px 8px", 
+                borderRadius: 10, 
+                transition: "all 0.2s" 
               }}
-                onMouseEnter={e => { if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; }}
-                onMouseLeave={e => { if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = "#555"; }}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+              onMouseEnter={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "#fef4f0")}
+              onMouseLeave={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "transparent")}
+            >
+              <UserIcon />
+            </Link>
 
-          {/* Cart + Mobile menu */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Link href="/checkout" style={{ position: "relative", color: "#1a1a2e", textDecoration: "none", display: "flex", alignItems: "center", padding: "6px 8px", borderRadius: 10, transition: "background 0.2s" }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "#fef4f0"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "transparent"}>
+            <Link 
+              href="/checkout" 
+              style={{ 
+                position: "relative", 
+                color: isTransparent ? "#fff" : "#1a1a2e", 
+                textDecoration: "none", 
+                display: "flex", 
+                alignItems: "center", 
+                padding: "6px 8px", 
+                borderRadius: 10, 
+                transition: "all 0.2s" 
+              }}
+              onMouseEnter={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "#fef4f0")}
+              onMouseLeave={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "transparent")}
+            >
               <BagIcon />
               {cartCount > 0 && (
-                <span style={{ position: "absolute", top: 0, right: 0, background: "#fda1b7", color: "#fff", width: 18, height: 18, borderRadius: "50%", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ 
+                  position: "absolute", 
+                  top: 0, 
+                  right: 0, 
+                  background: "#fda1b7", 
+                  color: "#fff", 
+                  width: 18, 
+                  height: 18, 
+                  borderRadius: "50%", 
+                  fontSize: 10, 
+                  fontWeight: 700, 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center" 
+                }}>
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}
             </Link>
-
-            {/* Mobile hamburger */}
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="mobile-nav"
-              style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#fda1b7", display: "none" }}>
-              {mobileMenuOpen ? "✕" : "☰"}
-            </button>
           </div>
         </div>
 
+        {/* Desktop Nav */}
+        <nav 
+          className="desktop-nav"
+          style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            gap: 8,
+            marginTop: isHome ? 8 : 0,
+            paddingTop: isHome ? 8 : 0,
+            borderTop: isHome ? `1px solid ${isTransparent ? 'rgba(255,255,255,0.2)' : '#f5e6ea'}` : 'none',
+          }}
+        >
+          {NAV_LINKS.map(item => (
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              style={{
+                padding: "7px 16px", 
+                borderRadius: 20, 
+                textDecoration: "none",
+                fontSize: 13, 
+                fontWeight: 500, 
+                whiteSpace: "nowrap",
+                color: pathname === item.href ? "#fda1b7" : (isTransparent ? "#fff" : "#555"),
+                background: pathname === item.href ? (isTransparent ? "rgba(255,255,255,0.15)" : "#fef4f0") : "transparent",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={e => { 
+                if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; 
+              }}
+              onMouseLeave={e => { 
+                if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = isTransparent ? "#fff" : "#555"; 
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
         {/* Mobile dropdown */}
         {mobileMenuOpen && (
-          <div style={{ background: "#fff", borderTop: "1px solid #fdf0f3", padding: "12px 24px" }}>
+          <div style={{ 
+            background: "#fff", 
+            borderTop: "1px solid #fdf0f3", 
+            padding: "12px 24px",
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+          }}>
             {NAV_LINKS.map(item => (
-              <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}
-                style={{ display: "block", padding: "10px 0", fontSize: 15, fontWeight: 600, color: pathname === item.href ? "#fda1b7" : "#333", textDecoration: "none", borderBottom: "1px solid #fdf0f3" }}>
+              <Link 
+                key={item.href} 
+                href={item.href} 
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ 
+                  display: "block", 
+                  padding: "10px 0", 
+                  fontSize: 15, 
+                  fontWeight: 600, 
+                  color: pathname === item.href ? "#fda1b7" : "#333", 
+                  textDecoration: "none", 
+                  borderBottom: "1px solid #fdf0f3" 
+                }}
+              >
                 {item.label}
               </Link>
             ))}
@@ -126,6 +309,7 @@ export default function Header() {
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
+          .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
         }
       `}</style>
