@@ -69,9 +69,6 @@ const DEFAULT_REVIEWS = [
   { id: "d9", review_text: "El fabric 7elw awi w el tafseel perfect. 3amlt order w gali bokra! ma3ndhomsh delay wala 7aga", customer_name: "دينا", rating: 5 },
 ];
 
-
-
-
 export default function HomePage() {
   const [currentReview, setCurrentReview] = useState(0);
   const [showForm, setShowForm] = useState(false);
@@ -135,14 +132,12 @@ export default function HomePage() {
         .cat-card:hover img { transform: scale(1.07); }
         .cat-card img { transition: transform 0.45s ease; }
 
-        /* Desktop: 6 cards in 2 rows of 3 */
         .categories-grid-inner {
           display: grid;
           grid-template-columns: repeat(6, 1fr);
           gap: 16px;
         }
 
-        /* Mobile: still 3 per row */
         @media (max-width: 768px) {
           .categories-grid-inner {
             grid-template-columns: repeat(3, 1fr);
@@ -152,7 +147,7 @@ export default function HomePage() {
           .cat-desc  { display: none !important; }
           .cat-text  { padding: 6px 8px 8px !important; }
           .cat-img   { aspect-ratio: 1/1.3 !important; }
-          .hero-section { height: 380px !important; }
+          .hero-section { height: 60vh !important; min-height: 400px !important; }
         }
 
         @media (max-width: 480px) {
@@ -161,37 +156,36 @@ export default function HomePage() {
         }
       `}</style>
 
-         {/* ── HERO ── */}
+      {/* ── HERO ── */}
       <section
         className="hero-section"
         style={{
           width: "100%", 
-          height: "100vh",
-          minHeight: "600px",
-          maxHeight: "900px",
+          height: "75vh",
+          minHeight: "500px",
+          maxHeight: "700px",
           backgroundImage: 'url("/images/hero-bg.jpg")',
           backgroundSize: "cover", 
           backgroundPosition: "center", 
           backgroundRepeat: "no-repeat",
           display: "flex", 
-          alignItems: "flex-end", 
+          alignItems: "center", 
           justifyContent: "center",
           textAlign: "center", 
           position: "relative", 
-          paddingBottom: "80px",
         }}
       >
         <div style={{ 
           position: "absolute", 
           inset: 0, 
-          background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.2) 100%)", 
+          background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.2) 100%)", 
           pointerEvents: "none" 
         }} />
         
         <div style={{ 
           position: "relative", 
           padding: "0 20px",
-          marginBottom: 20,
+          marginTop: "60px",
         }}>
           <Link href="/shop" style={{
             display: "inline-block", 
@@ -217,7 +211,7 @@ export default function HomePage() {
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 52px", background: "#fff" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Collections</p>
-          <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 28, fontWeight: 700, color: "#1a1a2e", margin: 0 }}>
+          <h2 style={{ fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif", fontSize: 32, fontWeight: 400, color: "#1a1a2e", margin: 0, letterSpacing: 2, textTransform: "uppercase" }}>
             Shop By Category
           </h2>
         </div>
@@ -246,11 +240,10 @@ export default function HomePage() {
       {/* ── REVIEWS ── */}
       <section style={{ textAlign: "center", padding: "52px 20px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 500, marginBottom: 30, color: "#333" }}>
+        <h2 style={{ fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif", fontSize: 28, fontWeight: 400, marginBottom: 30, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
           What Our Customers Are Saying
         </h2>
 
-        {/* Review Box */}
         <div style={{ background: "#f2f2f2", width: 340, aspectRatio: "1/1", margin: "0 auto", padding: 25, borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
           <p style={{ fontSize: 17, color: "#333", marginBottom: 15, lineHeight: 1.6, direction: "rtl" }}>
             "{allReviews[currentReview]?.review_text || allReviews[currentReview]?.text}"
@@ -263,13 +256,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Navigation */}
         <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 15 }}>
           <button onClick={prevReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❮</button>
           <button onClick={nextReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❯</button>
         </div>
 
-        {/* Dots */}
         <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 8 }}>
           {allReviews.map((_, i) => (
             <span key={i} onClick={() => setCurrentReview(i)}
@@ -283,13 +274,11 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Add Review Button */}
         <button onClick={() => setShowForm(s => !s)}
           style={{ marginTop: 25, background: "#fda1b7", color: "white", border: "none", padding: "14px 28px", fontSize: 16, borderRadius: 8, cursor: "pointer", transition: "all 0.3s ease" }}>
           Add Your Review
         </button>
 
-        {/* Form */}
         {showForm && (
           <div style={{ marginTop: 35, background: "#fafafa", padding: 25, borderRadius: 12, maxWidth: 400, marginLeft: "auto", marginRight: "auto" }}>
             <h3 style={{ marginBottom: 20, color: "#333" }}>Share Your Experience</h3>
@@ -298,7 +287,6 @@ export default function HomePage() {
                 style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, boxSizing: "border-box" }} />
               <textarea value={formText} onChange={e => setFormText(e.target.value)} placeholder="Write your review..." required rows={4}
                 style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }} />
-              {/* Stars */}
               <div style={{ display: "flex", flexDirection: "row-reverse", justifyContent: "center", margin: "15px 0", gap: 4 }}>
                 {[5, 4, 3, 2, 1].map(star => (
                   <span key={star} onClick={() => setFormRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
@@ -317,8 +305,8 @@ export default function HomePage() {
       {/* ── YOUR EVERYDAY SPARKLE ── */}
       <section style={{ padding: "52px 16px", textAlign: "center", background: "#fff", borderTop: "1px solid #eee" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Instagram</p>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 600, marginBottom: 28, color: "#1a1a2e" }}>
-          Your everyday sparkle ✨
+        <h2 style={{ fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif", fontSize: 28, fontWeight: 400, marginBottom: 28, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase" }}>
+          Your everyday sparkle
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 3, maxWidth: 680, margin: "0 auto", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(253,161,183,0.15)" }}>
           {["sparkle-1", "sparkle-2", "sparkle-3", "sparkle-4"].map((s, i) => (
@@ -334,22 +322,28 @@ export default function HomePage() {
         <p style={{ marginTop: 20, fontSize: 13, color: "#bbb" }}>@salmabehery</p>
       </section>
 
-      
-
       {/* ── FOOTER ── */}
       <footer style={{ background: "#fff", borderTop: "1px solid #f0e0e6", padding: "24px 24px 16px", color: "#aaa" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 20, marginBottom: 20 }}>
             <div>
-              <img src="https://assets.wuiltstore.com/cmmghekwr0oa601k44qqgca21__D8_AA_D8_B5_D9_85_D9_8A_D9_85__D8_A8_D8_AF_D9_88_D9_86__D8_B9_D9_86_D9_88_D8_A7_D9_86__2_.webp"
-                alt="Salma Behery" style={{ height: 36, marginBottom: 10, display: "block" }} />
+              <div style={{ 
+                fontSize: 20, 
+                fontWeight: 400, 
+                color: "#1a1a2e", 
+                letterSpacing: 4, 
+                textTransform: "uppercase",
+                fontFamily: "var(--font-bodoni), 'Bodoni Moda', serif",
+                marginBottom: 10,
+              }}>
+                Salma Behery
+              </div>
               <p style={{ fontSize: 12, lineHeight: 1.7, color: "#bbb", margin: 0 }}>Handcrafted jewelry. Free shipping 900+ EGP.</p>
             </div>
             <div>
               <p style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#fda1b7", marginBottom: 10 }}>Shop</p>
               {CATEGORY_CARDS.map(c => (
-                <Link key={c.key} href={c.href} style={{ display: "block", fontSize: 12, color: "#bbb", textDecoration: "none", marginBottom: 6 }}
-                >
+                <Link key={c.key} href={c.href} style={{ display: "block", fontSize: 12, color: "#bbb", textDecoration: "none", marginBottom: 6 }}>
                   {c.title}
                 </Link>
               ))}
