@@ -71,9 +71,21 @@ export default function HomePage() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
+    // Show cached reviews instantly while backend wakes up
+    try {
+      const cached = localStorage.getItem("cached_reviews");
+      if (cached) setAllReviews(JSON.parse(cached));
+    } catch {}
+
+    // Fetch fresh from backend in background
     fetch(`${API}/reviews`)
       .then(r => r.json())
-      .then(d => { if (d.reviews) setAllReviews(d.reviews); })
+      .then(d => {
+        if (d.reviews && d.reviews.length > 0) {
+          setAllReviews(d.reviews);
+          try { localStorage.setItem("cached_reviews", JSON.stringify(d.reviews)); } catch {}
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -85,26 +97,34 @@ export default function HomePage() {
     e.preventDefault();
     if (!formRating) return alert("Please select a star rating");
     setSubmitting(true);
+    // Show review immediately in UI
+    const optimistic = { id: `tmp-${Date.now()}`, customer_name: formName, review_text: formText, rating: formRating };
+    setAllReviews(prev => {
+      const updated = [optimistic, ...prev];
+      try { localStorage.setItem("cached_reviews", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+    setCurrentReview(0);
+    setFormName(""); setFormText(""); setFormRating(0);
+    setSubmitted(true);
+    setShowForm(false);
+    setTimeout(() => setSubmitted(false), 3000);
     try {
       const res = await fetch(`${API}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer_name: formName, review_text: formText, rating: formRating }),
+        body: JSON.stringify({ customer_name: optimistic.customer_name, review_text: optimistic.review_text, rating: optimistic.rating }),
       });
       const data = await res.json();
       if (data.review) {
-        setAllReviews(prev => [data.review, ...prev]);
-        setCurrentReview(0);
+        setAllReviews(prev => {
+          const updated = prev.map(r => r.id === optimistic.id ? data.review : r);
+          try { localStorage.setItem("cached_reviews", JSON.stringify(updated)); } catch {}
+          return updated;
+        });
       }
-      setFormName(""); setFormText(""); setFormRating(0);
-      setSubmitted(true);
-      setShowForm(false);
-      setTimeout(() => setSubmitted(false), 3000);
-    } catch {
-      alert("Failed to submit. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    } catch {}
+    finally { setSubmitting(false); }
   };
 
   return (
