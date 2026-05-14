@@ -63,7 +63,6 @@ export default function HomePage() {
   const [currentReview, setCurrentReview] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [allReviews, setAllReviews] = useState<any[]>([]);
-  const [reviewCount, setReviewCount] = useState(BASE_COUNT);
   const [formName, setFormName] = useState("");
   const [formText, setFormText] = useState("");
   const [formRating, setFormRating] = useState(0);
@@ -71,70 +70,41 @@ export default function HomePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const loadLocalReviews = (): any[] => {
-    try { return JSON.parse(localStorage.getItem("local_reviews") || "[]"); } catch { return []; }
-  };
-  const saveLocalReviews = (reviews: any[]) => {
-    try { localStorage.setItem("local_reviews", JSON.stringify(reviews)); } catch {}
-  };
-  const getCount = (): number => {
-    try { return parseInt(localStorage.getItem("review_count") || String(BASE_COUNT)); } catch { return BASE_COUNT; }
-  };
-  const saveCount = (n: number) => {
-    try { localStorage.setItem("review_count", String(n)); } catch {}
-  };
-
   useEffect(() => {
-    setReviewCount(getCount());
-    const local = loadLocalReviews();
-    if (local.length > 0) setAllReviews(local);
-
     fetch(`${API}/reviews`)
       .then(r => r.json())
-      .then(d => {
-        if (d.reviews && d.reviews.length > 0) {
-          const local2 = loadLocalReviews();
-          const backendIds = new Set(d.reviews.map((r: any) => r.id));
-          const onlyLocal = local2.filter((r: any) => !backendIds.has(r.id));
-          setAllReviews([...onlyLocal, ...d.reviews]);
-        }
-      })
+      .then(d => { if (d.reviews) setAllReviews(d.reviews); })
       .catch(() => {});
   }, []);
 
+  const reviewCount = BASE_COUNT + allReviews.length;
   const nextReview = () => setCurrentReview((p) => (p + 1) % allReviews.length);
   const prevReview = () => setCurrentReview((p) => (p - 1 + allReviews.length) % allReviews.length);
 
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formRating) return alert("Please select a rating");
+    if (!formRating) return alert("Please select a star rating");
     setSubmitting(true);
-    const newReview = { id: `local-${Date.now()}`, customer_name: formName, review_text: formText, rating: formRating };
-    const updatedLocal = [newReview, ...loadLocalReviews()];
-    saveLocalReviews(updatedLocal);
-    const newCount = getCount() + 1;
-    saveCount(newCount);
-    setReviewCount(newCount);
-    setAllReviews(prev => [newReview, ...prev]);
-    setCurrentReview(0);
-    setFormName(""); setFormText(""); setFormRating(0);
-    setSubmitted(true);
-    setShowForm(false);
-    setTimeout(() => setSubmitted(false), 3000);
     try {
       const res = await fetch(`${API}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer_name: newReview.customer_name, review_text: newReview.review_text, rating: newReview.rating }),
+        body: JSON.stringify({ customer_name: formName, review_text: formText, rating: formRating }),
       });
       const data = await res.json();
       if (data.review) {
-        const cleaned = updatedLocal.filter((r: any) => r.id !== newReview.id);
-        saveLocalReviews(cleaned);
-        setAllReviews(prev => prev.map(r => r.id === newReview.id ? data.review : r));
+        setAllReviews(prev => [data.review, ...prev]);
+        setCurrentReview(0);
       }
-    } catch {}
-    finally { setSubmitting(false); }
+      setFormName(""); setFormText(""); setFormRating(0);
+      setSubmitted(true);
+      setShowForm(false);
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch {
+      alert("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -279,7 +249,7 @@ export default function HomePage() {
 
         {allReviews.length === 0 ? (
           <div style={{ background: "#f9f9f9", maxWidth: 480, margin: "0 auto", padding: "32px 28px", borderRadius: 12, color: "#aaa", fontSize: 15 }}>
-            Be the first to share your experience!
+            Be the first to leave a review!
           </div>
         ) : (
           <>
@@ -311,31 +281,31 @@ export default function HomePage() {
 
         {submitted && (
           <div style={{ marginTop: 16, padding: "10px 20px", borderRadius: 10, background: "#dcfce7", color: "#166534", fontWeight: 600, fontSize: 14, display: "inline-block" }}>
-            ✅ شكراً على رأيك!
+            Thank you for your review!
           </div>
         )}
 
         <button onClick={() => setShowForm(s => !s)}
           style={{ marginTop: 22, background: "#fda1b7", color: "white", border: "none", padding: "13px 28px", fontSize: 15, borderRadius: 8, cursor: "pointer", transition: "all 0.3s ease" }}>
-          أضف رأيك
+          {showForm ? "Cancel" : "Add Your Review"}
         </button>
 
         {showForm && (
-          <div style={{ marginTop: 35, background: "#fafafa", padding: 25, borderRadius: 12, maxWidth: 400, marginLeft: "auto", marginRight: "auto" }}>
-            <h3 style={{ marginBottom: 20, color: "#333" }}>Share Your Experience</h3>
+          <div style={{ marginTop: 28, background: "#fafafa", padding: 25, borderRadius: 12, maxWidth: 400, marginLeft: "auto", marginRight: "auto" }}>
+            <h3 style={{ marginBottom: 20, color: "#333", fontFamily: "'Inter', sans-serif" }}>Share Your Experience</h3>
             <form onSubmit={submitReview}>
               <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Your Name" required
-                style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, boxSizing: "border-box" }} />
+                style={{ width: "100%", padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, boxSizing: "border-box" }} />
               <textarea value={formText} onChange={e => setFormText(e.target.value)} placeholder="Write your review..." required rows={4}
-                style={{ width: "100%", maxWidth: 340, padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }} />
-              <div style={{ display: "flex", flexDirection: "row-reverse", justifyContent: "center", margin: "15px 0", gap: 4 }}>
-                {[5, 4, 3, 2, 1].map(star => (
+                style={{ width: "100%", padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }} />
+              <div style={{ display: "flex", justifyContent: "center", margin: "14px 0", gap: 6 }}>
+                {[1, 2, 3, 4, 5].map(star => (
                   <span key={star} onClick={() => setFormRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
-                    style={{ fontSize: 30, color: star <= (hoverRating || formRating) ? "#fda1b7" : "#ccc", cursor: "pointer", padding: "0 3px", transition: "color 0.2s" }}>★</span>
+                    style={{ fontSize: 32, color: star <= (hoverRating || formRating) ? "#fda1b7" : "#ccc", cursor: "pointer", transition: "color 0.15s" }}>★</span>
                 ))}
               </div>
               <button type="submit" disabled={submitting}
-                style={{ background: "#fda1b7", color: "white", border: "none", padding: "12px 24px", borderRadius: 6, cursor: "pointer", fontSize: 16, marginTop: 10, opacity: submitting ? 0.7 : 1 }}>
+                style={{ width: "100%", background: "#fda1b7", color: "white", border: "none", padding: "12px 24px", borderRadius: 6, cursor: "pointer", fontSize: 15, marginTop: 8, opacity: submitting ? 0.7 : 1, fontWeight: 600 }}>
                 {submitting ? "Submitting..." : "Submit Review"}
               </button>
             </form>
