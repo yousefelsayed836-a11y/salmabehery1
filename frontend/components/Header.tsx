@@ -171,22 +171,6 @@ export default function Header() {
               >
                 Salma Behery
               </span>
-              <span
-                className="logo-sub"
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 400,
-                  fontSize: 9,
-                  letterSpacing: 4,
-                  textTransform: "uppercase",
-                  color: isTransparent ? "rgba(255,255,255,0.8)" : "#999",
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                  transition: "color 0.3s ease",
-                }}
-              >
-                Luxury Jewelry
-              </span>
             </div>
           </Link>
 

@@ -94,19 +94,23 @@ export default function HomePage() {
     e.preventDefault();
     if (!formRating) return alert("Please select a rating");
     setSubmitting(true);
+    const optimistic = { id: `tmp-${Date.now()}`, customer_name: formName, review_text: formText, rating: formRating };
+    setAllReviews(prev => [optimistic, ...prev]);
+    setCurrentReview(0);
+    setFormName(""); setFormText(""); setFormRating(0);
+    setSubmitted(true);
+    setShowForm(false);
+    setTimeout(() => setSubmitted(false), 3000);
     try {
       const res = await fetch(`${API}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer_name: formName, review_text: formText, rating: formRating }),
+        body: JSON.stringify({ customer_name: optimistic.customer_name, review_text: optimistic.review_text, rating: optimistic.rating }),
       });
       const data = await res.json();
-      if (data.review) setAllReviews(prev => [data.review, ...prev]);
-      setFormName(""); setFormText(""); setFormRating(0);
-      setSubmitted(true);
-      setShowForm(false);
-      setCurrentReview(0);
-      setTimeout(() => setSubmitted(false), 3000);
+      if (data.review) {
+        setAllReviews(prev => prev.map(r => r.id === optimistic.id ? data.review : r));
+      }
     } catch {}
     finally { setSubmitting(false); }
   };
