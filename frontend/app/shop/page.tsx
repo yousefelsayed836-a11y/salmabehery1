@@ -49,7 +49,6 @@ function ShopContent() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [toast, setToast] = useState("");
 
   useEffect(() => {
@@ -90,6 +89,15 @@ function ShopContent() {
     });
     setToast(`✓ ${product.name_en.slice(0, 20)} added to cart`);
     setTimeout(() => setToast(""), 2000);
+  };
+
+  const decrementCart = (productId: string) => {
+    setCartItems(prev => {
+      const idx = prev.findIndex(i => i.product.id === productId);
+      if (idx < 0) return prev;
+      if (prev[idx].qty <= 1) return prev.filter((_, i) => i !== idx);
+      return prev.map((x, i) => i === idx ? { ...x, qty: x.qty - 1 } : x);
+    });
   };
 
   const cartTotal = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -217,7 +225,6 @@ function ShopContent() {
                 const img = getProductImage(p);
                 const hasDiscount = p.old_price && p.old_price > p.price;
                 const discount = hasDiscount ? Math.round((1 - p.price / p.old_price!) * 100) : 0;
-                const qty = quantities[p.id] || 1;
 
                 return (
                   <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(253,161,183,0.1)", transition: "transform 0.2s, box-shadow 0.2s" }}>
@@ -244,14 +251,24 @@ function ShopContent() {
                         <span style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
                         {hasDiscount && <span style={{ fontSize: 12, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #f0d4dc", borderRadius: 8, overflow: "hidden" }}>
-                          <button onClick={() => setQuantities(q => ({ ...q, [p.id]: Math.max(1, (q[p.id] || 1) - 1) }))} style={{ width: 30, height: 34, border: "none", background: "#fff", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fda1b7" }}>−</button>
-                          <span style={{ width: 32, textAlign: "center", fontSize: 13, fontWeight: 600, background: "#fff", lineHeight: "34px" }}>{qty}</span>
-                          <button onClick={() => setQuantities(q => ({ ...q, [p.id]: Math.min(10, (q[p.id] || 1) + 1) }))} style={{ width: 30, height: 34, border: "none", background: "#fff", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fda1b7" }}>+</button>
-                        </div>
-                        <button onClick={() => addToCart(p, qty)} style={{ flex: 1, height: 34, borderRadius: 8, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🛒 Add</button>
-                      </div>
+                      {(() => {
+                        const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
+                        const oos = p.stock === 0;
+                        return oos ? (
+                          <div style={{ textAlign: "center", padding: "8px 0", color: "#9ca3af", fontSize: 12, fontWeight: 600 }}>Out of Stock</div>
+                        ) : cartQty > 0 ? (
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", border: "2px solid #fda1b7", borderRadius: 25, overflow: "hidden", height: 38 }}>
+                            <button onClick={() => decrementCart(p.id)} style={{ flex: 1, border: "none", background: "transparent", cursor: "pointer", fontSize: 20, fontWeight: 700, color: "#fda1b7" }}>−</button>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>{cartQty}</span>
+                            <button onClick={() => addToCart(p, 1)} style={{ flex: 1, border: "none", background: "transparent", cursor: "pointer", fontSize: 20, fontWeight: 700, color: "#fda1b7" }}>+</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => addToCart(p, 1)} style={{ width: "100%", height: 38, borderRadius: 25, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            Add to Bag
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 );

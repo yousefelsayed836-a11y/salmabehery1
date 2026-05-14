@@ -153,7 +153,7 @@ export default function HomePage() {
 
         @media (max-width: 768px) {
           .categories-grid-inner {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
           }
           .cat-title { font-size: 11px !important; }

@@ -29,8 +29,6 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showCart, setShowCart] = useState(false);
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [addedId, setAddedId] = useState<string | null>(null);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -44,13 +42,12 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
-  const handleAdd = (product: Product, qty: number = 1) => {
-    if ((product.stock ?? 1) === 0) return; // ✅ block out of stock
-    const ok = addToCart(
+  const handleAdd = (product: Product) => {
+    if ((product.stock ?? 1) === 0) return;
+    addToCart(
       { id: product.id, name_en: product.name_en, price: product.price, image_url: getImg(product) },
-      qty, product.size_info || "One Size", product.stock
+      1, product.size_info || "One Size", product.stock
     );
-    if (ok) { setAddedId(product.id); setTimeout(() => setAddedId(null), 1500); setShowCart(true); }
   };
 
   const sorted = [...products].sort((a, b) =>
@@ -131,10 +128,9 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                 const img = getImg(p);
                 const hasD = p.old_price && p.old_price > p.price;
                 const disc = hasD ? Math.round((1 - p.price / p.old_price!) * 100) : 0;
-                const qty = quantities[p.id] || 1;
-                const oos = (p.stock ?? 1) === 0; // out of stock
+                const oos = (p.stock ?? 1) === 0;
                 const low = !oos && (p.stock ?? 99) <= 3;
-                const added = addedId === p.id;
+                const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
                 return (
                   <div key={p.id} className="pc" style={{ opacity: oos ? 0.65 : 1 }}>
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
@@ -154,19 +150,20 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                         <span style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
                         {hasD && <span style={{ fontSize: 12, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {!oos && (
-                          <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #f0d4dc", borderRadius: 8, overflow: "hidden" }}>
-                            <button onClick={() => setQuantities(q => ({ ...q, [p.id]: Math.max(1, (q[p.id] || 1) - 1) }))} style={{ width: 30, height: 34, border: "none", background: "#fff", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fda1b7" }}>−</button>
-                            <span style={{ width: 32, textAlign: "center", fontSize: 13, fontWeight: 600, lineHeight: "34px" }}>{qty}</span>
-                            <button onClick={() => setQuantities(q => ({ ...q, [p.id]: Math.min(10, (q[p.id] || 1) + 1) }))} style={{ width: 30, height: 34, border: "none", background: "#fff", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fda1b7" }}>+</button>
-                          </div>
-                        )}
-                        <button onClick={() => handleAdd(p, qty)} disabled={oos}
-                          style={{ flex: 1, height: 34, borderRadius: 8, border: "none", background: oos ? "#e5e7eb" : added ? "#22c55e" : "linear-gradient(135deg,#fda1b7,#f78fa3)", color: oos ? "#9ca3af" : "#fff", fontSize: 12, fontWeight: 700, cursor: oos ? "not-allowed" : "pointer", transition: "background 0.3s" }}>
-                          {oos ? "Out of Stock" : added ? "✓ Added!" : "🛒 Add"}
+                      {oos ? (
+                        <div style={{ textAlign: "center", padding: "8px 0", color: "#9ca3af", fontSize: 12, fontWeight: 600 }}>Out of Stock</div>
+                      ) : cartQty > 0 ? (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", border: "2px solid #fda1b7", borderRadius: 25, overflow: "hidden", height: 38 }}>
+                          <button onClick={e => { e.preventDefault(); updateQty(p.id, p.size_info || "One Size", -1); }} style={{ flex: 1, border: "none", background: "transparent", cursor: "pointer", fontSize: 20, fontWeight: 700, color: "#fda1b7" }}>−</button>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>{cartQty}</span>
+                          <button onClick={e => { e.preventDefault(); handleAdd(p); }} style={{ flex: 1, border: "none", background: "transparent", cursor: "pointer", fontSize: 20, fontWeight: 700, color: "#fda1b7" }}>+</button>
+                        </div>
+                      ) : (
+                        <button onClick={e => { e.preventDefault(); handleAdd(p); }} style={{ width: "100%", height: 38, borderRadius: 25, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                          Add to Bag
                         </button>
-                      </div>
+                      )}
                     </div>
                   </div>
                 );
