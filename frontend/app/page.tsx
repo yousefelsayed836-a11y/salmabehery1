@@ -211,7 +211,7 @@ export default function HomePage() {
       <section style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 20px 24px", background: "#fff" }}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Collections</p>
-          <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: "#1a1a2e", margin: 0, letterSpacing: 2, textTransform: "uppercase" }}>
+          <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, color: "#1a1a2e", margin: 0, letterSpacing: 2, textTransform: "uppercase" }}>
             Shop By Category
           </h2>
         </div>
@@ -240,11 +240,11 @@ export default function HomePage() {
       {/* ── REVIEWS ── */}
       <section style={{ textAlign: "center", padding: "28px 20px 24px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
-        <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, marginBottom: 30, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, marginBottom: 24, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
           What Our Customers Are Saying
         </h2>
 
-        <div style={{ background: "#f2f2f2", width: 340, aspectRatio: "1/1", margin: "0 auto", padding: 25, borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
+        <div style={{ background: "#f2f2f2", maxWidth: 480, margin: "0 auto", padding: "24px 28px", borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
           <p style={{ fontSize: 17, color: "#333", marginBottom: 15, lineHeight: 1.6, direction: "rtl" }}>
             "{allReviews[currentReview]?.review_text || allReviews[currentReview]?.text}"
           </p>
@@ -305,7 +305,7 @@ export default function HomePage() {
       {/* ── YOUR EVERYDAY SPARKLE ── */}
       <section style={{ padding: "28px 16px 24px", textAlign: "center", background: "#fff", borderTop: "1px solid #eee" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Instagram</p>
-        <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, marginBottom: 28, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase" }}>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, marginBottom: 24, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase" }}>
           Your everyday sparkle
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 3, maxWidth: 680, margin: "0 auto", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(253,161,183,0.15)" }}>
@@ -327,13 +327,13 @@ export default function HomePage() {
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 20, marginBottom: 20 }}>
             <div>
-              <div style={{ 
-                fontSize: 20, 
-                fontWeight: 400, 
-                color: "#1a1a2e", 
-                letterSpacing: 4, 
+              <div style={{
+                fontSize: 16,
+                fontWeight: 600,
+                color: "#1a1a2e",
+                letterSpacing: 3,
                 textTransform: "uppercase",
-                fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif",
+                fontFamily: "'Inter', sans-serif",
                 marginBottom: 10,
               }}>
                 Salma Behery

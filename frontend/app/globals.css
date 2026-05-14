@@ -3,10 +3,18 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'HelloParis';
-  src: url('/fonts/HelloParisScript.woff2') format('woff2'),
-       url('/fonts/HelloParisScript.woff') format('woff');
-  font-weight: normal;
+  font-family: 'HelloParisSerif';
+  src: url('/fonts/HelloParisSerif-ExtraLight.woff2') format('woff2'),
+       url('/fonts/HelloParisSerif-ExtraLight.woff') format('woff');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'HelloParisSerif';
+  src: url('/fonts/HelloParisSerif-Regular.woff2') format('woff2'),
+       url('/fonts/HelloParisSerif-Regular.woff') format('woff');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }

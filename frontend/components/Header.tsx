@@ -152,41 +152,40 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Center: Logo with special S */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-              {/* S - special curved style */}
-              <span 
-                className="logo-s"
-                style={{ 
-                  fontSize: 36, 
-                  fontWeight: 300, 
-                  color: isTransparent ? "#fff" : "#1a1a2e", 
-                  fontFamily: "'HelloParis', cursive",
-                  fontStyle: "italic",
-                  letterSpacing: 0,
-                  lineHeight: 1,
-                  transition: "color 0.3s ease",
-                }}
-              >
-                S
-              </span>
-              {/* alma Behery - normal */}
-              <span 
-                className="logo-rest"
-                style={{ 
-                  fontSize: 28, 
-                  fontWeight: 300, 
-                  color: isTransparent ? "#fff" : "#1a1a2e", 
-                  fontFamily: "'HelloParis', cursive",
-                  letterSpacing: 4, 
+          {/* Center: Logo */}
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+              <span
+                className="logo-main"
+                style={{
+                  fontFamily: "'HelloParisSerif', 'Didot', 'Bodoni MT', 'Playfair Display', serif",
+                  fontWeight: 200,
+                  fontSize: 34,
+                  letterSpacing: 6,
                   textTransform: "uppercase",
+                  color: isTransparent ? "#fff" : "#1a1a2e",
                   lineHeight: 1,
+                  whiteSpace: "nowrap",
                   transition: "color 0.3s ease",
-                  marginLeft: -2,
                 }}
               >
-                alma Behery
+                Salma Behery
+              </span>
+              <span
+                className="logo-sub"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 400,
+                  fontSize: 9,
+                  letterSpacing: 4,
+                  textTransform: "uppercase",
+                  color: isTransparent ? "rgba(255,255,255,0.8)" : "#999",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  transition: "color 0.3s ease",
+                }}
+              >
+                Luxury Jewelry
               </span>
             </div>
           </Link>
@@ -312,12 +311,11 @@ export default function Header() {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-s { font-size: 30px !important; }
-          .logo-rest { font-size: 22px !important; letter-spacing: 2px !important; }
+          .logo-main { font-size: 24px !important; letter-spacing: 4px !important; }
+          .logo-sub { font-size: 8px !important; letter-spacing: 3px !important; }
         }
-        @media (max-width: 480px) {
-          .logo-s { font-size: 26px !important; }
-          .logo-rest { fontSize: 18px !important; letter-spacing: 1px !important; }
+        @media (max-width: 400px) {
+          .logo-main { font-size: 20px !important; letter-spacing: 3px !important; }
         }
       `}</style>
     </>
