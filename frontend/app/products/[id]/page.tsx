@@ -91,7 +91,6 @@ export default function ProductPage() {
   if (loading) return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>💍</div>
         <p style={{ color: "#aaa", fontSize: 14 }}>Loading...</p>
       </div>
     </div>
@@ -100,7 +99,6 @@ export default function ProductPage() {
   if (!product) return (
     <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
       <div>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>😕</div>
         <h2 style={{ color: "#1a1a2e", marginBottom: 12 }}>Product not found</h2>
         <Link href="/shop" style={{ color: "#fda1b7", fontWeight: 700, textDecoration: "none" }}>← Back to Shop</Link>
       </div>
@@ -199,16 +197,25 @@ export default function ProductPage() {
 
             {/* Price */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#fda1b7" }}>{product.price} EGP</span>
+              <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
               {hasDiscount && <span style={{ fontSize: 17, color: "#bbb", textDecoration: "line-through" }}>{product.old_price} EGP</span>}
               {hasDiscount && <span style={{ fontSize: 13, background: "#fef2f2", color: "#ef4444", padding: "3px 10px", borderRadius: 20, fontWeight: 700 }}>Save {discount}%</span>}
             </div>
 
+            {/* Stock */}
+            <div style={{ fontSize: 13, fontWeight: 700 }}>
+              {!inStock
+                ? <span style={{ color: "#ef4444" }}>Out of Stock</span>
+                : product.stock && product.stock <= 5
+                  ? <span style={{ color: "#f59e0b" }}>Only {product.stock} left</span>
+                  : <span style={{ color: "#22c55e" }}>In Stock</span>}
+            </div>
+
             {/* Badges */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {product.material && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#fdf4f7", color: "#c97a8a", fontSize: 12, fontWeight: 700, border: "1px solid #fce4ec" }}>✨ {product.material}</span>}
-              {product.water_resistance && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#eff6ff", color: "#1e40af", fontSize: 12, fontWeight: 700, border: "1px solid #dbeafe" }}>💧 {product.water_resistance}</span>}
-              {product.size_info && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#f0fdf4", color: "#166534", fontSize: 12, fontWeight: 700, border: "1px solid #dcfce7" }}>📏 {product.size_info}</span>}
+              {product.material && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#fdf4f7", color: "#c97a8a", fontSize: 12, fontWeight: 700, border: "1px solid #fce4ec" }}>{product.material}</span>}
+              {product.water_resistance && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#eff6ff", color: "#1e40af", fontSize: 12, fontWeight: 700, border: "1px solid #dbeafe" }}>{product.water_resistance}</span>}
+              {product.size_info && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#f0fdf4", color: "#166534", fontSize: 12, fontWeight: 700, border: "1px solid #dcfce7" }}>{product.size_info}</span>}
             </div>
 
             {/* Description */}
@@ -216,15 +223,6 @@ export default function ProductPage() {
               <div style={{ fontSize: 14, lineHeight: 1.9, color: "#666", padding: "14px 16px", background: "#fdf9fb", borderRadius: 12, borderLeft: "3px solid #fda1b7" }}
                 dangerouslySetInnerHTML={{ __html: product.description_en }} />
             )}
-
-            {/* Stock */}
-            <div style={{ fontSize: 13, fontWeight: 700 }}>
-              {!inStock
-                ? <span style={{ color: "#ef4444" }}>● Out of Stock</span>
-                : product.stock && product.stock <= 5
-                  ? <span style={{ color: "#f59e0b" }}>● Only {product.stock} left!</span>
-                  : <span style={{ color: "#22c55e" }}>● In Stock</span>}
-            </div>
 
             {/* Qty + Add to cart */}
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -240,7 +238,7 @@ export default function ProductPage() {
                   background: !inStock ? "#e5e7eb" : added ? "#22c55e" : "linear-gradient(135deg,#fda1b7,#f78fa3)",
                   color: !inStock ? "#9ca3af" : "#fff", fontSize: 15, fontWeight: 700,
                   cursor: !inStock ? "not-allowed" : "pointer", transition: "all 0.3s" }}>
-                {!inStock ? "Out of Stock" : added ? "✓ Added to Cart!" : "🛒 Add to Cart"}
+                {!inStock ? "Out of Stock" : added ? "Added to Cart" : "Add to Cart"}
               </button>
             </div>
 
@@ -251,15 +249,9 @@ export default function ProductPage() {
                 textDecoration: "none", transition: "all 0.2s" }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "#fda1b7"; (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; }}>
-              ⚡ Buy Now
+              Buy Now
             </Link>
 
-            {/* Perks */}
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", padding: "14px 16px", background: "#fdf9fb", borderRadius: 12 }}>
-              <span style={{ fontSize: 12, color: "#777", display: "flex", alignItems: "center", gap: 6 }}>🚚 Free shipping above 900 EGP</span>
-              <span style={{ fontSize: 12, color: "#777", display: "flex", alignItems: "center", gap: 6 }}>💳 Cash on Delivery</span>
-              <span style={{ fontSize: 12, color: "#777", display: "flex", alignItems: "center", gap: 6 }}>🔄 Easy returns</span>
-            </div>
           </div>
         </div>
       </div>

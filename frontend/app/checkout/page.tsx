@@ -187,7 +187,7 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <>
-                  <div style={{ maxHeight: 200, overflowY: "auto", marginBottom: 12 }}>
+                  <div style={{ marginBottom: 12 }}>
                     {cart.map((item, i) => (
                       <div key={i} style={{ display: "flex", gap: 10, padding: "8px 0", borderBottom: "1px solid #fdf0f3", alignItems: "center" }}>
                         <div style={{ width: 44, height: 44, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#fdf0f3" }}>
@@ -300,6 +300,7 @@ export default function CheckoutPage() {
       </div>
 
       <style jsx global>{`
+        html, body { overflow-x: hidden; }
         .checkout-grid {
           display: grid;
           grid-template-columns: 1fr 340px;

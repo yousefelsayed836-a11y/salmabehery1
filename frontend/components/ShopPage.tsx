@@ -60,10 +60,6 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>
-      {/* Floating cart */}
-      <button onClick={() => setShowCart(true)} style={{ position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", border: "none", fontSize: 24, cursor: "pointer", zIndex: 100, boxShadow: "0 4px 16px rgba(253,161,183,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        🛒{cartCount > 0 && <span style={{ position: "absolute", top: -4, right: -4, background: "#ef4444", color: "#fff", borderRadius: "50%", width: 22, height: 22, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{cartCount}</span>}
-      </button>
 
       {/* Cart sidebar */}
       {showCart && (

@@ -105,16 +105,16 @@ export default function Header() {
       )}
 
       {/* Header */}
-      <header style={{ 
-        position: isHome ? "absolute" : "sticky", 
-        top: isHome ? "38px" : "0", 
-        left: 0, 
-        right: 0, 
-        zIndex: 100, 
-        background: isTransparent ? "transparent" : "#fff", 
-        borderBottom: isTransparent ? "none" : "1px solid #f5e6ea", 
-        boxShadow: isTransparent ? "none" : "0 2px 12px rgba(253,161,183,0.08)", 
-        padding: "14px 24px",
+      <header style={{
+        position: isHome ? "absolute" : "sticky",
+        top: isHome ? "38px" : "0",
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        background: isTransparent ? "transparent" : "#fff",
+        borderBottom: isTransparent ? "none" : "1px solid #f5e6ea",
+        boxShadow: isTransparent ? "none" : "0 2px 12px rgba(253,161,183,0.08)",
+        padding: "8px 24px",
         transition: "all 0.3s ease",
       }}>
         <div style={{ maxWidth: 1300, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
@@ -159,9 +159,9 @@ export default function Header() {
                 className="logo-main"
                 style={{
                   fontFamily: "'HelloParisSerif', 'Didot', 'Bodoni MT', 'Playfair Display', serif",
-                  fontWeight: 200,
-                  fontSize: 34,
-                  letterSpacing: 6,
+                  fontWeight: 400,
+                  fontSize: 30,
+                  letterSpacing: 3,
                   textTransform: "uppercase",
                   color: isTransparent ? "#fff" : "#1a1a2e",
                   lineHeight: 1,
@@ -295,7 +295,7 @@ export default function Header() {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-main { font-size: 24px !important; letter-spacing: 4px !important; }
+          .logo-main { font-size: 20px !important; letter-spacing: 2px !important; }
           .logo-sub { font-size: 8px !important; letter-spacing: 3px !important; }
         }
         @media (max-width: 400px) {
