@@ -57,22 +57,13 @@ const CATEGORY_CARDS = [
   },
 ];
 
-const DEFAULT_REVIEWS = [
-  { id: "d1", review_text: "Wallahi el quality 3alya gedan! el fabric na3em khaleees w el size perfect. ha order tany 100%", customer_name: "سارة", rating: 5 },
-  { id: "d2", review_text: "El shipping was super fast w el customer service mo7tarma gedan. el colors a7la mn el sora bketeeer!", customer_name: "نور", rating: 5 },
-  { id: "d3", review_text: "A7la purchase 3amltaha el sana di! el details mafhouma w el piece tela3et a7la mn el ma3ared.", customer_name: "مريم", rating: 5 },
-  { id: "d4", review_text: "El quality 7elw awi lel price. ghasaltaha kaza mara w lessa zay el fol! ma3mletsh color wala 7aga", customer_name: "فاطمة", rating: 5 },
-  { id: "d5", review_text: "Dih el makan el ba3mel meno shopping kol mara. kol mara beywafro styles gdeda w as3ar 7elwa.", customer_name: "هدير", rating: 5 },
-  { id: "d6", review_text: "Ana meshtreya menhom 3 marat w kol mara bey3jboni aktar. el packaging 7elw w el delivery 3ala tool!", customer_name: "ياسمين", rating: 5 },
-  { id: "d7", review_text: "El piece el gdeda di 3amltaha l fr7ty w kol s7aby sa2aloni menen. 7elw awi w quality mosh tab3eya!", customer_name: "ليلى", rating: 5 },
-  { id: "d8", review_text: "Ba7eb ashtry menhom 3ashan homa wa7deen elly bywafro el styles el 3asrya di b as3ar montazama.", customer_name: "رنا", rating: 5 },
-  { id: "d9", review_text: "El fabric 7elw awi w el tafseel perfect. 3amlt order w gali bokra! ma3ndhomsh delay wala 7aga", customer_name: "دينا", rating: 5 },
-];
+const BASE_COUNT = 136;
 
 export default function HomePage() {
   const [currentReview, setCurrentReview] = useState(0);
   const [showForm, setShowForm] = useState(false);
-  const [allReviews, setAllReviews] = useState(DEFAULT_REVIEWS as any[]);
+  const [allReviews, setAllReviews] = useState<any[]>([]);
+  const [reviewCount, setReviewCount] = useState(BASE_COUNT);
   const [formName, setFormName] = useState("");
   const [formText, setFormText] = useState("");
   const [formRating, setFormRating] = useState(0);
@@ -86,13 +77,17 @@ export default function HomePage() {
   const saveLocalReviews = (reviews: any[]) => {
     try { localStorage.setItem("local_reviews", JSON.stringify(reviews)); } catch {}
   };
+  const getCount = (): number => {
+    try { return parseInt(localStorage.getItem("review_count") || String(BASE_COUNT)); } catch { return BASE_COUNT; }
+  };
+  const saveCount = (n: number) => {
+    try { localStorage.setItem("review_count", String(n)); } catch {}
+  };
 
   useEffect(() => {
+    setReviewCount(getCount());
     const local = loadLocalReviews();
-    if (local.length > 0) setAllReviews(prev => {
-      const ids = new Set(prev.map((r: any) => r.id));
-      return [...local.filter((r: any) => !ids.has(r.id)), ...prev];
-    });
+    if (local.length > 0) setAllReviews(local);
 
     fetch(`${API}/reviews`)
       .then(r => r.json())
@@ -117,6 +112,9 @@ export default function HomePage() {
     const newReview = { id: `local-${Date.now()}`, customer_name: formName, review_text: formText, rating: formRating };
     const updatedLocal = [newReview, ...loadLocalReviews()];
     saveLocalReviews(updatedLocal);
+    const newCount = getCount() + 1;
+    saveCount(newCount);
+    setReviewCount(newCount);
     setAllReviews(prev => [newReview, ...prev]);
     setCurrentReview(0);
     setFormName(""); setFormText(""); setFormRating(0);
@@ -268,43 +266,58 @@ export default function HomePage() {
       {/* ── REVIEWS ── */}
       <section style={{ textAlign: "center", padding: "28px 20px 24px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, marginBottom: 24, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, marginBottom: 6, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
           What Our Customers Are Saying
         </h2>
 
-        <div style={{ background: "#f2f2f2", maxWidth: 480, margin: "0 auto", padding: "24px 28px", borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
-          <p style={{ fontSize: 17, color: "#333", marginBottom: 15, lineHeight: 1.6, direction: "rtl" }}>
-            "{allReviews[currentReview]?.review_text || allReviews[currentReview]?.text}"
-          </p>
-          <div style={{ fontSize: 14, color: "#777", marginBottom: 10, fontWeight: 600 }}>
-            - {allReviews[currentReview]?.customer_name || allReviews[currentReview]?.name}
-          </div>
-          <div style={{ color: "#fda1b7", fontSize: 25 }}>
-            {"★".repeat(allReviews[currentReview]?.rating || allReviews[currentReview]?.stars || 5)}
-          </div>
+        {/* Counter */}
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fef4f7", border: "1px solid #fda1b7", borderRadius: 30, padding: "6px 18px", marginBottom: 22 }}>
+          <span style={{ color: "#fda1b7", fontSize: 16 }}>★</span>
+          <span style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e" }}>{reviewCount.toLocaleString()}</span>
+          <span style={{ fontSize: 13, color: "#888" }}>happy customers</span>
         </div>
 
-        <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 15 }}>
-          <button onClick={prevReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❮</button>
-          <button onClick={nextReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer", transition: "all 0.3s ease" }}>❯</button>
-        </div>
+        {allReviews.length === 0 ? (
+          <div style={{ background: "#f9f9f9", maxWidth: 480, margin: "0 auto", padding: "32px 28px", borderRadius: 12, color: "#aaa", fontSize: 15 }}>
+            Be the first to share your experience!
+          </div>
+        ) : (
+          <>
+            <div style={{ background: "#f2f2f2", maxWidth: 480, margin: "0 auto", padding: "24px 28px", borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
+              <p style={{ fontSize: 17, color: "#333", marginBottom: 15, lineHeight: 1.6, direction: "rtl" }}>
+                "{allReviews[currentReview]?.review_text || allReviews[currentReview]?.text}"
+              </p>
+              <div style={{ fontSize: 14, color: "#777", marginBottom: 10, fontWeight: 600 }}>
+                — {allReviews[currentReview]?.customer_name || allReviews[currentReview]?.name}
+              </div>
+              <div style={{ color: "#fda1b7", fontSize: 22 }}>
+                {"★".repeat(allReviews[currentReview]?.rating || allReviews[currentReview]?.stars || 5)}
+              </div>
+            </div>
 
-        <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 8 }}>
-          {allReviews.map((_, i) => (
-            <span key={i} onClick={() => setCurrentReview(i)}
-              style={{ width: 10, height: 10, borderRadius: "50%", background: i === currentReview ? "#fda1b7" : "#ddd", cursor: "pointer", display: "inline-block", transition: "all 0.3s ease" }} />
-          ))}
-        </div>
+            <div style={{ marginTop: 15, display: "flex", justifyContent: "center", gap: 15 }}>
+              <button onClick={prevReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer" }}>❮</button>
+              <button onClick={nextReview} style={{ background: "#fda1b7", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: 18, cursor: "pointer" }}>❯</button>
+            </div>
+
+            <div style={{ marginTop: 12, display: "flex", justifyContent: "center", gap: 7, flexWrap: "wrap" }}>
+              {allReviews.slice(0, 10).map((_, i) => (
+                <span key={i} onClick={() => setCurrentReview(i)}
+                  style={{ width: 9, height: 9, borderRadius: "50%", background: i === currentReview ? "#fda1b7" : "#ddd", cursor: "pointer", display: "inline-block", transition: "background 0.2s" }} />
+              ))}
+            </div>
+          </>
+        )}
 
         {submitted && (
           <div style={{ marginTop: 16, padding: "10px 20px", borderRadius: 10, background: "#dcfce7", color: "#166534", fontWeight: 600, fontSize: 14, display: "inline-block" }}>
-            ✅ Thank you for your review! ❤️
+            ✅ شكراً على رأيك!
           </div>
         )}
 
         <button onClick={() => setShowForm(s => !s)}
-          style={{ marginTop: 25, background: "#fda1b7", color: "white", border: "none", padding: "14px 28px", fontSize: 16, borderRadius: 8, cursor: "pointer", transition: "all 0.3s ease" }}>
-          Add Your Review
+          style={{ marginTop: 22, background: "#fda1b7", color: "white", border: "none", padding: "13px 28px", fontSize: 15, borderRadius: 8, cursor: "pointer", transition: "all 0.3s ease" }}>
+          أضف رأيك
         </button>
 
         {showForm && (
