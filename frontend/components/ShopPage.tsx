@@ -138,7 +138,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                 return (
                   <div key={p.id} className="pc" style={{ opacity: oos ? 0.65 : 1 }}>
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ position: "relative", height: 200, background: "#fafafa", overflow: "hidden" }}>
+                    <div style={{ position: "relative", aspectRatio: "1/1", background: "#fafafa", overflow: "hidden" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi" loading="lazy" onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
                       {hasD && <span style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>-{disc}%</span>}
                       {oos && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#6b7280", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>Out of stock</span>}
@@ -151,7 +151,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                       <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.3, cursor: "pointer" }}>{p.name_en}</h3>
                       </Link>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 18, fontWeight: 800, color: "#fda1b7" }}>{p.price} EGP</span>
+                        <span style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
                         {hasD && <span style={{ fontSize: 12, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

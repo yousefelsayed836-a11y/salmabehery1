@@ -220,7 +220,22 @@ export default function OrdersPage() {
     printWindow.document.close();
   };
 
-  const getStatusColor = (s: string) => s === "pending" ? "#f59e0b" : s === "completed" || s === "delivered" ? "#22c55e" : s === "cancelled" ? "#ef4444" : "#6b7280";
+  const getStatusColor = (s: string) => {
+    if (s === "pending") return "#f59e0b";
+    if (s === "processing") return "#3b82f6";
+    if (s === "partially_shipped") return "#8b5cf6";
+    if (s === "completed" || s === "delivered") return "#22c55e";
+    if (s === "cancelled") return "#ef4444";
+    return "#6b7280";
+  };
+  const getStatusBg = (s: string) => {
+    if (s === "pending") return "#fef3c7";
+    if (s === "processing") return "#dbeafe";
+    if (s === "partially_shipped") return "#ede9fe";
+    if (s === "completed" || s === "delivered") return "#dcfce7";
+    if (s === "cancelled") return "#fee2e2";
+    return "#f3f4f6";
+  };
   const fmt = (n: number) => (n || 0).toLocaleString();
 
   return (
@@ -309,6 +324,7 @@ export default function OrdersPage() {
                           style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 12, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
                           <option value="pending">Pending</option>
                           <option value="processing">Processing</option>
+                          <option value="partially_shipped">Partially Shipped</option>
                           <option value="completed">Completed</option>
                           <option value="cancelled">Cancelled</option>
                         </select>
@@ -346,8 +362,8 @@ export default function OrdersPage() {
                 <p style={{ margin: "4px 0 0", color: "#fda1b7", fontSize: 13 }}>{new Date(selectedOrder.created_at).toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
               </div>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <span style={{ padding: "6px 16px", borderRadius: 20, fontSize: 13, fontWeight: 700, background: selectedOrder.status === "completed" ? "#dcfce7" : selectedOrder.status === "cancelled" ? "#fee2e2" : "#fef3c7", color: getStatusColor(selectedOrder.status) }}>
-                  {selectedOrder.status}
+                <span style={{ padding: "6px 16px", borderRadius: 20, fontSize: 13, fontWeight: 700, background: getStatusBg(selectedOrder.status), color: getStatusColor(selectedOrder.status) }}>
+                  {selectedOrder.status === "partially_shipped" ? "Partially Shipped" : selectedOrder.status}
                 </span>
                 <button onClick={() => handlePrint(selectedOrder)}
                   style={{ padding: "8px 18px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
@@ -401,10 +417,11 @@ export default function OrdersPage() {
                   <label style={{ fontSize: 12, color: "#888", fontWeight: 700, display: "block", marginBottom: 8 }}>UPDATE STATUS</label>
                   <select value={selectedOrder.status} onChange={e => updateStatus(selectedOrder.id, e.target.value)}
                     style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1.5px solid #f0d4dc", fontSize: 14, fontWeight: 700, color: getStatusColor(selectedOrder.status), cursor: "pointer", background: "#fff", outline: "none" }}>
-                    <option value="pending">⏳ Pending</option>
-                    <option value="processing">🔄 Processing</option>
-                    <option value="completed">✅ Completed</option>
-                    <option value="cancelled">❌ Cancelled</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="partially_shipped">Partially Shipped</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
               </div>

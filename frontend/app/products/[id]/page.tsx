@@ -207,7 +207,7 @@ export default function ProductPage() {
               {!inStock
                 ? <span style={{ color: "#ef4444" }}>Out of Stock</span>
                 : product.stock && product.stock <= 5
-                  ? <span style={{ color: "#f59e0b" }}>Only {product.stock} left</span>
+                  ? <span style={{ color: "#ef4444" }}>Only {product.stock} left</span>
                   : <span style={{ color: "#22c55e" }}>In Stock</span>}
             </div>
 
@@ -220,8 +220,11 @@ export default function ProductPage() {
 
             {/* Description */}
             {product.description_en && (
-              <div style={{ fontSize: 14, lineHeight: 1.9, color: "#666", padding: "14px 16px", background: "#fdf9fb", borderRadius: 12, borderLeft: "3px solid #fda1b7" }}
-                dangerouslySetInnerHTML={{ __html: product.description_en }} />
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 700, color: "#aaa", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
+                <div style={{ fontSize: 14, lineHeight: 1.9, color: "#666", padding: "14px 16px", background: "#f9f9f9", borderRadius: 12, borderLeft: "3px solid #eee" }}
+                  dangerouslySetInnerHTML={{ __html: product.description_en }} />
+              </div>
             )}
 
             {/* Qty + Add to cart */}
@@ -270,7 +273,7 @@ export default function ProductPage() {
                 return (
                   <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                     <div className="sim-card">
-                      <div style={{ position: "relative", aspectRatio: "1/1", background: "#f9f0f3", overflow: "hidden" }}>
+                      <div style={{ position: "relative", aspectRatio: "1/1", background: "#f5f5f5", overflow: "hidden" }}>
                         {disc > 0 && <span style={{ position: "absolute", top: 8, left: 8, background: "#ef4444", color: "#fff", padding: "3px 9px", borderRadius: 20, fontSize: 10, fontWeight: 700, zIndex: 2 }}>-{disc}%</span>}
                         <img src={img} alt={p.name_en} className="sim-img"
                           style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }}
@@ -280,7 +283,7 @@ export default function ProductPage() {
                         <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1a2e", margin: "0 0 6px", lineHeight: 1.4,
                           overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>{p.name_en}</p>
                         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                          <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 15 }}>{p.price} EGP</span>
+                          <span style={{ fontWeight: 800, color: "#1a1a2e", fontSize: 15 }}>{p.price} EGP</span>
                           {p.old_price && p.old_price > p.price && <span style={{ fontSize: 12, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
                         </div>
                         <button onClick={e => { e.preventDefault(); addToCart(p, 1); }}

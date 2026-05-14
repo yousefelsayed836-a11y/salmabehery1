@@ -22,10 +22,15 @@ interface Product {
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
+const ADMIN_PASSWORD = "1122";
+
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authed, setAuthed] = useState(false);
+  const [pw, setPw] = useState("");
+  const [pwError, setPwError] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -66,6 +71,26 @@ export default function AdminDashboard() {
     .slice(0, 8);
 
   const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  if (!authed) return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f5f5f5" }}>
+      <div style={{ background: "#fff", borderRadius: 20, padding: 40, boxShadow: "0 4px 24px rgba(0,0,0,0.08)", textAlign: "center", width: 300 }}>
+        <div style={{ fontSize: 36, marginBottom: 12 }}>🔐</div>
+        <h2 style={{ margin: "0 0 20px", color: "#1a1a2e", fontSize: 18 }}>Admin Access</h2>
+        <input
+          type="password" value={pw} onChange={e => { setPw(e.target.value); setPwError(false); }}
+          onKeyDown={e => { if (e.key === "Enter") { if (pw === ADMIN_PASSWORD) setAuthed(true); else setPwError(true); } }}
+          placeholder="Enter password"
+          style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${pwError ? "#ef4444" : "#ddd"}`, fontSize: 15, boxSizing: "border-box", outline: "none", marginBottom: 12 }}
+        />
+        {pwError && <p style={{ color: "#ef4444", fontSize: 13, margin: "0 0 10px" }}>Incorrect password</p>}
+        <button onClick={() => { if (pw === ADMIN_PASSWORD) setAuthed(true); else setPwError(true); }}
+          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+          Login
+        </button>
+      </div>
+    </div>
+  );
 
   if (loading) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>

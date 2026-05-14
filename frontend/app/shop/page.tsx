@@ -222,7 +222,7 @@ function ShopContent() {
                 return (
                   <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(253,161,183,0.1)", transition: "transform 0.2s, box-shadow 0.2s" }}>
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
-                    <div className="product-image-wrapper" style={{ position: "relative", height: 200, background: "#fff", overflow: "hidden", cursor: "pointer" }}>
+                    <div className="product-image-wrapper" style={{ position: "relative", aspectRatio: "1/1", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="product-image" loading="lazy"
                         onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`; }} />
                       {hasDiscount && <span style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>-{discount}%</span>}
@@ -241,7 +241,7 @@ function ShopContent() {
                       <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.3, cursor: "pointer" }}>{p.name_en}</h3>
                       </Link>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 18, fontWeight: 800, color: "#fda1b7" }}>{p.price} EGP</span>
+                        <span style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
                         {hasDiscount && <span style={{ fontSize: 12, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
