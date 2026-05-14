@@ -1,52 +1,57 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect, useRef, useCallback } from 'react';
-
-interface Product {
-  id: string;
-  name_en: string;
-  price: number;
-  main_image?: string;
-  images?: string[];
-  handle?: string;
-  category_name?: string;
-}
-
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
-
-function getImg(p: Product) {
-  const img = p.main_image || (p.images && p.images[0]);
-  if (!img) return null;
-  if (img.startsWith("http")) return img;
-  return `${process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com"}${img}`;
-}
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 const NAV_LINKS = [
-  { label: "Shop",        href: "/shop" },
-  { label: "Rings",       href: "/shop/rings" },
-  { label: "Necklaces",   href: "/shop/necklace" },
-  { label: "Bracelets",   href: "/shop/bracelet" },
-  { label: "Earrings",    href: "/shop/earrings" },
+  { label: "Shop",          href: "/shop" },
+  { label: "Rings",         href: "/shop/rings" },
+  { label: "Necklaces",     href: "/shop/necklace" },
+  { label: "Bracelets",     href: "/shop/bracelet" },
+  { label: "Earrings",      href: "/shop/earrings" },
   { label: "Sets & Offers", href: "/shop/sets-and-offers" },
 ];
 
+const BagIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <path d="M16 10a4 4 0 0 1-8 0"/>
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+);
+
+const MenuIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
 export default function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   const [cartCount, setCartCount] = useState(0);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Product[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<NodeJS.Timeout>(undefined);
+  const [scrolled, setScrolled] = useState(false);
 
   const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+  const isHome = pathname === '/';
 
-  // Cart count
   useEffect(() => {
     const update = () => {
       try {
@@ -63,199 +68,236 @@ export default function Header() {
     return () => { window.removeEventListener('cartUpdated', update); window.removeEventListener('storage', update); };
   }, []);
 
-  // Close dropdown outside click
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowDropdown(false);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Live search
-  const doSearch = useCallback(async (q: string) => {
-    if (!q.trim()) { setResults([]); setShowDropdown(false); return; }
-    setSearching(true);
-    try {
-      const res = await fetch(`${API_BASE}/products?search=${encodeURIComponent(q)}&is_active=true&limit=8`, { cache: "no-store" });
-      const data = await res.json();
-      setResults(data.products || []);
-      setShowDropdown(true);
-    } catch { setResults([]); }
-    finally { setSearching(false); }
-  }, []);
-
-  const handleInput = (val: string) => {
-    setQuery(val);
-    clearTimeout(timerRef.current);
-    if (!val.trim()) { setResults([]); setShowDropdown(false); return; }
-    timerRef.current = setTimeout(() => doSearch(val), 300);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && query.trim()) {
-      setShowDropdown(false);
-      router.push(`/shop?search=${encodeURIComponent(query)}`);
-    }
-    if (e.key === 'Escape') { setShowDropdown(false); setQuery(''); }
-  };
 
   if (isDashboard) return null;
 
+  const isTransparent = isHome && !scrolled;
+
   return (
     <>
-      {/* ✅ Ticker - Free Shipping فقط + خلفية وردية فاتحة */}
-      <div style={{
-        background: "#fda1b7",
-        overflow: "hidden",
-        padding: "9px 0",
-        position: "sticky",
-        top: 0,
-        zIndex: 101,
-      }}>
-        <div style={{ display: "flex", width: "200%", animation: "tickerScroll 22s linear infinite" }}>
-          {[1, 2].map(k => (
-            <div key={k} style={{ flex: "0 0 50%", display: "flex", justifyContent: "space-around" }}>
-              {[
-                "🚚 Free Shipping on orders above 900 EGP",
-                "🚚 Free Shipping on orders above 900 EGP",
-                "🚚 Free Shipping on orders above 900 EGP",
-                "🚚 Free Shipping on orders above 900 EGP",
-                "🚚 Free Shipping on orders above 900 EGP",
-              ].map((t, i) => (
-                <span key={i} style={{ color: "#fff", fontSize: 13, fontWeight: 600, letterSpacing: 1.5, whiteSpace: "nowrap", padding: "0 40px" }}>{t}</span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ✅ Header - خلفية بيضاء */}
-      <header style={{
-        position: "sticky",
-        top: "38px",
-        zIndex: 100,
-        background: "#fff",
-        borderBottom: "1px solid #f5e6ea",
-        boxShadow: "0 2px 12px rgba(253,161,183,0.08)",
-        padding: "10px 24px",
-      }}>
-        <div style={{ maxWidth: 1300, margin: "0 auto", display: "flex", alignItems: "center", gap: 16 }}>
-
-          {/* Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-            <img
-              src="https://assets.wuiltstore.com/cmmghekwr0oa601k44qqgca21__D8_AA_D8_B5_D9_85_D9_8A_D9_85__D8_A8_D8_AF_D9_88_D9_86__D8_B9_D9_86_D9_88_D8_A7_D9_86__2_.webp"
-              alt="Salma Behery"
-              style={{ height: 46, width: "auto" }}
-            />
-          </Link>
-
-          {/* Search */}
-          <div ref={searchRef} style={{ flex: 1, maxWidth: 520, position: "relative", margin: "0 auto" }}>
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: "#fda1b7", pointerEvents: "none" }}>🔍</span>
-              <input
-                type="text"
-                value={query}
-                onChange={e => handleInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => query && setShowDropdown(true)}
-                placeholder="Search jewelry..."
-                style={{
-                  width: "100%", padding: "10px 36px 10px 38px",
-                  borderRadius: 30, border: "1.5px solid #f0d4dc",
-                  fontSize: 14, outline: "none", background: "#fff",
-                  color: "#333", boxSizing: "border-box", transition: "border-color 0.2s, box-shadow 0.2s",
-                }}
-                onFocusCapture={e => { (e.target as HTMLInputElement).style.borderColor = "#fda1b7"; (e.target as HTMLInputElement).style.boxShadow = "0 0 0 3px rgba(253,161,183,0.12)"; }}
-                onBlurCapture={e => { (e.target as HTMLInputElement).style.borderColor = "#f0d4dc"; (e.target as HTMLInputElement).style.boxShadow = "none"; }}
-              />
-              {searching && <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: "#fda1b7" }}>⏳</span>}
-              {query && !searching && (
-                <button onClick={() => { setQuery(""); setResults([]); setShowDropdown(false); }}
-                  style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "#ccc", lineHeight: 1, padding: 0 }}>×</button>
-              )}
-            </div>
-
-            {/* Dropdown */}
-            {showDropdown && query && (
-              <div style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, right: 0, background: "#fff", borderRadius: 16, border: "1px solid #f5e0e6", boxShadow: "0 12px 40px rgba(253,161,183,0.18)", zIndex: 200, overflow: "hidden", maxHeight: 400, overflowY: "auto" }}>
-                {results.length === 0 ? (
-                  <div style={{ padding: 20, textAlign: "center", color: "#bbb", fontSize: 14 }}>No results for "<strong>{query}</strong>"</div>
-                ) : (
-                  <>
-                    {results.map(p => (
-                      <Link key={p.id} href={`/products/${p.handle || p.id}`}
-                        onClick={() => { setShowDropdown(false); setQuery(""); }}
-                        style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderBottom: "1px solid #fdf0f3", color: "inherit", transition: "background 0.15s" }}
-                        onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "#fef9fb"}
-                        onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "transparent"}>
-                        <div style={{ width: 46, height: 46, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#fff" }}>
-                          {getImg(p) ? (
-                            <img src={getImg(p)!} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                          ) : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>💍</div>}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</div>
-                          {p.category_name && <div style={{ fontSize: 12, color: "#fda1b7" }}>{p.category_name}</div>}
-                        </div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: "#fda1b7", flexShrink: 0 }}>{p.price} EGP</div>
-                      </Link>
-                    ))}
-                    <button onClick={() => { setShowDropdown(false); router.push(`/shop?search=${encodeURIComponent(query)}`); }}
-                      style={{ width: "100%", padding: 12, background: "#fff", border: "none", color: "#fda1b7", fontSize: 13, fontWeight: 700, cursor: "pointer", borderTop: "1px solid #f5e0e6" }}>
-                      View all results for "{query}" →
-                    </button>
-                  </>
-                )}
+      {/* Ticker - white background, black text, no emoji */}
+      {isHome && (
+        <div style={{ 
+          background: "#fff", 
+          overflow: "hidden", 
+          padding: "9px 0", 
+          position: "relative", 
+          zIndex: 101,
+          borderBottom: "1px solid #eee",
+        }}>
+          <div style={{ display: "flex", width: "200%", animation: "tickerScroll 22s linear infinite" }}>
+            {[1, 2].map(k => (
+              <div key={k} style={{ flex: "0 0 50%", display: "flex", justifyContent: "space-around" }}>
+                {Array(5).fill("Free Shipping on orders above 900 EGP").map((t, i) => (
+                  <span key={i} style={{ color: "#1a1a2e", fontSize: 12, fontWeight: 500, letterSpacing: 1.5, whiteSpace: "nowrap", padding: "0 40px", textTransform: "uppercase" }}>{t}</span>
+                ))}
               </div>
-            )}
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <header style={{ 
+        position: isHome ? "absolute" : "sticky", 
+        top: isHome ? "38px" : "0", 
+        left: 0, 
+        right: 0, 
+        zIndex: 100, 
+        background: isTransparent ? "transparent" : "#fff", 
+        borderBottom: isTransparent ? "none" : "1px solid #f5e6ea", 
+        boxShadow: isTransparent ? "none" : "0 2px 12px rgba(253,161,183,0.08)", 
+        padding: "14px 24px",
+        transition: "all 0.3s ease",
+      }}>
+        <div style={{ maxWidth: 1300, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+
+          {/* Left: Menu + Search */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="mobile-nav"
+              style={{ 
+                background: "none", 
+                border: "none", 
+                cursor: "pointer", 
+                color: isTransparent ? "#fff" : "#1a1a2e", 
+                display: "none",
+                padding: 4,
+              }}
+            >
+              {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+
+            <button 
+              className="desktop-icon"
+              style={{ 
+                background: "none", 
+                border: "none", 
+                cursor: "pointer", 
+                color: isTransparent ? "#fff" : "#1a1a2e",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <SearchIcon />
+            </button>
           </div>
 
-          {/* Nav links - desktop */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }} className="desktop-nav">
-            {NAV_LINKS.map(item => (
-              <Link key={item.href} href={item.href} style={{
-                padding: "7px 11px", borderRadius: 20, textDecoration: "none",
-                fontSize: 13, fontWeight: 500, whiteSpace: "nowrap",
-                color: pathname === item.href ? "#fda1b7" : "#555",
-                background: pathname === item.href ? "#fef4f0" : "transparent",
-                transition: "all 0.2s",
+          {/* Center: Logo */}
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+              <span
+                className="logo-main"
+                style={{
+                  fontFamily: "'HelloParisSerif', 'Didot', 'Bodoni MT', 'Playfair Display', serif",
+                  fontWeight: 200,
+                  fontSize: 34,
+                  letterSpacing: 6,
+                  textTransform: "uppercase",
+                  color: isTransparent ? "#fff" : "#1a1a2e",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  transition: "color 0.3s ease",
+                }}
+              >
+                Salma Behery
+              </span>
+              <span
+                className="logo-sub"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 400,
+                  fontSize: 9,
+                  letterSpacing: 4,
+                  textTransform: "uppercase",
+                  color: isTransparent ? "rgba(255,255,255,0.8)" : "#999",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  transition: "color 0.3s ease",
+                }}
+              >
+                Luxury Jewelry
+              </span>
+            </div>
+          </Link>
+
+          {/* Right: Cart Only (No User Icon) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, justifyContent: "flex-end" }}>
+            <Link 
+              href="/checkout" 
+              style={{ 
+                position: "relative", 
+                color: isTransparent ? "#fff" : "#1a1a2e", 
+                textDecoration: "none", 
+                display: "flex", 
+                alignItems: "center", 
+                padding: "6px 8px", 
+                borderRadius: 10, 
+                transition: "all 0.2s" 
               }}
-                onMouseEnter={e => { if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; }}
-                onMouseLeave={e => { if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = "#555"; }}>
-                {item.label}
-              </Link>
-            ))}
-            <Link href="/cart" style={{ position: "relative", padding: "7px 10px", textDecoration: "none", fontSize: 22 }}>
-              🛒
+              onMouseEnter={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "#fef4f0")}
+              onMouseLeave={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "transparent")}
+            >
+              <BagIcon />
               {cartCount > 0 && (
-                <span style={{ position: "absolute", top: 2, right: 2, background: "#fda1b7", color: "#fff", width: 18, height: 18, borderRadius: "50%", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ 
+                  position: "absolute", 
+                  top: 0, 
+                  right: 0, 
+                  background: "#fda1b7", 
+                  color: "#fff", 
+                  width: 18, 
+                  height: 18, 
+                  borderRadius: "50%", 
+                  fontSize: 10, 
+                  fontWeight: 700, 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center" 
+                }}>
                   {cartCount > 9 ? "9+" : cartCount}
                 </span>
               )}
             </Link>
-          </nav>
-
-          {/* Mobile cart + menu */}
-          <div className="mobile-nav" style={{ display: "none", alignItems: "center", gap: 8 }}>
-            <Link href="/cart" style={{ position: "relative", fontSize: 22, textDecoration: "none" }}>
-              🛒
-              {cartCount > 0 && <span style={{ position: "absolute", top: -4, right: -4, background: "#fda1b7", color: "#fff", width: 16, height: 16, borderRadius: "50%", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{cartCount}</span>}
-            </Link>
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#fda1b7" }}>
-              {mobileMenuOpen ? "✕" : "☰"}
-            </button>
           </div>
         </div>
 
-        {/* Mobile dropdown menu */}
+        {/* Desktop Nav */}
+        <nav 
+          className="desktop-nav"
+          style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            gap: 8,
+            marginTop: isHome ? 8 : 0,
+            paddingTop: isHome ? 8 : 0,
+            borderTop: isHome ? `1px solid ${isTransparent ? 'rgba(255,255,255,0.2)' : '#f5e6ea'}` : 'none',
+          }}
+        >
+          {NAV_LINKS.map(item => (
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              style={{
+                padding: "7px 16px", 
+                borderRadius: 20, 
+                textDecoration: "none",
+                fontSize: 13, 
+                fontWeight: 500, 
+                whiteSpace: "nowrap",
+                color: pathname === item.href ? "#fda1b7" : (isTransparent ? "#fff" : "#555"),
+                background: pathname === item.href ? (isTransparent ? "rgba(255,255,255,0.15)" : "#fef4f0") : "transparent",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={e => { 
+                if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; 
+              }}
+              onMouseLeave={e => { 
+                if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = isTransparent ? "#fff" : "#555"; 
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Mobile dropdown */}
         {mobileMenuOpen && (
-          <div style={{ background: "#fff", borderTop: "1px solid #fdf0f3", padding: "12px 24px" }}>
+          <div style={{ 
+            background: "#fff", 
+            borderTop: "1px solid #fdf0f3", 
+            padding: "12px 24px",
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+          }}>
             {NAV_LINKS.map(item => (
-              <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}
-                style={{ display: "block", padding: "10px 0", fontSize: 15, fontWeight: 600, color: pathname === item.href ? "#fda1b7" : "#333", textDecoration: "none", borderBottom: "1px solid #fdf0f3" }}>
+              <Link 
+                key={item.href} 
+                href={item.href} 
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ 
+                  display: "block", 
+                  padding: "10px 0", 
+                  fontSize: 15, 
+                  fontWeight: 600, 
+                  color: pathname === item.href ? "#fda1b7" : "#333", 
+                  textDecoration: "none", 
+                  borderBottom: "1px solid #fdf0f3" 
+                }}
+              >
                 {item.label}
               </Link>
             ))}
@@ -267,7 +309,13 @@ export default function Header() {
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
+          .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
+          .logo-main { font-size: 24px !important; letter-spacing: 4px !important; }
+          .logo-sub { font-size: 8px !important; letter-spacing: 3px !important; }
+        }
+        @media (max-width: 400px) {
+          .logo-main { font-size: 20px !important; letter-spacing: 3px !important; }
         }
       `}</style>
     </>
