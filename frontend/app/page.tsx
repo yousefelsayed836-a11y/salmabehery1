@@ -57,12 +57,28 @@ const CATEGORY_CARDS = [
   },
 ];
 
-const BASE_COUNT = 136;
+const SEED_REVIEWS = [
+  { id: "s1", customer_name: "سارة م.", review_text: "والله البضاعة تحفة! الخاتم وصل ومش شايفاه على إيدي خالص، الشغل ناعم جداً وما بيعملش حساسية. هطلب تاني 100%", rating: 5 },
+  { id: "s2", customer_name: "Nour", review_text: "El delivery kan super fast w el packaging 7elw awy! el 2erd elly shtrytu a7la mn el sora b kteer, colors zay ma howa", rating: 5 },
+  { id: "s3", customer_name: "مريم ع.", review_text: "أحسن حاجة اشتريتها من زمان! السوار عمل معايا في البحر وما اتأثرش خالص، مش صادقة إنه لسه زي الفل", rating: 5 },
+  { id: "s4", customer_name: "Farah", review_text: "Glt haga kda w lazm a2olha, el customer service tab3 salma behery very responsive w 7alet moshklty f thwany", rating: 5 },
+  { id: "s5", customer_name: "هدير ك.", review_text: "الطقم كامل جميل جداً وبسعر منطقي أوي مقارنة بحاجات مشابهة. كل صحباتي سألوني عليه وعارفاهم على الصفحة", rating: 5 },
+  { id: "s6", customer_name: "Yasmine", review_text: "Ana meshtreya menhom 4 marat w kol mara a7san mn elli ablaha. el quality consistent w homa bywafro designs gdeda dyman", rating: 5 },
+  { id: "s7", customer_name: "لميس", review_text: "الأقراط دول عملتهم هدية لأختي وهي اتجننت بيهم! والتغليف كان شيك جداً وكأنه من محل كبير، شكراً سلمى بحيري", rating: 5 },
+  { id: "s8", customer_name: "Dina", review_text: "Honestly surprised mn el quality, knt msh mta2da bs lama galy غيرت رأيي تماماً. el details mfhouma w el shan el feky perfect", rating: 5 },
+  { id: "s9", customer_name: "رنا ط.", review_text: "لبستهم في فرح وأخدت كتير تعليقات! الإسوارة مع الخاتم مع بعض شكلهم راقي جداً. بجد أنصح بيهم", rating: 5 },
+  { id: "s10", customer_name: "Malak", review_text: "El swar 3amlt meno surprize l 2okhty w hya m9adqtsh en dh online! kanet fakra mn ma7al. packaging w quality top", rating: 5 },
+  { id: "s11", customer_name: "نادين", review_text: "أنا عندي بشرة حساسة وعملت حساسية من مجوهرات تانية كتير. دي لبستها أسبوعين متواصلين ولا أي مشكلة. أخيراً لقيت", rating: 5 },
+  { id: "s12", customer_name: "Rana S.", review_text: "Kl mara bashtry hedya lnafsaha mn hna! el as3ar mn8la w el joda 3alya. 3amlt order w ga fi 3 ayam bas", rating: 5 },
+  { id: "s13", customer_name: "شيرين", review_text: "العقد ده عملته لأمي في عيد ميلادها وهي عجبها جداً! قالت زي اللي بتشوفه في المحلات الكبيرة بالظبط", rating: 5 },
+  { id: "s14", customer_name: "Salma K.", review_text: "Realy msh mta2da eny hat2ol kda bs dh el wa2e3. El khatm 3amlt beih selfie w 3mly 200 like 3ala instagram lol", rating: 5 },
+  { id: "s15", customer_name: "ياسمين ف.", review_text: "جربت أشتري من مواقع تانية وما اتجبتش زي اللي اشتريته من هنا. الجودة فرق كبير جداً وسعره أرخص كمان!", rating: 5 },
+];
 
 export default function HomePage() {
   const [currentReview, setCurrentReview] = useState(0);
   const [showForm, setShowForm] = useState(false);
-  const [allReviews, setAllReviews] = useState<any[]>([]);
+  const [allReviews, setAllReviews] = useState<any[]>(SEED_REVIEWS);
   const [formName, setFormName] = useState("");
   const [formText, setFormText] = useState("");
   const [formRating, setFormRating] = useState(0);
@@ -71,25 +87,17 @@ export default function HomePage() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    // Show cached reviews instantly while backend wakes up
-    try {
-      const cached = localStorage.getItem("cached_reviews");
-      if (cached) setAllReviews(JSON.parse(cached));
-    } catch {}
-
-    // Fetch fresh from backend in background
     fetch(`${API}/reviews`)
       .then(r => r.json())
       .then(d => {
         if (d.reviews && d.reviews.length > 0) {
-          setAllReviews(d.reviews);
-          try { localStorage.setItem("cached_reviews", JSON.stringify(d.reviews)); } catch {}
+          const seedIds = new Set(SEED_REVIEWS.map(r => r.id));
+          setAllReviews([...d.reviews, ...SEED_REVIEWS.filter(r => !seedIds.has(r.id))]);
         }
       })
       .catch(() => {});
   }, []);
 
-  const reviewCount = BASE_COUNT + allReviews.length;
   const nextReview = () => setCurrentReview((p) => (p + 1) % allReviews.length);
   const prevReview = () => setCurrentReview((p) => (p - 1 + allReviews.length) % allReviews.length);
 
@@ -97,13 +105,8 @@ export default function HomePage() {
     e.preventDefault();
     if (!formRating) return alert("Please select a star rating");
     setSubmitting(true);
-    // Show review immediately in UI
     const optimistic = { id: `tmp-${Date.now()}`, customer_name: formName, review_text: formText, rating: formRating };
-    setAllReviews(prev => {
-      const updated = [optimistic, ...prev];
-      try { localStorage.setItem("cached_reviews", JSON.stringify(updated)); } catch {}
-      return updated;
-    });
+    setAllReviews(prev => [optimistic, ...prev]);
     setCurrentReview(0);
     setFormName(""); setFormText(""); setFormRating(0);
     setSubmitted(true);
@@ -116,13 +119,7 @@ export default function HomePage() {
         body: JSON.stringify({ customer_name: optimistic.customer_name, review_text: optimistic.review_text, rating: optimistic.rating }),
       });
       const data = await res.json();
-      if (data.review) {
-        setAllReviews(prev => {
-          const updated = prev.map(r => r.id === optimistic.id ? data.review : r);
-          try { localStorage.setItem("cached_reviews", JSON.stringify(updated)); } catch {}
-          return updated;
-        });
-      }
+      if (data.review) setAllReviews(prev => prev.map(r => r.id === optimistic.id ? data.review : r));
     } catch {}
     finally { setSubmitting(false); }
   };
@@ -256,22 +253,11 @@ export default function HomePage() {
       {/* ── REVIEWS ── */}
       <section style={{ textAlign: "center", padding: "28px 20px 24px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, marginBottom: 6, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, marginBottom: 22, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
           What Our Customers Are Saying
         </h2>
 
-        {/* Counter */}
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fef4f7", border: "1px solid #fda1b7", borderRadius: 30, padding: "6px 18px", marginBottom: 22 }}>
-          <span style={{ color: "#fda1b7", fontSize: 16 }}>★</span>
-          <span style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e" }}>{reviewCount.toLocaleString()}</span>
-          <span style={{ fontSize: 13, color: "#888" }}>happy customers</span>
-        </div>
-
-        {allReviews.length === 0 ? (
-          <div style={{ background: "#f9f9f9", maxWidth: 480, margin: "0 auto", padding: "32px 28px", borderRadius: 12, color: "#aaa", fontSize: 15 }}>
-            Be the first to leave a review!
-          </div>
-        ) : (
+        {(
           <>
             <div style={{ background: "#f2f2f2", maxWidth: 480, margin: "0 auto", padding: "24px 28px", borderRadius: 12, display: "flex", flexDirection: "column", justifyContent: "center", transition: "all 0.3s ease" }}>
               <p style={{ fontSize: 17, color: "#333", marginBottom: 15, lineHeight: 1.6, direction: "rtl" }}>
