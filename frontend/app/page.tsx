@@ -208,8 +208,8 @@ export default function HomePage() {
       </section>
 
       {/* ── CATEGORIES ── */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 52px", background: "#fff" }}>
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
+      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 20px 24px", background: "#fff" }}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
           <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Collections</p>
           <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: "#1a1a2e", margin: 0, letterSpacing: 2, textTransform: "uppercase" }}>
             Shop By Category
@@ -238,7 +238,7 @@ export default function HomePage() {
       </section>
 
       {/* ── REVIEWS ── */}
-      <section style={{ textAlign: "center", padding: "52px 20px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
+      <section style={{ textAlign: "center", padding: "28px 20px 24px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8 }}>Testimonials</p>
         <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, marginBottom: 30, color: "#333", letterSpacing: 2, textTransform: "uppercase" }}>
           What Our Customers Are Saying
@@ -303,7 +303,7 @@ export default function HomePage() {
       </section>
 
       {/* ── YOUR EVERYDAY SPARKLE ── */}
-      <section style={{ padding: "52px 16px", textAlign: "center", background: "#fff", borderTop: "1px solid #eee" }}>
+      <section style={{ padding: "28px 16px 24px", textAlign: "center", background: "#fff", borderTop: "1px solid #eee" }}>
         <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Instagram</p>
         <h2 style={{ fontFamily: "var(--font-cormorant), 'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, marginBottom: 28, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase" }}>
           Your everyday sparkle

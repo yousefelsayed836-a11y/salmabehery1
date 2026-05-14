@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'HelloParis';
+  src: url('/fonts/HelloParisScript.woff2') format('woff2'),
+       url('/fonts/HelloParisScript.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --foreground-rgb: 42, 21, 32;
   --pink-main: #fda1b7;
