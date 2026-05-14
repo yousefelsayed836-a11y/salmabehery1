@@ -16,6 +16,10 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: 'Salma Behery - Jewelry Store',
   description: 'Premium handcrafted jewelry collection',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
