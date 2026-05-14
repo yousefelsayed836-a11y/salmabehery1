@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Cairo, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import Header from '../components/Header';
+import Ticker from '../components/Ticker';
 import { CartProvider } from '../components/CartContext';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" dir="ltr">
       <body className={`${inter.className} ${cairo.variable} ${cormorant.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
+          <Ticker />
           <Header />
           <main style={{ minHeight: '100vh', background: '#fff' }}>
             {children}

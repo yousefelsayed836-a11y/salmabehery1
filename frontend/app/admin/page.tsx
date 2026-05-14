@@ -28,7 +28,10 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(() => {
+    if (typeof window !== "undefined") return sessionStorage.getItem("admin_auth") === "1";
+    return false;
+  });
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
 
@@ -79,13 +82,14 @@ export default function AdminDashboard() {
         <h2 style={{ margin: "0 0 20px", color: "#1a1a2e", fontSize: 18 }}>Admin Access</h2>
         <input
           type="password" value={pw} onChange={e => { setPw(e.target.value); setPwError(false); }}
-          onKeyDown={e => { if (e.key === "Enter") { if (pw === ADMIN_PASSWORD) setAuthed(true); else setPwError(true); } }}
+          onKeyDown={e => { if (e.key === "Enter") { if (pw === ADMIN_PASSWORD) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); } }}
           placeholder="Enter password"
           style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${pwError ? "#ef4444" : "#ddd"}`, fontSize: 15, boxSizing: "border-box", outline: "none", marginBottom: 12 }}
         />
         {pwError && <p style={{ color: "#ef4444", fontSize: 13, margin: "0 0 10px" }}>Incorrect password</p>}
         <button onClick={() => { if (pw === ADMIN_PASSWORD) setAuthed(true); else setPwError(true); }}
-          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}
+          onClick={() => { if (pw === ADMIN_PASSWORD) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); }}>
           Login
         </button>
       </div>

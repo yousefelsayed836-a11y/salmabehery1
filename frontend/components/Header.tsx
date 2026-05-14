@@ -82,32 +82,10 @@ export default function Header() {
 
   return (
     <>
-      {/* Ticker - white background, black text, no emoji */}
-      {isHome && (
-        <div style={{ 
-          background: "#fff", 
-          overflow: "hidden", 
-          padding: "9px 0", 
-          position: "relative", 
-          zIndex: 101,
-          borderBottom: "1px solid #eee",
-        }}>
-          <div style={{ display: "flex", width: "200%", animation: "tickerScroll 22s linear infinite" }}>
-            {[1, 2].map(k => (
-              <div key={k} style={{ flex: "0 0 50%", display: "flex", justifyContent: "space-around" }}>
-                {Array(5).fill("Free Shipping on orders above 900 EGP").map((t, i) => (
-                  <span key={i} style={{ color: "#1a1a2e", fontSize: 12, fontWeight: 500, letterSpacing: 1.5, whiteSpace: "nowrap", padding: "0 40px", textTransform: "uppercase" }}>{t}</span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <header style={{
         position: isHome ? "absolute" : "sticky",
-        top: isHome ? "38px" : "0",
+        top: isHome ? "40px" : "40px",
         left: 0,
         right: 0,
         zIndex: 100,
