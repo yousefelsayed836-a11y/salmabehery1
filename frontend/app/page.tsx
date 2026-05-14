@@ -58,21 +58,21 @@ const CATEGORY_CARDS = [
 ];
 
 const SEED_REVIEWS = [
-  { id: "s1", customer_name: "سارة م.", review_text: "والله البضاعة تحفة! الخاتم وصل ومش شايفاه على إيدي خالص، الشغل ناعم جداً وما بيعملش حساسية. هطلب تاني 100%", rating: 5 },
-  { id: "s2", customer_name: "Nour", review_text: "El delivery kan super fast w el packaging 7elw awy! el 2erd elly shtrytu a7la mn el sora b kteer, colors zay ma howa", rating: 5 },
-  { id: "s3", customer_name: "مريم ع.", review_text: "أحسن حاجة اشتريتها من زمان! السوار عمل معايا في البحر وما اتأثرش خالص، مش صادقة إنه لسه زي الفل", rating: 5 },
-  { id: "s4", customer_name: "Farah", review_text: "Glt haga kda w lazm a2olha, el customer service tab3 salma behery very responsive w 7alet moshklty f thwany", rating: 5 },
-  { id: "s5", customer_name: "هدير ك.", review_text: "الطقم كامل جميل جداً وبسعر منطقي أوي مقارنة بحاجات مشابهة. كل صحباتي سألوني عليه وعارفاهم على الصفحة", rating: 5 },
-  { id: "s6", customer_name: "Yasmine", review_text: "Ana meshtreya menhom 4 marat w kol mara a7san mn elli ablaha. el quality consistent w homa bywafro designs gdeda dyman", rating: 5 },
-  { id: "s7", customer_name: "لميس", review_text: "الأقراط دول عملتهم هدية لأختي وهي اتجننت بيهم! والتغليف كان شيك جداً وكأنه من محل كبير، شكراً سلمى بحيري", rating: 5 },
-  { id: "s8", customer_name: "Dina", review_text: "Honestly surprised mn el quality, knt msh mta2da bs lama galy غيرت رأيي تماماً. el details mfhouma w el shan el feky perfect", rating: 5 },
-  { id: "s9", customer_name: "رنا ط.", review_text: "لبستهم في فرح وأخدت كتير تعليقات! الإسوارة مع الخاتم مع بعض شكلهم راقي جداً. بجد أنصح بيهم", rating: 5 },
-  { id: "s10", customer_name: "Malak", review_text: "El swar 3amlt meno surprize l 2okhty w hya m9adqtsh en dh online! kanet fakra mn ma7al. packaging w quality top", rating: 5 },
-  { id: "s11", customer_name: "نادين", review_text: "أنا عندي بشرة حساسة وعملت حساسية من مجوهرات تانية كتير. دي لبستها أسبوعين متواصلين ولا أي مشكلة. أخيراً لقيت", rating: 5 },
-  { id: "s12", customer_name: "Rana S.", review_text: "Kl mara bashtry hedya lnafsaha mn hna! el as3ar mn8la w el joda 3alya. 3amlt order w ga fi 3 ayam bas", rating: 5 },
-  { id: "s13", customer_name: "شيرين", review_text: "العقد ده عملته لأمي في عيد ميلادها وهي عجبها جداً! قالت زي اللي بتشوفه في المحلات الكبيرة بالظبط", rating: 5 },
-  { id: "s14", customer_name: "Salma K.", review_text: "Realy msh mta2da eny hat2ol kda bs dh el wa2e3. El khatm 3amlt beih selfie w 3mly 200 like 3ala instagram lol", rating: 5 },
-  { id: "s15", customer_name: "ياسمين ف.", review_text: "جربت أشتري من مواقع تانية وما اتجبتش زي اللي اشتريته من هنا. الجودة فرق كبير جداً وسعره أرخص كمان!", rating: 5 },
+  { id: "s1",  customer_name: "Sara M.",    review_text: "Wallahi el khatm da te7fa! Galy fast w el shoghol na3em awy, msh shayfah 3ala edy khales. Ha2oleb tany akeed 100%", rating: 5 },
+  { id: "s2",  customer_name: "Nour",       review_text: "El delivery kan super fast w el packaging 7elw awy! El 2erd elly shtrytu a7la mn el sora b kteer, colors zay ma howa", rating: 5 },
+  { id: "s3",  customer_name: "Mariam A.",  review_text: "A7san 7aga eshtaretha mn zaman! El eswara sheghlet ma3aya fil ba7r w msh at2saret khales, msh sadaa2a enha lessa zay el fol", rating: 5 },
+  { id: "s4",  customer_name: "Farah",      review_text: "Lazem a2olha, el customer service tab3 salma behery responsive awy w 7alet moshklty fi tawany. Shokran awy!", rating: 5 },
+  { id: "s5",  customer_name: "Hedir K.",   review_text: "El ta2m kamil w be se3r mante2i awy mokarana be 7agat moshaba. Kol so7abty sa2alo 3aleh w 3arraftohom 3ala el page", rating: 5 },
+  { id: "s6",  customer_name: "Yasmine",    review_text: "Ana meshtreya menhom 4 marat w kol mara a7san mn elli ablaha. El quality consistent w homa bywafro designs gdeda dyman", rating: 5 },
+  { id: "s7",  customer_name: "Lamees",     review_text: "El a2rat dol 3amltahom hedya le okhty w hya etgannet bihom! El taghleef kan chic awy ka2eno mn ma7al kebeer, shokran salma", rating: 5 },
+  { id: "s8",  customer_name: "Dina",       review_text: "Honestly surprised mn el quality, kont msh mota2ada bas lama galy 3'ayart ra2yi tamaman. El details mafhoma w el shaghla perfect", rating: 5 },
+  { id: "s9",  customer_name: "Rana T.",    review_text: "Lebeshtom fi far7 w akhadt kteer ta3le2at! El eswara ma3 el khatm ma3 ba3d shakelhom ra2i awy. Ba2eed baneseblhom", rating: 5 },
+  { id: "s10", customer_name: "Malak",      review_text: "El eswara 3amlt menha surprise le okhty w hya msh moda2a2a en da online! Kanet fakra mn ma7al. Packaging w quality top", rating: 5 },
+  { id: "s11", customer_name: "Nadine",     review_text: "3andi bashra 7asa2a w 3amlt 7asaseya mn mo2awarat tanya kteer. Di lebetha esbo3en mtwasleen wala ay moshkela. A5eran la2et!", rating: 5 },
+  { id: "s12", customer_name: "Rana S.",    review_text: "Kol mara bashtri hedya le nafsaha mn hena! El as3ar man2ola w el goda 3alya. 3amalt order w ga fi 3 ayam bas", rating: 5 },
+  { id: "s13", customer_name: "Shereen",    review_text: "El 2oud da 3amaltah le omi fi 3eed meladha w hya 3agabha awy! 2alit zay elly betshofu fi el ma7alat el kebeera bizzabt", rating: 5 },
+  { id: "s14", customer_name: "Salma K.",   review_text: "Realy msh mota2ada eny hat2ol kda bas da el wa2e3. El khatm 3amalt beih selfie w 3amly 200 like 3ala instagram lol", rating: 5 },
+  { id: "s15", customer_name: "Yasmin F.",  review_text: "Garabt ashtri mn mawa2e3 tanya w mat-gebtesh zay elly eshtareetu mn hena. El goda far2 kebeer awy w se3ro arkhas kaman!", rating: 5 },
 ];
 
 export default function HomePage() {
