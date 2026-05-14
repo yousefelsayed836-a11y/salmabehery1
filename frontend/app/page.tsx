@@ -80,10 +80,30 @@ export default function HomePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const loadLocalReviews = (): any[] => {
+    try { return JSON.parse(localStorage.getItem("local_reviews") || "[]"); } catch { return []; }
+  };
+  const saveLocalReviews = (reviews: any[]) => {
+    try { localStorage.setItem("local_reviews", JSON.stringify(reviews)); } catch {}
+  };
+
   useEffect(() => {
+    const local = loadLocalReviews();
+    if (local.length > 0) setAllReviews(prev => {
+      const ids = new Set(prev.map((r: any) => r.id));
+      return [...local.filter((r: any) => !ids.has(r.id)), ...prev];
+    });
+
     fetch(`${API}/reviews`)
       .then(r => r.json())
-      .then(d => { if (d.reviews && d.reviews.length > 0) setAllReviews(d.reviews); })
+      .then(d => {
+        if (d.reviews && d.reviews.length > 0) {
+          const local2 = loadLocalReviews();
+          const backendIds = new Set(d.reviews.map((r: any) => r.id));
+          const onlyLocal = local2.filter((r: any) => !backendIds.has(r.id));
+          setAllReviews([...onlyLocal, ...d.reviews]);
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -94,8 +114,10 @@ export default function HomePage() {
     e.preventDefault();
     if (!formRating) return alert("Please select a rating");
     setSubmitting(true);
-    const optimistic = { id: `tmp-${Date.now()}`, customer_name: formName, review_text: formText, rating: formRating };
-    setAllReviews(prev => [optimistic, ...prev]);
+    const newReview = { id: `local-${Date.now()}`, customer_name: formName, review_text: formText, rating: formRating };
+    const updatedLocal = [newReview, ...loadLocalReviews()];
+    saveLocalReviews(updatedLocal);
+    setAllReviews(prev => [newReview, ...prev]);
     setCurrentReview(0);
     setFormName(""); setFormText(""); setFormRating(0);
     setSubmitted(true);
@@ -105,11 +127,13 @@ export default function HomePage() {
       const res = await fetch(`${API}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer_name: optimistic.customer_name, review_text: optimistic.review_text, rating: optimistic.rating }),
+        body: JSON.stringify({ customer_name: newReview.customer_name, review_text: newReview.review_text, rating: newReview.rating }),
       });
       const data = await res.json();
       if (data.review) {
-        setAllReviews(prev => prev.map(r => r.id === optimistic.id ? data.review : r));
+        const cleaned = updatedLocal.filter((r: any) => r.id !== newReview.id);
+        saveLocalReviews(cleaned);
+        setAllReviews(prev => prev.map(r => r.id === newReview.id ? data.review : r));
       }
     } catch {}
     finally { setSubmitting(false); }
