@@ -203,15 +203,27 @@ export default function ProductsPage() {
 
   return (
     <>
-      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }`}</style>
-      <div style={{ minHeight: "100vh", padding: "24px" }}>
+      <style jsx global>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        .prod-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
+        .prod-table-wrap table { min-width: 700px; }
+        @media (max-width: 640px) {
+          .prod-outer { padding: 10px !important; }
+          .prod-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+          .prod-header-btns { width: 100% !important; }
+          .prod-header-btns button { flex: 1 !important; }
+          .prod-modal-pad { padding: 10px !important; }
+        }
+      `}</style>
+      <div className="prod-outer" style={{ minHeight: "100vh", padding: "14px" }}>
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
+          <div className="prod-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
             <div>
               <Link href="/admin" style={{ color: "#fda1b7", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
-              <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1a1a2e" }}>🛍️ Product Management</h1>
+              <h1 style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "#1a1a2e" }}>🛍️ Product Management</h1>
             </div>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div className="prod-header-btns" style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setAddForm({ ...emptyForm }); setAddError(""); setShowAddModal(true); }}
                 style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#22c55e,#16a34a)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
                 ➕ Add Product
@@ -243,7 +255,7 @@ export default function ProductsPage() {
           {loading ? (
             <div style={{ textAlign: "center", padding: 60, color: "#888" }}>Loading products...</div>
           ) : (
-            <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div className="prod-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "#1a1a2e", color: "#fff" }}>
@@ -322,7 +334,7 @@ export default function ProductsPage() {
 
       {/* ADD MODAL */}
       {showAddModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }} onClick={() => setShowAddModal(false)}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 12 }} onClick={() => setShowAddModal(false)}>
           <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 700, maxHeight: "90vh", overflow: "auto", padding: 32 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1a2e" }}>➕ Add New Product</h2>
@@ -342,7 +354,7 @@ export default function ProductsPage() {
 
       {/* EDIT MODAL */}
       {fullEditProduct && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }} onClick={() => setFullEditProduct(null)}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 12 }} onClick={() => setFullEditProduct(null)}>
           <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 700, maxHeight: "90vh", overflow: "auto", padding: 32 }} onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1a2e" }}>✏️ Edit: {fullEditProduct.name_en}</h2>

@@ -225,13 +225,26 @@ export default function OrdersPage() {
 
   return (
     <>
-      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }`}</style>
+      <style jsx global>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        .orders-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
+        .orders-table-wrap table { min-width: 820px; }
+        @media (max-width: 640px) {
+          .orders-outer { padding: 10px !important; }
+          .orders-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+          .orders-header button { width: 100% !important; }
+          .modal-grid { grid-template-columns: 1fr !important; }
+          .modal-inner { padding: 14px !important; }
+          .modal-header { padding: 14px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
+        }
+      `}</style>
 
-      <div style={{ minHeight: "100vh", padding: 24 }}>
+      <div className="orders-outer" style={{ minHeight: "100vh", padding: 16 }}>
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
 
           {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <div className="orders-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <div>
               <Link href="/admin" style={{ color: "#fda1b7", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
               <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1a1a2e" }}>📦 Orders</h1>
@@ -248,7 +261,7 @@ export default function OrdersPage() {
               <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div><p>No orders found</p>
             </div>
           ) : (
-            <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div className="orders-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "#1a1a2e", color: "#fff" }}>
@@ -327,7 +340,7 @@ export default function OrdersPage() {
           <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
             {/* Modal Header */}
-            <div style={{ padding: "20px 28px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
+            <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
               <div>
                 <h2 style={{ margin: 0, color: "#fff", fontSize: 20, fontWeight: 800 }}>Order #{selectedOrder.id.slice(-6)}</h2>
                 <p style={{ margin: "4px 0 0", color: "#fda1b7", fontSize: 13 }}>{new Date(selectedOrder.created_at).toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
@@ -344,7 +357,7 @@ export default function OrdersPage() {
               </div>
             </div>
 
-            <div style={{ padding: 28, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+            <div className="modal-inner modal-grid" style={{ padding: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
 
               {/* Customer Info */}
               <div style={{ background: "#fafafa", borderRadius: 14, padding: 20 }}>
@@ -398,7 +411,7 @@ export default function OrdersPage() {
             </div>
 
             {/* Items */}
-            <div style={{ padding: "0 28px 28px" }}>
+            <div className="modal-inner" style={{ padding: "0 20px 20px" }}>
               <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 1 }}>🛍️ Items ({selectedOrder.items?.length || 0})</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {selectedOrder.items?.map((item, i) => {

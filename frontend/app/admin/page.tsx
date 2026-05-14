@@ -75,19 +75,28 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }`}</style>
+      <style jsx global>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        @media (max-width: 640px) {
+          .admin-wrap { padding: 12px !important; }
+          .admin-nav-grid { grid-template-columns: 1fr !important; }
+          .admin-stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+          .admin-recent-row { flex-direction: column !important; align-items: flex-start !important; gap: 6px !important; }
+        }
+      `}</style>
 
-      <div style={{ minHeight: "100vh", padding: "24px" }}>
+      <div className="admin-wrap" style={{ minHeight: "100vh", padding: "16px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
 
           {/* Header */}
-          <div style={{ marginBottom: 28 }}>
-            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1a2e" }}>🏠 Admin Dashboard</h1>
-            <p style={{ margin: "6px 0 0", color: "#888", fontSize: 14 }}>Overview of your store</p>
+          <div style={{ marginBottom: 20 }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1a2e" }}>🏠 Admin Dashboard</h1>
+            <p style={{ margin: "4px 0 0", color: "#888", fontSize: 13 }}>Overview of your store</p>
           </div>
 
           {/* Stats */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+          <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 20 }}>
 
             {/* Orders */}
             <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
@@ -142,7 +151,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Nav Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28 }}>
+          <div className="admin-nav-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
             <Link href="/admin/orders" style={{ background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(253,161,183,0.3)", transition: "transform 0.2s" }}
               onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"}
               onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"}>
@@ -180,7 +189,7 @@ export default function AdminDashboard() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {recentOrders.map(order => (
-                  <div key={order.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", borderRadius: 10, background: "#fff" }}>
+                  <div key={order.id} className="admin-recent-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderRadius: 10, background: "#f9f9f9", marginBottom: 4 }}>
                     <div>
                       <span style={{ fontWeight: 700, color: "#fda1b7" }}>#{order.id.slice(-6)}</span>
                       {order.customer_name && <span style={{ marginLeft: 10, fontSize: 13, color: "#555" }}>{order.customer_name}</span>}
