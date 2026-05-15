@@ -13,7 +13,7 @@ interface CartCtx {
   clearCart: () => void;
 }
 const CartContext = createContext<CartCtx | null>(null);
-const KEY = "sb_cart_v2";
+const KEY = "cart";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -40,7 +40,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeFromCart = useCallback((id: string, size: string) => setCartItems(prev => prev.filter(i => !(i.product.id === id && i.size === size))), []);
-  const updateQty = useCallback((id: string, size: string, delta: number) => setCartItems(prev => prev.map(i => i.product.id === id && i.size === size ? { ...i, qty: Math.min(10, Math.max(1, i.qty + delta)) } : i)), []);
+  const updateQty = useCallback((id: string, size: string, delta: number) => setCartItems(prev => prev.map(i => i.product.id === id && i.size === size ? { ...i, qty: Math.min(10, i.qty + delta) } : i).filter(i => i.qty > 0)), []);
   const clearCart = useCallback(() => setCartItems([]), []);
 
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);

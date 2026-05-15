@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useCart } from "../../components/CartContext";
 
 interface Product {
   id: string;
@@ -23,12 +24,6 @@ interface Product {
   is_active: boolean;
 }
 
-interface CartItem {
-  product: { id: string; name_en: string; price: number; image_url?: string; };
-  qty: number;
-  size: string;
-}
-
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
 function getProductImage(p: Product): string {
@@ -41,29 +36,15 @@ function getProductImage(p: Product): string {
 function ShopContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  const { cartItems, cartCount, cartTotal, addToCart: ctxAddToCart, updateQty, removeFromCart } = useCart();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [toast, setToast] = useState("");
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("cart");
-      if (saved) setCartItems(JSON.parse(saved));
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("cart", JSON.stringify(cartItems));
-      window.dispatchEvent(new Event("cartUpdated"));
-    } catch {}
-  }, [cartItems]);
 
   useEffect(() => { fetchProducts(); }, [searchQuery]);
 
@@ -80,28 +61,14 @@ function ShopContent() {
     finally { setLoading(false); }
   };
 
-  const addToCart = (product: Product, qty: number = 1) => {
-    const size = product.size_info || "One Size";
-    setCartItems(prev => {
-      const idx = prev.findIndex(i => i.product.id === product.id && i.size === size);
-      if (idx >= 0) { const c = [...prev]; c[idx] = { ...c[idx], qty: Math.min(10, c[idx].qty + qty) }; return c; }
-      return [...prev, { product: { id: product.id, name_en: product.name_en, price: product.price, image_url: getProductImage(product) }, qty, size }];
-    });
-    setToast(`✓ ${product.name_en.slice(0, 20)} added to cart`);
+  const addToCart = (product: Product) => {
+    ctxAddToCart(
+      { id: product.id, name_en: product.name_en, price: product.price, image_url: getProductImage(product) },
+      1, product.size_info || "One Size", product.stock
+    );
+    setToast(`✓ ${product.name_en.slice(0, 20)} added`);
     setTimeout(() => setToast(""), 2000);
   };
-
-  const decrementCart = (productId: string) => {
-    setCartItems(prev => {
-      const idx = prev.findIndex(i => i.product.id === productId);
-      if (idx < 0) return prev;
-      if (prev[idx].qty <= 1) return prev.filter((_, i) => i !== idx);
-      return prev.map((x, i) => i === idx ? { ...x, qty: x.qty - 1 } : x);
-    });
-  };
-
-  const cartTotal = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0);
-  const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
 
   const sorted = [...products].sort((a, b) => {
     if (sortBy === "price-low") return a.price - b.price;
@@ -148,10 +115,10 @@ function ShopContent() {
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, fontSize: 14 }}>{item.product.name_en}</div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                          <button onClick={() => setCartItems(p => p.map(x => x.product.id === item.product.id && x.size === item.size ? { ...x, qty: Math.max(1, x.qty - 1) } : x))} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid #ddd", background: "#fff", cursor: "pointer" }}>-</button>
+                          <button onClick={() => updateQty(item.product.id, item.size, -1)} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid #ddd", background: "#fff", cursor: "pointer" }}>-</button>
                           <span>{item.qty}</span>
-                          <button onClick={() => setCartItems(p => p.map(x => x.product.id === item.product.id && x.size === item.size ? { ...x, qty: Math.min(10, x.qty + 1) } : x))} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid #ddd", background: "#fff", cursor: "pointer" }}>+</button>
-                          <button onClick={() => setCartItems(p => p.filter(x => !(x.product.id === item.product.id && x.size === item.size)))} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 12 }}>Remove</button>
+                          <button onClick={() => updateQty(item.product.id, item.size, 1)} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid #ddd", background: "#fff", cursor: "pointer" }}>+</button>
+                          <button onClick={() => removeFromCart(item.product.id, item.size)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 12 }}>Remove</button>
                         </div>
                       </div>
                       <div style={{ fontWeight: 700, color: "#fda1b7" }}>{item.product.price * item.qty} EGP</div>
@@ -255,16 +222,17 @@ function ShopContent() {
                       {(() => {
                         const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
                         const oos = p.stock === 0;
+                        const size = p.size_info || "One Size";
                         return oos ? (
                           <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Out of Stock</span>
                         ) : cartQty > 0 ? (
                           <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #fda1b7", borderRadius: 20, overflow: "hidden" }}>
-                            <button onClick={() => decrementCart(p.id)} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>−</button>
+                            <button onClick={() => updateQty(p.id, size, -1)} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>−</button>
                             <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", minWidth: 16, textAlign: "center" }}>{cartQty}</span>
-                            <button onClick={() => addToCart(p, 1)} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>+</button>
+                            <button onClick={() => addToCart(p)} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>+</button>
                           </div>
                         ) : (
-                          <button onClick={() => addToCart(p, 1)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <button onClick={() => addToCart(p)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                           </button>
                         );
@@ -304,7 +272,7 @@ function ShopContent() {
                 {selectedProduct.water_resistance && <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#dbeafe", color: "#1e40af", fontWeight: 700 }}>💧 {selectedProduct.water_resistance}</span>}
                 {selectedProduct.size_info && <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#fff", color: "#666", fontWeight: 700 }}>📏 {selectedProduct.size_info}</span>}
               </div>
-              <button onClick={() => { addToCart(selectedProduct, 1); setSelectedProduct(null); }} style={{ width: "100%", padding: 14, borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", marginTop: "auto" }}>🛒 Add to Cart</button>
+              <button onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }} style={{ width: "100%", padding: 14, borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", marginTop: "auto" }}>🛒 Add to Cart</button>
             </div>
           </div>
         </div>
