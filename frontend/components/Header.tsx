@@ -138,9 +138,9 @@ export default function Header() {
                 style={{
                   fontFamily: "'HelloParisSerif', 'Didot', 'Bodoni MT', 'Playfair Display', serif",
                   fontWeight: 400,
-                  fontSize: 30,
-                  letterSpacing: 3,
-                  fontVariant: "small-caps",
+                  fontSize: 32,
+                  letterSpacing: 4,
+                  textTransform: "uppercase",
                   color: isTransparent ? "#fff" : "#1a1a2e",
                   lineHeight: 1,
                   whiteSpace: "nowrap",
