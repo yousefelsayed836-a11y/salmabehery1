@@ -87,9 +87,8 @@ export default function AdminDashboard() {
           style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${pwError ? "#ef4444" : "#ddd"}`, fontSize: 15, boxSizing: "border-box", outline: "none", marginBottom: 12 }}
         />
         {pwError && <p style={{ color: "#ef4444", fontSize: 13, margin: "0 0 10px" }}>Incorrect password</p>}
-        <button onClick={() => { if (pw === ADMIN_PASSWORD) setAuthed(true); else setPwError(true); }}
-          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}
-          onClick={() => { if (pw === ADMIN_PASSWORD) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); }}>
+        <button onClick={() => { if (pw === ADMIN_PASSWORD) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); }}
+          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
           Login
         </button>
       </div>

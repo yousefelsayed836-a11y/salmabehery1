@@ -303,7 +303,7 @@ function ShopContent() {
                 {selectedProduct.water_resistance && <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#dbeafe", color: "#1e40af", fontWeight: 700 }}>💧 {selectedProduct.water_resistance}</span>}
                 {selectedProduct.size_info && <span style={{ padding: "6px 12px", borderRadius: 10, fontSize: 12, background: "#fff", color: "#666", fontWeight: 700 }}>📏 {selectedProduct.size_info}</span>}
               </div>
-              <button onClick={() => { addToCart(selectedProduct, quantities[selectedProduct.id] || 1); setSelectedProduct(null); }} style={{ width: "100%", padding: 14, borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", marginTop: "auto" }}>🛒 Add to Cart</button>
+              <button onClick={() => { addToCart(selectedProduct, 1); setSelectedProduct(null); }} style={{ width: "100%", padding: 14, borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", marginTop: "auto" }}>🛒 Add to Cart</button>
             </div>
           </div>
         </div>
