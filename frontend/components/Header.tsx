@@ -140,7 +140,7 @@ export default function Header() {
                   fontWeight: 400,
                   fontSize: 30,
                   letterSpacing: 3,
-                  textTransform: "uppercase",
+                  fontVariant: "small-caps",
                   color: isTransparent ? "#fff" : "#1a1a2e",
                   lineHeight: 1,
                   whiteSpace: "nowrap",
