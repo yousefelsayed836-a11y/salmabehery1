@@ -22,7 +22,7 @@ interface Product {
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
-const ADMIN_PASSWORD = "1122";
+const getAdminPw = () => (typeof window !== "undefined" ? localStorage.getItem("admin_pw") || "1122" : "1122");
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -34,6 +34,9 @@ export default function AdminDashboard() {
   });
   const [pw, setPw] = useState("");
   const [pwError, setPwError] = useState(false);
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [changePwForm, setChangePwForm] = useState({ current: "", next: "", confirm: "" });
+  const [changePwMsg, setChangePwMsg] = useState("");
 
   useEffect(() => { fetchData(); }, []);
 
@@ -82,12 +85,12 @@ export default function AdminDashboard() {
         <h2 style={{ margin: "0 0 20px", color: "#1a1a2e", fontSize: 18 }}>Admin Access</h2>
         <input
           type="password" value={pw} onChange={e => { setPw(e.target.value); setPwError(false); }}
-          onKeyDown={e => { if (e.key === "Enter") { if (pw === ADMIN_PASSWORD) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); } }}
+          onKeyDown={e => { if (e.key === "Enter") { if (pw === getAdminPw()) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); } }}
           placeholder="Enter password"
           style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1.5px solid ${pwError ? "#ef4444" : "#ddd"}`, fontSize: 15, boxSizing: "border-box", outline: "none", marginBottom: 12 }}
         />
         {pwError && <p style={{ color: "#ef4444", fontSize: 13, margin: "0 0 10px" }}>Incorrect password</p>}
-        <button onClick={() => { if (pw === ADMIN_PASSWORD) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); }}
+        <button onClick={() => { if (pw === getAdminPw()) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); }}
           style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
           Login
         </button>
@@ -211,6 +214,58 @@ export default function AdminDashboard() {
               <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Categories</h2>
               <span style={{ padding: "4px 16px", borderRadius: 20, background: "rgba(255,255,255,0.2)", fontSize: 12, fontWeight: 600 }}>Manage →</span>
             </Link>
+          </div>
+
+          {/* Change Password Panel */}
+          <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1a2e" }}>🔐 Change Password</h3>
+              <button onClick={() => { setShowChangePw(v => !v); setChangePwMsg(""); setChangePwForm({ current: "", next: "", confirm: "" }); }}
+                style={{ padding: "8px 16px", borderRadius: 10, border: "1.5px solid #eee", background: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#555" }}>
+                {showChangePw ? "Cancel" : "Change →"}
+              </button>
+            </div>
+            {showChangePw && (
+              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                {changePwMsg && (
+                  <div style={{ padding: "10px 14px", borderRadius: 10, background: changePwMsg.includes("✅") ? "#dcfce7" : "#fee2e2", color: changePwMsg.includes("✅") ? "#166534" : "#991b1b", fontSize: 13, fontWeight: 600 }}>
+                    {changePwMsg}
+                  </div>
+                )}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 11, color: "#888", display: "block", marginBottom: 5 }}>Current Password</label>
+                    <input type="password" value={changePwForm.current} onChange={e => setChangePwForm(f => ({ ...f, current: e.target.value }))}
+                      placeholder="Current password"
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, color: "#888", display: "block", marginBottom: 5 }}>New Password</label>
+                    <input type="password" value={changePwForm.next} onChange={e => setChangePwForm(f => ({ ...f, next: e.target.value }))}
+                      placeholder="New password"
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, color: "#888", display: "block", marginBottom: 5 }}>Confirm New</label>
+                    <input type="password" value={changePwForm.confirm} onChange={e => setChangePwForm(f => ({ ...f, confirm: e.target.value }))}
+                      placeholder="Confirm password"
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+                <button onClick={() => {
+                  if (changePwForm.current !== getAdminPw()) { setChangePwMsg("❌ Current password is incorrect"); return; }
+                  if (!changePwForm.next || changePwForm.next.length < 3) { setChangePwMsg("❌ New password must be at least 3 characters"); return; }
+                  if (changePwForm.next !== changePwForm.confirm) { setChangePwMsg("❌ Passwords do not match"); return; }
+                  localStorage.setItem("admin_pw", changePwForm.next);
+                  setChangePwMsg("✅ Password changed successfully!");
+                  setChangePwForm({ current: "", next: "", confirm: "" });
+                  setTimeout(() => setShowChangePw(false), 2000);
+                }}
+                  style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                  Save Password
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Recent Orders */}

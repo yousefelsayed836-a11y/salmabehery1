@@ -132,24 +132,18 @@ export default function Header() {
 
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              <span
-                className="logo-main"
-                style={{
-                  fontFamily: "'HelloParisSerif', 'Didot', 'Bodoni MT', 'Playfair Display', serif",
-                  fontWeight: 400,
-                  fontSize: 32,
-                  letterSpacing: 4,
-                  textTransform: "uppercase",
-                  color: isTransparent ? "#fff" : "#1a1a2e",
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                  transition: "color 0.3s ease",
-                }}
-              >
-                Salma Behery
-              </span>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/logo (2).png"
+              alt="Salma Behery"
+              style={{
+                height: 36,
+                objectFit: "contain",
+                display: "block",
+                filter: isTransparent ? "brightness(0) invert(1)" : "none",
+                transition: "filter 0.3s ease",
+              }}
+            />
           </Link>
 
           {/* Right: Cart Only (No User Icon) */}

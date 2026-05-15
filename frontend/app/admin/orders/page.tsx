@@ -33,7 +33,6 @@ interface Order {
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
 
-// ✅ Fetch real product image from API
 async function fetchProductImage(productId: string): Promise<string | null> {
   try {
     const res = await fetch(`${API_BASE}/products/${productId}`);
@@ -45,14 +44,66 @@ async function fetchProductImage(productId: string): Promise<string | null> {
   } catch { return null; }
 }
 
+function generateWaybillHtml(order: Order, deposit: number, productImages: Record<string, string>): string {
+  const remaining = Math.max(0, (order.total_amount || 0) - deposit);
+  const address = order.shipping_address || order.address || "-";
+  const shipping = order.shipping_cost || 0;
+
+  return `
+    <div class="waybill">
+      <div class="wb-top">
+        <div class="wb-logo">Salma Behery ✦</div>
+        <div class="wb-order">#${order.id.slice(-6)} &nbsp;|&nbsp; ${new Date(order.created_at).toLocaleDateString("ar-EG")}</div>
+      </div>
+      <div class="wb-grid">
+        <div class="wb-col">
+          <div class="wb-row"><span class="wb-label">الاسم</span><span class="wb-val">${order.customer_name}</span></div>
+          <div class="wb-row"><span class="wb-label">التليفون</span><span class="wb-val">${order.customer_phone}${order.phone2 ? " / " + order.phone2 : ""}</span></div>
+          <div class="wb-row"><span class="wb-label">العنوان</span><span class="wb-val">${address}</span></div>
+          <div class="wb-row"><span class="wb-label">المدينة</span><span class="wb-val">${order.city || "-"}${order.governorate ? " / " + order.governorate : ""}</span></div>
+          ${order.notes ? `<div class="wb-row"><span class="wb-label">ملاحظات</span><span class="wb-val">${order.notes}</span></div>` : ""}
+        </div>
+        <div class="wb-col">
+          <div class="wb-items-title">المنتجات</div>
+          ${(order.items || []).map(item => `
+            <div class="wb-item">
+              <span class="wb-item-name">${item.product_name || "منتج"}</span>
+              ${item.size ? `<span class="wb-item-size">مقاس: ${item.size}</span>` : ""}
+              <span class="wb-item-qty">x${item.quantity}</span>
+            </div>`).join("")}
+          <div class="wb-totals">
+            <div class="wb-total-row"><span>الشحن</span><span>${shipping === 0 ? "مجاني 🎉" : shipping + " ج.م"}</span></div>
+            <div class="wb-total-row"><span>الإجمالي</span><span>${order.total_amount} ج.م</span></div>
+            ${deposit > 0 ? `<div class="wb-total-row"><span>مدفوع مقدم</span><span>${deposit} ج.م</span></div>` : ""}
+            <div class="wb-total-final"><span>المتبقي للتحصيل</span><span>${remaining} ج.م</span></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [productImages, setProductImages] = useState<Record<string, string>>({});
+  const [deposits, setDeposits] = useState<Record<string, number>>({});
+  const [depositInput, setDepositInput] = useState<string>("");
+  const [selectedForPrint, setSelectedForPrint] = useState<Set<string>>(new Set());
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => {
+    fetchOrders();
+    const saved: Record<string, number> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("deposit_")) {
+        const id = key.replace("deposit_", "");
+        saved[id] = parseFloat(localStorage.getItem(key) || "0") || 0;
+      }
+    }
+    setDeposits(saved);
+  }, []);
 
   const fetchOrders = async () => {
     try {
@@ -65,9 +116,9 @@ export default function OrdersPage() {
     finally { setLoading(false); }
   };
 
-  // Load product images when order is selected
   const openOrder = async (order: Order) => {
     setSelectedOrder(order);
+    setDepositInput(String(deposits[order.id] || ""));
     if (!order.items) return;
     const newImages: Record<string, string> = {};
     await Promise.all(order.items.map(async (item) => {
@@ -77,6 +128,11 @@ export default function OrdersPage() {
       }
     }));
     setProductImages(prev => ({ ...prev, ...newImages }));
+  };
+
+  const saveDeposit = (orderId: string, amount: number) => {
+    localStorage.setItem(`deposit_${orderId}`, String(amount));
+    setDeposits(prev => ({ ...prev, [orderId]: amount }));
   };
 
   const updateStatus = async (id: string, status: string) => {
@@ -90,133 +146,60 @@ export default function OrdersPage() {
     } catch {}
   };
 
+  const togglePrint = (orderId: string) => {
+    setSelectedForPrint(prev => {
+      const next = new Set(prev);
+      if (next.has(orderId)) next.delete(orderId);
+      else next.add(orderId);
+      return next;
+    });
+  };
+
+  const waybillCss = `
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+    @page { size: A4 portrait; margin: 8mm 10mm; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; margin: 0; padding: 0; color: #1a1a2e; font-size: 13px; }
+    .waybill { height: 128mm; border: 1.5px solid #fda1b7; border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; page-break-inside: avoid; overflow: hidden; }
+    .page-break { page-break-after: always; }
+    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #fda1b7; padding-bottom: 6px; margin-bottom: 6px; }
+    .wb-logo { font-size: 18px; font-weight: 800; color: #fda1b7; }
+    .wb-order { font-size: 11px; color: #888; }
+    .wb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; }
+    .wb-col { display: flex; flex-direction: column; gap: 3px; }
+    .wb-row { display: flex; gap: 8px; font-size: 12px; padding: 2px 0; border-bottom: 1px solid #f5f5f5; }
+    .wb-label { color: #aaa; min-width: 70px; font-size: 11px; }
+    .wb-val { font-weight: 700; flex: 1; }
+    .wb-items-title { font-size: 11px; color: #fda1b7; font-weight: 700; border-bottom: 1px solid #fda1b7; padding-bottom: 3px; margin-bottom: 4px; }
+    .wb-item { display: flex; gap: 6px; font-size: 11px; padding: 2px 0; border-bottom: 1px dotted #eee; }
+    .wb-item-name { flex: 1; font-weight: 600; }
+    .wb-item-size { color: #888; }
+    .wb-item-qty { color: #fda1b7; font-weight: 700; }
+    .wb-totals { margin-top: auto; border-top: 1.5px solid #fda1b7; padding-top: 6px; }
+    .wb-total-row { display: flex; justify-content: space-between; font-size: 11px; padding: 1px 0; color: #555; }
+    .wb-total-final { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; color: #fda1b7; margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px; }
+  `;
+
   const handlePrint = (order: Order) => {
-    const items = order.items || [];
-    const address = order.shipping_address || order.address || "";
-    const shipping = order.shipping_cost || 0;
-    const subtotal = (order.total_amount || 0) - shipping;
-    const phone2 = order.phone2 || "";
-
-    const itemsHtml = items.map(item => {
-      const img = productImages[item.product_id];
-      const imgHtml = img
-        ? `<img src="${img}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid #eee;" />`
-        : `<div style="width:48px;height:48px;border-radius:8px;background:#fdf0f3;display:flex;align-items:center;justify-content:center;font-size:20px;">💍</div>`;
-      return `
-        <tr>
-          <td style="padding:10px 8px;">${imgHtml}</td>
-          <td style="padding:10px 8px;font-weight:600;">${item.product_name || "Product"}</td>
-          <td style="padding:10px 8px;text-align:center;">${item.size || "-"}</td>
-          <td style="padding:10px 8px;text-align:center;font-weight:700;">${item.quantity}</td>
-          <td style="padding:10px 8px;text-align:right;">${item.price} EGP</td>
-          <td style="padding:10px 8px;text-align:right;font-weight:700;color:#fda1b7;">${(item.total || item.price * item.quantity)} EGP</td>
-        </tr>`;
-    }).join("");
-
+    const deposit = deposits[order.id] || 0;
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
+    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${generateWaybillHtml(order, deposit, productImages)}<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script></body></html>`);
+    printWindow.document.close();
+  };
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Order #${order.id.slice(-6)}</title>
-        <style>
-          /* ✅ Full page width, half page height */
-          @page {
-            size: A4 landscape;
-            margin: 10mm 14mm;
-          }
-          * { box-sizing: border-box; }
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            color: #222;
-            font-size: 13px;
-            /* Half the page height */
-            max-height: 50vh;
-            overflow: hidden;
-          }
-          .wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            height: 100%;
-          }
-          .left { display: flex; flex-direction: column; gap: 10px; }
-          .right { display: flex; flex-direction: column; }
-          .logo { color: #fda1b7; font-size: 22px; font-weight: 800; margin-bottom: 2px; }
-          .order-num { font-size: 13px; color: #888; }
-          .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #fda1b7; font-weight: 700; border-bottom: 1.5px solid #fda1b7; padding-bottom: 4px; margin-bottom: 8px; }
-          .info-row { display: flex; gap: 8px; padding: 3px 0; font-size: 12px; }
-          .info-label { color: #888; min-width: 80px; }
-          .info-val { font-weight: 600; }
-          table { width: 100%; border-collapse: collapse; font-size: 12px; }
-          th { background: #fda1b7; color: #fff; padding: 6px 8px; text-align: left; font-size: 11px; }
-          th:nth-child(3), th:nth-child(4) { text-align: center; }
-          th:nth-child(5), th:nth-child(6) { text-align: right; }
-          td { border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
-          .total-area { margin-top: 8px; border-top: 2px solid #fda1b7; padding-top: 8px; display: flex; justify-content: flex-end; }
-          .total-box { min-width: 200px; }
-          .total-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
-          .total-final { display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; color: #fda1b7; padding-top: 6px; margin-top: 4px; border-top: 1px solid #eee; }
-          .status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; background: ${order.status === "completed" ? "#dcfce7" : order.status === "cancelled" ? "#fee2e2" : "#fef3c7"}; color: ${order.status === "completed" ? "#166534" : order.status === "cancelled" ? "#991b1b" : "#92400e"}; }
-          .no-print { display: none; }
-          @media print { .no-print { display: none !important; } }
-        </style>
-      </head>
-      <body>
-        <div class="wrapper">
-          <!-- LEFT: Customer & Order Info -->
-          <div class="left">
-            <div>
-              <div class="logo">Salma Behery ✦</div>
-              <div class="order-num">Order #${order.id.slice(-6)} &nbsp;|&nbsp; ${new Date(order.created_at).toLocaleDateString("en-GB")} &nbsp;|&nbsp; <span class="status-badge">${order.status}</span></div>
-            </div>
-
-            <div>
-              <div class="section-title">📦 Customer</div>
-              <div class="info-row"><span class="info-label">Name:</span><span class="info-val">${order.customer_name}</span></div>
-              <div class="info-row"><span class="info-label">📞 Phone:</span><span class="info-val">${order.customer_phone}</span></div>
-              ${phone2 ? `<div class="info-row"><span class="info-label">💬 WhatsApp:</span><span class="info-val">${phone2}</span></div>` : ""}
-              <div class="info-row"><span class="info-label">📍 Address:</span><span class="info-val">${address}</span></div>
-              <div class="info-row"><span class="info-label">🏙️ City:</span><span class="info-val">${order.city || "-"} ${order.governorate ? "/ " + order.governorate : ""}</span></div>
-              ${order.notes ? `<div class="info-row"><span class="info-label">📝 Notes:</span><span class="info-val">${order.notes}</span></div>` : ""}
-            </div>
-          </div>
-
-          <!-- RIGHT: Items Table -->
-          <div class="right">
-            <div class="section-title">🛍️ Order Items</div>
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:52px;">IMG</th>
-                  <th>Product</th>
-                  <th style="text-align:center;">Size</th>
-                  <th style="text-align:center;">Qty</th>
-                  <th style="text-align:right;">Price</th>
-                  <th style="text-align:right;">Total</th>
-                </tr>
-              </thead>
-              <tbody>${itemsHtml}</tbody>
-            </table>
-            <div class="total-area">
-              <div class="total-box">
-                <div class="total-row"><span>Subtotal:</span><span>${subtotal} EGP</span></div>
-                <div class="total-row"><span>Shipping:</span><span style="color:${shipping === 0 ? "#22c55e" : "#666"};">${shipping === 0 ? "FREE 🎉" : shipping + " EGP"}</span></div>
-                <div class="total-final"><span>Total:</span><span>${order.total_amount} EGP</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <script>
-          window.onload = function() { setTimeout(function() { window.print(); }, 400); };
-        </script>
-      </body>
-      </html>
-    `);
+  const handleBatchPrint = () => {
+    const toPrint = orders.filter(o => selectedForPrint.has(o.id));
+    if (toPrint.length === 0) return;
+    const pairs: string[] = [];
+    for (let i = 0; i < toPrint.length; i += 2) {
+      const a = generateWaybillHtml(toPrint[i], deposits[toPrint[i].id] || 0, productImages);
+      const b = i + 1 < toPrint.length ? generateWaybillHtml(toPrint[i + 1], deposits[toPrint[i + 1].id] || 0, productImages) : "";
+      pairs.push(`<div style="display:flex;flex-direction:column;gap:8mm;page-break-after:always;">${a}${b}</div>`);
+    }
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pairs.join("")}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`);
     printWindow.document.close();
   };
 
@@ -244,11 +227,10 @@ export default function OrdersPage() {
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
         .orders-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
-        .orders-table-wrap table { min-width: 820px; }
+        .orders-table-wrap table { min-width: 900px; }
         @media (max-width: 640px) {
           .orders-outer { padding: 10px !important; }
           .orders-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
-          .orders-header button { width: 100% !important; }
           .modal-grid { grid-template-columns: 1fr !important; }
           .modal-inner { padding: 14px !important; }
           .modal-header { padding: 14px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
@@ -259,12 +241,19 @@ export default function OrdersPage() {
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
 
           {/* Header */}
-          <div className="orders-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div className="orders-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
             <div>
               <Link href="/admin" style={{ color: "#fda1b7", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
               <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1a1a2e" }}>📦 Orders</h1>
             </div>
-            <button onClick={fetchOrders} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>🔄 Refresh</button>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {selectedForPrint.size > 0 && (
+                <button onClick={handleBatchPrint} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1a1a2e,#333)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
+                  🖨️ طباعة {selectedForPrint.size} بوليصة
+                </button>
+              )}
+              <button onClick={fetchOrders} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>🔄 Refresh</button>
+            </div>
           </div>
 
           {error && <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 12, padding: 16, marginBottom: 24, color: "#ef4444", fontWeight: 600 }}>⚠️ {error}</div>}
@@ -280,69 +269,95 @@ export default function OrdersPage() {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "#1a1a2e", color: "#fff" }}>
-                    {["ORDER", "CUSTOMER", "PHONE", "ADDRESS", "CITY", "ITEMS", "TOTAL", "STATUS", "ACTIONS"].map(h => (
+                    <th style={{ padding: 14, width: 40 }}>
+                      <input type="checkbox" onChange={e => {
+                        if (e.target.checked) setSelectedForPrint(new Set(orders.map(o => o.id)));
+                        else setSelectedForPrint(new Set());
+                      }} checked={selectedForPrint.size === orders.length && orders.length > 0} />
+                    </th>
+                    {["ORDER", "CUSTOMER", "PHONE", "ADDRESS", "CITY", "ITEMS", "TOTAL", "DEPOSIT", "STATUS", "ACTIONS"].map(h => (
                       <th key={h} style={{ padding: 14, textAlign: "left", fontSize: 12, fontWeight: 600 }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map(order => (
-                    <tr key={order.id} style={{ borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}
-                      onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = "#fef9fb"}
-                      onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = "transparent"}>
-                      {/* ✅ Click row to open order detail */}
-                      <td style={{ padding: 14, fontSize: 14, fontWeight: 700, color: "#fda1b7" }} onClick={() => openOrder(order)}>
-                        #{order.id.slice(-6)}
-                      </td>
-                      <td style={{ padding: 14, fontSize: 14 }} onClick={() => openOrder(order)}>{order.customer_name}</td>
-                      <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>
-                        <div>📞 {order.customer_phone}</div>
-                        {order.phone2 && <div style={{ color: "#25d366", fontSize: 12, marginTop: 2 }}>💬 {order.phone2}</div>}
-                      </td>
-                      <td style={{ padding: 14, fontSize: 13, maxWidth: 180 }} onClick={() => openOrder(order)}>{order.shipping_address || order.address || "-"}</td>
-                      <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>{order.city || "-"}</td>
-                      {/* Items thumbnails */}
-                      <td style={{ padding: 8 }} onClick={() => openOrder(order)}>
-                        <div style={{ display: "flex", gap: 3, flexWrap: "wrap", maxWidth: 130 }}>
-                          {order.items?.slice(0, 4).map((item, i) => (
-                            <div key={i} style={{ position: "relative" }}>
-                              <div style={{ width: 38, height: 38, borderRadius: 8, overflow: "hidden", background: "#fdf0f3", border: "1px solid #eee" }}>
-                                <img src={productImages[item.product_id] || `https://placehold.co/38x38/fdf0f3/fda1b7?text=${encodeURIComponent((item.product_name || "?").slice(0, 2))}`}
-                                  alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                  onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/38x38/fdf0f3/fda1b7?text=💍`; }} />
+                  {orders.map(order => {
+                    const dep = deposits[order.id] || 0;
+                    const remaining = Math.max(0, (order.total_amount || 0) - dep);
+                    return (
+                      <tr key={order.id} style={{ borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}
+                        onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = "#fef9fb"}
+                        onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = "transparent"}>
+                        <td style={{ padding: "0 14px" }} onClick={e => e.stopPropagation()}>
+                          <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)} />
+                        </td>
+                        <td style={{ padding: 14, fontSize: 14, fontWeight: 700, color: "#fda1b7" }} onClick={() => openOrder(order)}>
+                          #{order.id.slice(-6)}
+                        </td>
+                        <td style={{ padding: 14, fontSize: 14 }} onClick={() => openOrder(order)}>{order.customer_name}</td>
+                        <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>
+                          <div>📞 {order.customer_phone}</div>
+                          {order.phone2 && <div style={{ color: "#25d366", fontSize: 12, marginTop: 2 }}>💬 {order.phone2}</div>}
+                        </td>
+                        <td style={{ padding: 14, fontSize: 13, maxWidth: 160 }} onClick={() => openOrder(order)}>{order.shipping_address || order.address || "-"}</td>
+                        <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>{order.city || "-"}</td>
+                        <td style={{ padding: 8 }} onClick={() => openOrder(order)}>
+                          <div style={{ display: "flex", gap: 3, flexWrap: "wrap", maxWidth: 120 }}>
+                            {order.items?.slice(0, 4).map((item, i) => (
+                              <div key={i} style={{ position: "relative" }}>
+                                <div style={{ width: 36, height: 36, borderRadius: 8, overflow: "hidden", background: "#fdf0f3", border: "1px solid #eee" }}>
+                                  <img src={productImages[item.product_id] || `https://placehold.co/36x36/fdf0f3/fda1b7?text=💍`}
+                                    alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/36x36/fdf0f3/fda1b7?text=💍`; }} />
+                                </div>
+                                {item.quantity > 1 && <span style={{ position: "absolute", top: -4, right: -4, background: "#1a1a2e", color: "#fff", borderRadius: "50%", width: 14, height: 14, fontSize: 8, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.quantity}</span>}
                               </div>
-                              {item.quantity > 1 && <span style={{ position: "absolute", top: -4, right: -4, background: "#1a1a2e", color: "#fff", borderRadius: "50%", width: 15, height: 15, fontSize: 8, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.quantity}</span>}
-                            </div>
-                          ))}
-                          {(order.items?.length || 0) > 4 && <div style={{ width: 38, height: 38, borderRadius: 8, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#888", fontWeight: 700 }}>+{(order.items?.length || 0) - 4}</div>}
-                        </div>
-                      </td>
-                      <td style={{ padding: 14, fontSize: 14, fontWeight: 700 }} onClick={() => openOrder(order)}>{fmt(order.total_amount)} EGP</td>
-                      <td style={{ padding: 14 }}>
-                        <select value={order.status} onChange={e => { e.stopPropagation(); updateStatus(order.id, e.target.value); }}
-                          onClick={e => e.stopPropagation()}
-                          style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 12, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
-                          <option value="pending">Pending</option>
-                          <option value="processing">Processing</option>
-                          <option value="partially_shipped">Partially Shipped</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      </td>
-                      <td style={{ padding: 14, textAlign: "center" }}>
-                        <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                          <button onClick={e => { e.stopPropagation(); openOrder(order); }}
-                            style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-                            👁️ View
-                          </button>
-                          <button onClick={e => { e.stopPropagation(); openOrder(order).then(() => handlePrint(order)); }}
-                            style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-                            🖨️ Print
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            ))}
+                            {(order.items?.length || 0) > 4 && <div style={{ width: 36, height: 36, borderRadius: 8, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#888", fontWeight: 700 }}>+{(order.items?.length || 0) - 4}</div>}
+                          </div>
+                        </td>
+                        <td style={{ padding: 14, fontSize: 14, fontWeight: 700 }} onClick={() => openOrder(order)}>
+                          <div>{fmt(order.total_amount)} EGP</div>
+                          {dep > 0 && <div style={{ fontSize: 11, color: "#22c55e", marginTop: 2 }}>متبقي: {fmt(remaining)}</div>}
+                        </td>
+                        <td style={{ padding: 8 }} onClick={e => e.stopPropagation()}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <input
+                              type="number"
+                              value={dep === 0 ? "" : dep}
+                              onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
+                              placeholder="0"
+                              style={{ width: 72, padding: "5px 8px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 12, outline: "none" }}
+                            />
+                            <span style={{ fontSize: 11, color: "#888" }}>ج.م</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: 14 }}>
+                          <select value={order.status} onChange={e => { e.stopPropagation(); updateStatus(order.id, e.target.value); }}
+                            onClick={e => e.stopPropagation()}
+                            style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 12, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="partially_shipped">Partially Shipped</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </td>
+                        <td style={{ padding: 14, textAlign: "center" }}>
+                          <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+                            <button onClick={e => { e.stopPropagation(); openOrder(order); }}
+                              style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                              👁️ View
+                            </button>
+                            <button onClick={e => { e.stopPropagation(); openOrder(order).then(() => handlePrint(order)); }}
+                              style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                              🖨️ Print
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -350,12 +365,11 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* ✅ Order Detail Modal */}
+      {/* Order Detail Modal */}
       {selectedOrder && (
         <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
           <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
-            {/* Modal Header */}
             <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
               <div>
                 <h2 style={{ margin: 0, color: "#fff", fontSize: 20, fontWeight: 800 }}>Order #{selectedOrder.id.slice(-6)}</h2>
@@ -367,7 +381,7 @@ export default function OrdersPage() {
                 </span>
                 <button onClick={() => handlePrint(selectedOrder)}
                   style={{ padding: "8px 18px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
-                  🖨️ Print
+                  🖨️ طباعة بوليصة
                 </button>
                 <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", color: "#fff", fontSize: 28, cursor: "pointer", lineHeight: 1 }}>×</button>
               </div>
@@ -394,7 +408,7 @@ export default function OrdersPage() {
                 ))}
               </div>
 
-              {/* Summary */}
+              {/* Summary + Deposit */}
               <div style={{ background: "#fafafa", borderRadius: 14, padding: 20 }}>
                 <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 1 }}>💰 Summary</h3>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
@@ -407,13 +421,40 @@ export default function OrdersPage() {
                     {(selectedOrder.shipping_cost || 0) === 0 ? "FREE 🎉" : `${selectedOrder.shipping_cost} EGP`}
                   </span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 0", marginTop: 4 }}>
-                  <span style={{ fontWeight: 800, fontSize: 16 }}>Total</span>
-                  <span style={{ fontWeight: 800, fontSize: 20, color: "#fda1b7" }}>{fmt(selectedOrder.total_amount)} EGP</span>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
+                  <span style={{ fontWeight: 800, fontSize: 15 }}>Total</span>
+                  <span style={{ fontWeight: 800, fontSize: 18, color: "#fda1b7" }}>{fmt(selectedOrder.total_amount)} EGP</span>
                 </div>
 
-                {/* Status Change */}
-                <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #eee" }}>
+                {/* Deposit */}
+                <div style={{ marginTop: 14, padding: 14, background: "#fff", borderRadius: 10, border: "1.5px solid #fda1b7" }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", display: "block", marginBottom: 8 }}>💵 مدفوع مقدم (Deposit)</label>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <input
+                      type="number"
+                      value={depositInput}
+                      onChange={e => setDepositInput(e.target.value)}
+                      placeholder="0"
+                      style={{ flex: 1, padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 15, fontWeight: 700, outline: "none" }}
+                    />
+                    <span style={{ fontWeight: 600, color: "#888" }}>EGP</span>
+                    <button onClick={() => { const amt = parseFloat(depositInput) || 0; saveDeposit(selectedOrder.id, amt); }}
+                      style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
+                      حفظ
+                    </button>
+                  </div>
+                  {(deposits[selectedOrder.id] || 0) > 0 && (
+                    <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                      <span style={{ color: "#888" }}>المتبقي للتحصيل</span>
+                      <span style={{ fontWeight: 800, fontSize: 18, color: "#22c55e" }}>
+                        {fmt(Math.max(0, (selectedOrder.total_amount || 0) - (deposits[selectedOrder.id] || 0)))} EGP
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Status */}
+                <div style={{ marginTop: 14 }}>
                   <label style={{ fontSize: 12, color: "#888", fontWeight: 700, display: "block", marginBottom: 8 }}>UPDATE STATUS</label>
                   <select value={selectedOrder.status} onChange={e => updateStatus(selectedOrder.id, e.target.value)}
                     style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1.5px solid #f0d4dc", fontSize: 14, fontWeight: 700, color: getStatusColor(selectedOrder.status), cursor: "pointer", background: "#fff", outline: "none" }}>
