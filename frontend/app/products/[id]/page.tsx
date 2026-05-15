@@ -191,14 +191,14 @@ export default function ProductPage() {
               </Link>
             )}
 
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1a1a2e", margin: 0, lineHeight: 1.35 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 400, color: "#1a1a2e", margin: 0, lineHeight: 1.35 }}>
               {product.name_en}
             </h1>
 
             {/* Price */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
               {hasDiscount && <span style={{ fontSize: 17, color: "#bbb", textDecoration: "line-through" }}>{product.old_price} EGP</span>}
+              <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
               {hasDiscount && <span style={{ fontSize: 13, background: "#fef2f2", color: "#ef4444", padding: "3px 10px", borderRadius: 20, fontWeight: 700 }}>Save {discount}%</span>}
             </div>
 

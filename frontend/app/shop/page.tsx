@@ -243,32 +243,33 @@ function ShopContent() {
                       
                     </div>
                     </Link>
-                    <div style={{ padding: "14px 14px 16px" }}>
+                    <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
                       <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
-                      <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#1a1a2e", lineHeight: 1.3, cursor: "pointer" }}>{p.name_en}</h3>
+                      <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</h3>
                       </Link>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
-                        {hasDiscount && <span style={{ fontSize: 12, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
-                      </div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div>
+                          <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
+                          {hasDiscount && <span style={{ fontSize: 11, color: "#bbb", textDecoration: "line-through", marginLeft: 6 }}>{p.old_price} EGP</span>}
+                        </div>
                       {(() => {
                         const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
                         const oos = p.stock === 0;
                         return oos ? (
-                          <div style={{ textAlign: "center", padding: "8px 0", color: "#9ca3af", fontSize: 12, fontWeight: 600 }}>Out of Stock</div>
+                          <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Out of Stock</span>
                         ) : cartQty > 0 ? (
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", border: "2px solid #fda1b7", borderRadius: 25, overflow: "hidden", height: 38 }}>
-                            <button onClick={() => decrementCart(p.id)} style={{ flex: 1, border: "none", background: "transparent", cursor: "pointer", fontSize: 20, fontWeight: 700, color: "#fda1b7" }}>−</button>
-                            <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>{cartQty}</span>
-                            <button onClick={() => addToCart(p, 1)} style={{ flex: 1, border: "none", background: "transparent", cursor: "pointer", fontSize: 20, fontWeight: 700, color: "#fda1b7" }}>+</button>
+                          <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #fda1b7", borderRadius: 20, overflow: "hidden" }}>
+                            <button onClick={() => decrementCart(p.id)} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>−</button>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", minWidth: 16, textAlign: "center" }}>{cartQty}</span>
+                            <button onClick={() => addToCart(p, 1)} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>+</button>
                           </div>
                         ) : (
-                          <button onClick={() => addToCart(p, 1)} style={{ width: "100%", height: 38, borderRadius: 25, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                          <button onClick={() => addToCart(p, 1)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                            Add to Bag
                           </button>
                         );
                       })()}
+                      </div>
                     </div>
                   </div>
                 );
