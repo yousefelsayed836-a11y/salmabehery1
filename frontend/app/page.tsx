@@ -75,30 +75,10 @@ const SEED_REVIEWS = [
   { id: "s15", customer_name: "Yasmin F.",  review_text: "Garabt ashtri mn mawa2e3 tanya w mat-gebtesh zay elly eshtareetu mn hena. El goda far2 kebeer awy w se3ro arkhas kaman!", rating: 5 },
 ];
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
-
 export default function HomePage() {
   const [currentReview, setCurrentReview] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [allReviews, setAllReviews] = useState<any[]>(SEED_REVIEWS);
-  const [categories, setCategories] = useState<any[]>(CATEGORY_CARDS);
-
-  useEffect(() => {
-    fetch(`${API}/categories`)
-      .then(r => r.json())
-      .then((data: any[]) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCategories(data.map(c => ({
-            key: c.slug,
-            title: c.name_en,
-            image: c.image?.startsWith("http") ? c.image : c.image ? `${BACKEND}${c.image}` : `https://placehold.co/400x500/fdf0f3/fda1b7?text=${encodeURIComponent(c.name_en)}`,
-            href: `/shop/${c.slug}`,
-            emoji: "💍",
-          })));
-        }
-      })
-      .catch(() => {});
-  }, []);
   const [formName, setFormName] = useState("");
   const [formText, setFormText] = useState("");
   const [formRating, setFormRating] = useState(0);
@@ -250,7 +230,7 @@ export default function HomePage() {
         </div>
 
         <div className="categories-grid-inner">
-          {categories.map((cat) => (
+          {CATEGORY_CARDS.map((cat) => (
             <Link key={cat.key} href={cat.href} className="cat-card" style={{
               textDecoration: "none", color: "#222", borderRadius: 20,
               boxShadow: "0 6px 20px rgba(0,0,0,0.08)", background: "#fff",
