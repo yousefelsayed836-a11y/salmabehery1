@@ -1,6 +1,53 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database/db');
+const nodemailer = require('nodemailer');
+
+function getMailer() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_PASS;
+  if (!user || !pass) return null;
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+  });
+}
+
+async function sendNewOrderEmail(order, items) {
+  const mailer = getMailer();
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER;
+  if (!mailer || !adminEmail) return;
+  const itemsList = (items || []).map(i => `<li>${i.product_name || 'منتج'} x${i.quantity} — ${i.price} EGP</li>`).join('');
+  try {
+    await mailer.sendMail({
+      from: `"Salma Behery Store" <${process.env.GMAIL_USER}>`,
+      to: adminEmail,
+      subject: `🛍️ أوردر جديد #${String(order.id).slice(-6)} — ${order.customer_name}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;direction:rtl;">
+          <div style="background:#fda1b7;padding:20px;border-radius:12px 12px 0 0;text-align:center;">
+            <h2 style="color:#fff;margin:0;">🛍️ أوردر جديد!</h2>
+          </div>
+          <div style="background:#fff;padding:24px;border:1px solid #eee;border-radius:0 0 12px 12px;">
+            <p><strong>الاسم:</strong> ${order.customer_name}</p>
+            <p><strong>التليفون:</strong> ${order.customer_phone}</p>
+            <p><strong>العنوان:</strong> ${order.shipping_address || order.address || '-'}</p>
+            <p><strong>المدينة:</strong> ${order.city || '-'}</p>
+            <p><strong>الإجمالي:</strong> <span style="color:#fda1b7;font-weight:bold;">${order.total_amount} EGP</span></p>
+            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+            <p><strong>المنتجات:</strong></p>
+            <ul>${itemsList}</ul>
+            <a href="https://salmabehery1.vercel.app/admin/orders" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#fda1b7;color:#fff;border-radius:10px;text-decoration:none;font-weight:bold;">
+              افتح الأوردر ←
+            </a>
+          </div>
+        </div>
+      `,
+    });
+  } catch (e) {
+    console.error('Email send error:', e.message);
+  }
+}
 
 async function getTableColumns(tableName) {
   try {
@@ -111,9 +158,26 @@ router.post('/', async (req, res) => {
       }
     }
 
+    const newOrder = orderResult.rows[0];
+
+    // SSE broadcast to admin
+    const broadcast = req.app.get('broadcast');
+    if (broadcast) {
+      broadcast({ type: 'new_order', order: { id: newOrder.id, customer_name: finalCustomerName, total_amount: total, city: finalCity } });
+    }
+
+    // Socket.io emit
+    try {
+      const io = req.app.get('io');
+      if (io) io.to('orders').emit('new_order', { id: newOrder.id, customer_name: finalCustomerName, total_amount: total });
+    } catch (e) {}
+
+    // Email notification (non-blocking)
+    sendNewOrderEmail(newOrder, items);
+
     res.status(201).json({
       message: 'Order created successfully',
-      order: orderResult.rows[0]
+      order: newOrder
     });
   } catch (error) {
     console.error('Order creation error:', error);

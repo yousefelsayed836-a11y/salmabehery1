@@ -37,8 +37,34 @@ export default function AdminDashboard() {
   const [showChangePw, setShowChangePw] = useState(false);
   const [changePwForm, setChangePwForm] = useState({ current: "", next: "", confirm: "" });
   const [changePwMsg, setChangePwMsg] = useState("");
+  const [newOrderToast, setNewOrderToast] = useState<{ name: string; total: number } | null>(null);
 
   useEffect(() => { fetchData(); }, []);
+
+  // SSE: listen for new orders
+  useEffect(() => {
+    if (!authed) return;
+    const es = new EventSource(`${API_BASE.replace("/api", "")}/api/events`);
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === "new_order") {
+          setNewOrderToast({ name: data.order.customer_name, total: data.order.total_amount });
+          fetchData();
+          // Browser notification
+          if (Notification.permission === "granted") {
+            new Notification("🛍️ أوردر جديد!", { body: `${data.order.customer_name} — ${data.order.total_amount} EGP`, icon: "/favicon.png" });
+          } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(p => {
+              if (p === "granted") new Notification("🛍️ أوردر جديد!", { body: `${data.order.customer_name} — ${data.order.total_amount} EGP` });
+            });
+          }
+          setTimeout(() => setNewOrderToast(null), 6000);
+        }
+      } catch {}
+    };
+    return () => es.close();
+  }, [authed]);
 
   const fetchData = async () => {
     try {
@@ -296,6 +322,18 @@ export default function AdminDashboard() {
 
         </div>
       </div>
+      {/* New Order Toast */}
+      {newOrderToast && (
+        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, background: "#1a1a2e", color: "#fff", borderRadius: 16, padding: "16px 20px", boxShadow: "0 8px 32px rgba(0,0,0,0.25)", display: "flex", alignItems: "center", gap: 14, minWidth: 280, animation: "slideUp 0.3s ease" }}>
+          <div style={{ fontSize: 32 }}>🛍️</div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#fda1b7" }}>أوردر جديد!</div>
+            <div style={{ fontSize: 13, marginTop: 2 }}>{newOrderToast.name} — {newOrderToast.total.toLocaleString()} EGP</div>
+          </div>
+          <button onClick={() => setNewOrderToast(null)} style={{ marginRight: "auto", background: "none", border: "none", color: "#aaa", fontSize: 20, cursor: "pointer", lineHeight: 1, padding: 0 }}>×</button>
+          <style>{`@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`}</style>
+        </div>
+      )}
     </>
   );
 }
