@@ -131,19 +131,20 @@ export default function Header() {
           </div>
 
           {/* Center: Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/logo-transparent.png"
-              alt="Salma Behery"
-              style={{
-                height: 44,
-                objectFit: "contain",
-                display: "block",
-                filter: isTransparent ? "brightness(0) invert(1)" : "brightness(0)",
-                transition: "filter 0.3s ease",
-              }}
-            />
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <span style={{
+              fontFamily: "'HelloParisSerif', 'Cormorant Garamond', 'Didot', 'Bodoni MT', serif",
+              fontWeight: 400,
+              fontSize: 30,
+              letterSpacing: 6,
+              textTransform: "uppercase",
+              color: isTransparent ? "#fff" : "#1a1a2e",
+              lineHeight: 1,
+              display: "block",
+              transition: "color 0.3s ease",
+            }}>
+              Salma Behery
+            </span>
           </Link>
 
           {/* Right: Cart Only (No User Icon) */}
@@ -267,11 +268,7 @@ export default function Header() {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-main { font-size: 20px !important; letter-spacing: 2px !important; }
-          .logo-sub { font-size: 8px !important; letter-spacing: 3px !important; }
-        }
-        @media (max-width: 400px) {
-          .logo-main { font-size: 20px !important; letter-spacing: 3px !important; }
+          .logo-text { font-size: 20px !important; letter-spacing: 3px !important; }
         }
       `}</style>
     </>
