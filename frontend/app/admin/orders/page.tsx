@@ -33,6 +33,19 @@ interface Order {
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
 
+const isArabic = (text: string) => /[؀-ۿ]/.test(text);
+
+async function translateToArabic(text: string): Promise<string> {
+  if (!text || text === "-" || isArabic(text)) return text;
+  try {
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ar`);
+    const data = await res.json();
+    const translated = data?.responseData?.translatedText;
+    if (translated && translated !== text) return translated;
+    return text;
+  } catch { return text; }
+}
+
 async function fetchProductImage(productId: string): Promise<string | null> {
   try {
     const res = await fetch(`${API_BASE}/products/${productId}`);
@@ -44,9 +57,9 @@ async function fetchProductImage(productId: string): Promise<string | null> {
   } catch { return null; }
 }
 
-function generateWaybillHtml(order: Order, deposit: number, productImages: Record<string, string>): string {
+function generateWaybillHtml(order: Order, deposit: number, productImages: Record<string, string>, translatedAddr?: string): string {
   const remaining = Math.max(0, (order.total_amount || 0) - deposit);
-  const address = order.shipping_address || order.address || "-";
+  const address = translatedAddr || order.shipping_address || order.address || "-";
   const shipping = order.shipping_cost || 0;
 
   return `
@@ -91,6 +104,7 @@ export default function OrdersPage() {
   const [deposits, setDeposits] = useState<Record<string, number>>({});
   const [depositInput, setDepositInput] = useState<string>("");
   const [selectedForPrint, setSelectedForPrint] = useState<Set<string>>(new Set());
+  const [translatedAddresses, setTranslatedAddresses] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchOrders();
@@ -119,6 +133,13 @@ export default function OrdersPage() {
   const openOrder = async (order: Order) => {
     setSelectedOrder(order);
     setDepositInput(String(deposits[order.id] || ""));
+    const rawAddress = order.shipping_address || order.address || "";
+    // Auto-translate address to Arabic if not already Arabic
+    if (rawAddress && !translatedAddresses[order.id]) {
+      translateToArabic(rawAddress).then(translated => {
+        setTranslatedAddresses(prev => ({ ...prev, [order.id]: translated }));
+      });
+    }
     if (!order.items) return;
     const newImages: Record<string, string> = {};
     await Promise.all(order.items.map(async (item) => {
@@ -182,9 +203,10 @@ export default function OrdersPage() {
 
   const handlePrint = (order: Order) => {
     const deposit = deposits[order.id] || 0;
+    const addr = translatedAddresses[order.id];
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
-    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${generateWaybillHtml(order, deposit, productImages)}<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script></body></html>`);
+    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${generateWaybillHtml(order, deposit, productImages, addr)}<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script></body></html>`);
     printWindow.document.close();
   };
 
@@ -193,8 +215,8 @@ export default function OrdersPage() {
     if (toPrint.length === 0) return;
     const pairs: string[] = [];
     for (let i = 0; i < toPrint.length; i += 2) {
-      const a = generateWaybillHtml(toPrint[i], deposits[toPrint[i].id] || 0, productImages);
-      const b = i + 1 < toPrint.length ? generateWaybillHtml(toPrint[i + 1], deposits[toPrint[i + 1].id] || 0, productImages) : "";
+      const a = generateWaybillHtml(toPrint[i], deposits[toPrint[i].id] || 0, productImages, translatedAddresses[toPrint[i].id]);
+      const b = i + 1 < toPrint.length ? generateWaybillHtml(toPrint[i + 1], deposits[toPrint[i + 1].id] || 0, productImages, translatedAddresses[toPrint[i + 1].id]) : "";
       pairs.push(`<div style="display:flex;flex-direction:column;gap:8mm;page-break-after:always;">${a}${b}</div>`);
     }
     const printWindow = window.open("", "_blank");

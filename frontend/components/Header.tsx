@@ -134,13 +134,13 @@ export default function Header() {
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/logo (2).png"
+              src="/images/logo-transparent.png"
               alt="Salma Behery"
               style={{
-                height: 36,
+                height: 44,
                 objectFit: "contain",
                 display: "block",
-                filter: isTransparent ? "brightness(0) invert(1)" : "none",
+                filter: isTransparent ? "brightness(0) invert(1)" : "brightness(0)",
                 transition: "filter 0.3s ease",
               }}
             />
