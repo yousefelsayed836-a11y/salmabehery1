@@ -216,8 +216,8 @@ function ShopContent() {
                       </Link>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <div>
+                          {hasDiscount && <span style={{ fontSize: 11, color: "#bbb", textDecoration: "line-through", marginRight: 6 }}>{p.old_price} EGP</span>}
                           <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
-                          {hasDiscount && <span style={{ fontSize: 11, color: "#bbb", textDecoration: "line-through", marginLeft: 6 }}>{p.old_price} EGP</span>}
                         </div>
                       {(() => {
                         const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
@@ -263,8 +263,8 @@ function ShopContent() {
                 <button onClick={() => setSelectedProduct(null)} style={{ background: "none", border: "none", fontSize: 26, cursor: "pointer", color: "#aaa" }}>×</button>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 26, fontWeight: 800, color: "#fda1b7" }}>{selectedProduct.price} EGP</span>
                 {selectedProduct.old_price && selectedProduct.old_price > selectedProduct.price && <span style={{ fontSize: 16, color: "#bbb", textDecoration: "line-through" }}>{selectedProduct.old_price} EGP</span>}
+                <span style={{ fontSize: 26, fontWeight: 800, color: "#fda1b7" }}>{selectedProduct.price} EGP</span>
               </div>
               {selectedProduct.description_en && <div style={{ fontSize: 13, lineHeight: 1.7, color: "#666" }} dangerouslySetInnerHTML={{ __html: selectedProduct.description_en }} />}
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
