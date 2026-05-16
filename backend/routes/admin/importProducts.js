@@ -64,9 +64,10 @@ function stripHtml(html) {
   return (html || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-// POST /api/admin/import-products  (protected by secret key)
-router.post('/', async (req, res) => {
+// GET or POST /api/admin/import-products?secret=salma-import-2026
+async function importHandler(req, res) {
   const secret = req.headers['x-import-secret'] || req.query.secret;
+
   if (secret !== (process.env.IMPORT_SECRET || 'salma-import-2026')) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -162,6 +163,9 @@ router.post('/', async (req, res) => {
     console.error('Import error:', e);
     res.status(500).json({ error: e.message });
   }
-});
+}
+
+router.get('/', importHandler);
+router.post('/', importHandler);
 
 module.exports = router;
