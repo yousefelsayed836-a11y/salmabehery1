@@ -168,7 +168,7 @@ export default function ProductPage() {
           </div>
 
           {/* ── Info ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, fontFamily: "'Inter', sans-serif", fontWeight: 400, color: "#1a1a2e" }}>
 
             <h1 style={{ fontSize: 17, fontWeight: 400, color: "#1a1a2e", margin: 0, lineHeight: 1.4 }}>
               {product.name_en}
@@ -176,42 +176,35 @@ export default function ProductPage() {
 
             {/* Price */}
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {hasDiscount && <span style={{ fontSize: 18, color: "#bbb", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
-                {hasDiscount && <span style={{ fontSize: 13, background: "#fef2f2", color: "#ef4444", padding: "3px 10px", borderRadius: 20, fontWeight: 400 }}>Save {discount}%</span>}
-              </div>
+              {hasDiscount && <span style={{ fontSize: 16, color: "#1a1a2e", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
+              <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
             </div>
 
             {/* Stock */}
-            <div style={{ fontSize: 13, fontWeight: 400 }}>
-              {!inStock
-                ? <span style={{ color: "#ef4444" }}>Out of Stock</span>
-                : product.stock && product.stock <= 5
-                  ? <span style={{ color: "#ef4444" }}>Only {product.stock} left</span>
-                  : <span style={{ color: "#22c55e" }}>In Stock</span>}
+            <div style={{ fontSize: 13, fontWeight: 400, color: "#1a1a2e" }}>
+              {!inStock ? "Out of Stock" : product.stock && product.stock <= 5 ? `Only ${product.stock} left` : "In Stock"}
             </div>
 
             {/* Badges */}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {product.material && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#fdf4f7", color: "#c97a8a", fontSize: 12, fontWeight: 400, border: "1px solid #fce4ec" }}>{product.material}</span>}
-              {product.water_resistance && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#eff6ff", color: "#1e40af", fontSize: 12, fontWeight: 400, border: "1px solid #dbeafe" }}>{product.water_resistance}</span>}
-              {product.size_info && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#f0fdf4", color: "#166534", fontSize: 12, fontWeight: 400, border: "1px solid #dcfce7" }}>{product.size_info}</span>}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 13, color: "#1a1a2e" }}>
+              {product.material && <span>{product.material}</span>}
+              {product.water_resistance && <span>{product.water_resistance}</span>}
+              {product.size_info && <span>{product.size_info}</span>}
             </div>
 
             {/* Qty + Add to cart */}
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #f0d4dc", borderRadius: 12, overflow: "hidden" }}>
                 <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                  style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 700, color: "#fda1b7", cursor: "pointer" }}>−</button>
-                <span style={{ width: 44, textAlign: "center", fontWeight: 700, fontSize: 16 }}>{qty}</span>
+                  style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 400, color: "#1a1a2e", cursor: "pointer" }}>−</button>
+                <span style={{ width: 44, textAlign: "center", fontWeight: 400, fontSize: 16, color: "#1a1a2e" }}>{qty}</span>
                 <button onClick={() => setQty(q => Math.min(10, q + 1))}
-                  style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 700, color: "#fda1b7", cursor: "pointer" }}>+</button>
+                  style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 400, color: "#1a1a2e", cursor: "pointer" }}>+</button>
               </div>
               <button onClick={handleAddToCart} disabled={!inStock}
                 style={{ flex: 1, height: 48, borderRadius: 12, border: "none",
                   background: !inStock ? "#e5e7eb" : added ? "#22c55e" : "linear-gradient(135deg,#fda1b7,#f78fa3)",
-                  color: !inStock ? "#9ca3af" : "#fff", fontSize: 15, fontWeight: 700,
+                  color: !inStock ? "#9ca3af" : "#fff", fontSize: 15, fontWeight: 400,
                   cursor: !inStock ? "not-allowed" : "pointer", transition: "all 0.3s" }}>
                 {!inStock ? "Out of Stock" : added ? "Added to Cart" : "Add to Cart"}
               </button>
@@ -220,19 +213,19 @@ export default function ProductPage() {
             {/* Buy Now */}
             <Link href="/checkout"
               style={{ display: "block", textAlign: "center", padding: "14px", borderRadius: 12,
-                border: "2px solid #fda1b7", color: "#fda1b7", fontSize: 15, fontWeight: 700,
+                border: "2px solid #fda1b7", color: "#fda1b7", fontSize: 15, fontWeight: 400,
                 textDecoration: "none", transition: "all 0.2s" }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "#fda1b7"; (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; }}>
               Buy Now
             </Link>
 
-            {/* Description — below buttons, no box */}
+            {/* Description */}
             {product.description_en && (
               <div>
                 <div style={{ borderTop: "1px solid #eee", margin: "4px 0 12px" }} />
-                <p style={{ fontSize: 11, fontWeight: 400, color: "#aaa", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
-                <div style={{ fontSize: 14, lineHeight: 1.8, color: "#888", fontWeight: 400 }}
+                <p style={{ fontSize: 11, fontWeight: 400, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
+                <div style={{ fontSize: 14, lineHeight: 1.8, color: "#1a1a2e", fontWeight: 400 }}
                   dangerouslySetInnerHTML={{ __html: product.description_en }} />
               </div>
             )}
