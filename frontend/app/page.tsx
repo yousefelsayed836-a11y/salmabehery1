@@ -155,48 +155,49 @@ export default function HomePage() {
         <div
           onClick={() => setShowPopup(false)}
           style={{
-            position: "fixed", inset: 0, zIndex: 9000,
-            background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            padding: "20px",
+            position: "fixed", inset: 0, zIndex: 999999,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex", justifyContent: "center", alignItems: "center",
           }}
         >
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: "#fff", borderRadius: 24, padding: "36px 32px 28px",
-              maxWidth: 420, width: "100%", textAlign: "center",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-              position: "relative", animation: "fadeUp 0.35s ease",
+              background: "#fff", color: "#333",
+              padding: "35px 40px", borderRadius: 16,
+              maxWidth: 420, width: "90%", textAlign: "center",
+              fontFamily: "Arial, sans-serif", position: "relative",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              borderTop: "4px solid #fda1b7",
             }}
           >
             <button
               onClick={() => setShowPopup(false)}
               style={{
-                position: "absolute", top: 14, right: 16,
-                background: "none", border: "none", fontSize: 22,
-                cursor: "pointer", color: "#aaa", lineHeight: 1,
+                position: "absolute", top: 15, right: 15,
+                width: 32, height: 32, border: "none",
+                background: "#f5f5f5", borderRadius: "50%",
+                fontSize: 20, color: "#666", cursor: "pointer",
               }}
             >×</button>
-            <div style={{ fontSize: 42, marginBottom: 12 }}>💍</div>
-            <h2 style={{
-              fontFamily: "'HelloParisSerif', 'Cormorant Garamond', serif",
-              fontSize: 24, fontWeight: 400, color: "#1a1a2e",
-              margin: "0 0 10px", letterSpacing: 2,
-            }}>
-              Welcome to Salma Behery
-            </h2>
-            <p style={{ color: "#888", fontSize: 14, lineHeight: 1.6, margin: "0 0 20px" }}>
-              Free shipping on orders above <strong style={{ color: "#fda1b7" }}>900 EGP</strong>.
-              Cash on delivery available.
+
+            <div style={{ fontSize: 48, marginBottom: 15 }}>📦</div>
+
+            <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 15, color: "#222" }}>
+              Important Notice
+            </h3>
+
+            <p style={{ fontSize: 16, lineHeight: 1.6, color: "#555", marginBottom: 25 }}>
+              Any product that is not available on the website is considered{" "}
+              <strong style={{ color: "#fda1b7" }}>Sold Out</strong>.
             </p>
+
             <button
               onClick={() => setShowPopup(false)}
               style={{
-                padding: "13px 40px", borderRadius: 50, border: "none",
-                background: "linear-gradient(135deg,#fda1b7,#f78fa3)",
-                color: "#fff", fontWeight: 600, fontSize: 15,
-                cursor: "pointer", letterSpacing: 1,
+                background: "#fda1b7", color: "#fff", border: "none",
+                padding: "12px 35px", fontSize: 16, borderRadius: 8,
+                cursor: "pointer", fontWeight: 500, minWidth: 120,
               }}
             >
               Got it
