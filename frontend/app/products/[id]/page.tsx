@@ -181,8 +181,12 @@ export default function ProductPage() {
             </div>
 
             {/* Stock */}
-            <div style={{ fontSize: 13, fontWeight: 400, color: "#1a1a2e" }}>
-              {!inStock ? "Out of Stock" : product.stock && product.stock <= 5 ? `Only ${product.stock} left` : "In Stock"}
+            <div style={{ fontSize: 13, fontWeight: 400 }}>
+              {!inStock
+                ? <span style={{ color: "#ef4444" }}>Out of Stock</span>
+                : product.stock && product.stock <= 5
+                  ? <span style={{ color: "#ef4444" }}>Only {product.stock} left</span>
+                  : <span style={{ color: "#22c55e" }}>In Stock</span>}
             </div>
 
             {/* Badges */}
@@ -224,9 +228,10 @@ export default function ProductPage() {
             {product.description_en && (
               <div>
                 <div style={{ borderTop: "1px solid #eee", margin: "4px 0 12px" }} />
-                <p style={{ fontSize: 11, fontWeight: 400, color: "#1a1a2e", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
-                <div style={{ fontSize: 14, lineHeight: 1.8, color: "#1a1a2e", fontWeight: 400 }}
-                  dangerouslySetInnerHTML={{ __html: product.description_en }} />
+                <p style={{ fontSize: 16, fontWeight: 400, color: "#1a1a2e", letterSpacing: 0, textTransform: "none", margin: "0 0 8px" }}>Description</p>
+                <div style={{ fontSize: 13, lineHeight: 1.8, color: "#1a1a2e", fontWeight: 400 }}>
+                  ● <span dangerouslySetInnerHTML={{ __html: product.description_en }} />
+                </div>
               </div>
             )}
 
