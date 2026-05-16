@@ -96,10 +96,7 @@ export default function HomePage() {
 
   const getCatImage = (slugs: string[], fallback: string) => {
     for (const s of slugs) {
-      const found = apiCategories.find(c =>
-        c.slug?.toLowerCase() === s.toLowerCase() ||
-        c.name_en?.toLowerCase().includes(s.toLowerCase())
-      );
+      const found = apiCategories.find(c => c.slug?.toLowerCase() === s.toLowerCase());
       if (found?.image) return found.image;
     }
     return fallback;
