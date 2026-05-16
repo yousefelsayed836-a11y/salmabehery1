@@ -113,21 +113,6 @@ export default function ProductPage() {
   return (
     <div style={{ background: "#fff", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
 
-      {/* Breadcrumb */}
-      <div style={{ padding: "10px 20px", borderBottom: "1px solid #f5e6ea", background: "#fafafa" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", fontSize: 12, color: "#aaa", display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          <Link href="/" style={{ color: "#fda1b7", textDecoration: "none" }}>Home</Link>
-          <span>/</span>
-          <Link href="/shop" style={{ color: "#fda1b7", textDecoration: "none" }}>Shop</Link>
-          {product.category_name && <>
-            <span>/</span>
-            <Link href={`/shop/${product.category_slug || ""}`} style={{ color: "#fda1b7", textDecoration: "none" }}>{product.category_name}</Link>
-          </>}
-          <span>/</span>
-          <span style={{ color: "#555" }}>{product.name_en}</span>
-        </div>
-      </div>
-
       {/* Main product section */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 20px" }}>
         <div className="pd-layout">
@@ -184,13 +169,6 @@ export default function ProductPage() {
 
           {/* ── Info ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {product.category_name && (
-              <Link href={`/shop/${product.category_slug || ""}`}
-                style={{ fontSize: 11, fontWeight: 400, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 2, textDecoration: "none" }}>
-                {product.category_name}
-              </Link>
-            )}
 
             <h1 style={{ fontSize: 17, fontWeight: 400, color: "#1a1a2e", margin: 0, lineHeight: 1.4 }}>
               {product.name_en}
