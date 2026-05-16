@@ -48,7 +48,7 @@ const CATEGORY_CARDS = [
     emoji: "🌙",
   },
   {
-    key: "extra-things",
+    key: "sets-and-offers",
     title: "Sets & Offers",
     desc: "Special sets & deals.",
     image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
@@ -93,7 +93,12 @@ export default function HomePage() {
       .then((d: any[]) => {
         const map: Record<string, string> = {};
         (Array.isArray(d) ? d : []).forEach((c: any) => {
-          if (c.slug && c.image) map[c.slug] = c.image;
+          if (c.slug && c.image) {
+            map[c.slug] = c.image;
+            // also map extra-things <-> sets-and-offers as aliases
+            if (c.slug === "extra-things") map["sets-and-offers"] = c.image;
+            if (c.slug === "sets-and-offers") map["extra-things"] = c.image;
+          }
         });
         setCategoryImages(map);
       })
