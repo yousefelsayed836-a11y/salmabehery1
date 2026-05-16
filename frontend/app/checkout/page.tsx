@@ -54,23 +54,23 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [shippingRates, setShippingRates] = useState<Record<string, number>>({});
+  const [shippingRates, setShippingRates] = useState<Record<string, { cost: number; id: number }>>({});
   const [freeThreshold, setFreeThreshold] = useState(900);
+  const [dbCities, setDbCities] = useState<{ name: string; name_ar: string; cost: number | null; is_active: boolean }[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
 
   useEffect(() => {
-    // Load cart
     try {
       const saved = localStorage.getItem("cart");
       if (saved) setCart(JSON.parse(saved));
     } catch {}
 
-    // Load shipping rates from API
     fetch(`${API_BASE}/shipping`)
       .then(r => r.json())
       .then(data => {
         if (data.rates) {
-          const rateMap: Record<string, number> = {};
-          data.rates.forEach((r: any) => { rateMap[r.name] = r.cost; });
+          const rateMap: Record<string, { cost: number; id: number }> = {};
+          data.rates.forEach((r: any) => { rateMap[r.name] = { cost: r.cost, id: r.id }; });
           setShippingRates(rateMap);
         }
         if (data.free_threshold) setFreeThreshold(data.free_threshold);
@@ -78,13 +78,42 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, []);
 
+  // Fetch DB cities when governorate changes
+  useEffect(() => {
+    setDbCities([]);
+    setLoadingCities(false);
+    if (!form.governorate) return;
+    const govData = shippingRates[form.governorate];
+    if (!govData) return;
+    setLoadingCities(true);
+    fetch(`${API_BASE}/shipping/${govData.id}/cities`)
+      .then(r => r.json())
+      .then(data => {
+        const activeCities = (data.cities || []).filter((c: any) => c.is_active);
+        setDbCities(activeCities);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingCities(false));
+  }, [form.governorate, shippingRates]);
+
   const subtotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
-  const govShipping = form.governorate ? (shippingRates[form.governorate] ?? DEFAULT_SHIPPING) : DEFAULT_SHIPPING;
+  const govShipping = form.governorate ? (shippingRates[form.governorate]?.cost ?? DEFAULT_SHIPPING) : DEFAULT_SHIPPING;
+
+  // City-level cost: if selected city has its own cost use it, else use governorate cost
+  const selectedCityData = dbCities.find(c => c.name === form.city);
+  const cityShipping = selectedCityData?.cost !== null && selectedCityData?.cost !== undefined
+    ? selectedCityData.cost
+    : govShipping;
+
+  const activeShipping = form.city ? cityShipping : govShipping;
   const freeShipping = subtotal >= freeThreshold;
-  const shippingCost = freeShipping ? 0 : govShipping;
+  const shippingCost = freeShipping ? 0 : activeShipping;
   const finalTotal = subtotal + shippingCost;
 
-  const cities = form.governorate ? (EGYPT_DATA[form.governorate]?.cities || []) : [];
+  // Use DB cities if available, else fallback to EGYPT_DATA
+  const cities = form.governorate
+    ? (dbCities.length > 0 ? dbCities.map(c => c.name) : (EGYPT_DATA[form.governorate]?.cities || []))
+    : [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

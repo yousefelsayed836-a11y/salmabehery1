@@ -12,6 +12,16 @@ async function ensureTable() {
       is_active BOOLEAN NOT NULL DEFAULT true
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS shipping_cities (
+      id SERIAL PRIMARY KEY,
+      governorate_id INT NOT NULL REFERENCES shipping_rates(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      name_ar TEXT NOT NULL DEFAULT '',
+      cost INT,
+      is_active BOOLEAN NOT NULL DEFAULT true
+    )
+  `);
 
   // Seed defaults if table is empty
   const { rows } = await pool.query('SELECT COUNT(*) FROM shipping_rates');
@@ -84,6 +94,59 @@ router.delete('/:id', async (req, res) => {
   try {
     await ensureTable();
     await pool.query('DELETE FROM shipping_rates WHERE id=$1', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/shipping/:id/cities
+router.get('/:id/cities', async (req, res) => {
+  try {
+    await ensureTable();
+    const { rows } = await pool.query(
+      'SELECT * FROM shipping_cities WHERE governorate_id=$1 ORDER BY name ASC',
+      [req.params.id]
+    );
+    res.json({ cities: rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/shipping/:id/cities — add city to governorate
+router.post('/:id/cities', async (req, res) => {
+  try {
+    await ensureTable();
+    const { name, name_ar = '', cost } = req.body;
+    if (!name) return res.status(400).json({ error: 'name required' });
+    const { rows } = await pool.query(
+      'INSERT INTO shipping_cities (governorate_id, name, name_ar, cost) VALUES ($1,$2,$3,$4) RETURNING *',
+      [req.params.id, name, name_ar, cost ?? null]
+    );
+    res.json({ city: rows[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// PUT /api/shipping/city/:cityId — update city
+router.put('/city/:cityId', async (req, res) => {
+  try {
+    await ensureTable();
+    const { name, name_ar, cost, is_active } = req.body;
+    await pool.query(
+      `UPDATE shipping_cities SET
+        name = COALESCE($1, name),
+        name_ar = COALESCE($2, name_ar),
+        cost = COALESCE($3, cost),
+        is_active = COALESCE($4, is_active)
+       WHERE id=$5`,
+      [name ?? null, name_ar ?? null, cost ?? null, is_active ?? null, req.params.cityId]
+    );
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE /api/shipping/city/:cityId
+router.delete('/city/:cityId', async (req, res) => {
+  try {
+    await ensureTable();
+    await pool.query('DELETE FROM shipping_cities WHERE id=$1', [req.params.cityId]);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
