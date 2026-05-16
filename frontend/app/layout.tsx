@@ -4,6 +4,7 @@ import './globals.css';
 import Header from '../components/Header';
 import Ticker from '../components/Ticker';
 import { CartProvider } from '../components/CartContext';
+import FaviconUpdater from '../components/FaviconUpdater';
 
 const inter = Inter({ subsets: ['latin'] });
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' });
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" dir="ltr">
       <body className={`${inter.className} ${cairo.variable} ${cormorant.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
+          <FaviconUpdater />
           <Ticker />
           <Header />
           <main style={{ minHeight: '100vh', background: '#fff' }}>

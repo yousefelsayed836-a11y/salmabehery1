@@ -38,8 +38,41 @@ export default function AdminDashboard() {
   const [changePwForm, setChangePwForm] = useState({ current: "", next: "", confirm: "" });
   const [changePwMsg, setChangePwMsg] = useState("");
   const [newOrderToast, setNewOrderToast] = useState<{ name: string; total: number } | null>(null);
+  const [faviconUrl, setFaviconUrl] = useState("");
+  const [faviconUploading, setFaviconUploading] = useState(false);
+  const [faviconMsg, setFaviconMsg] = useState("");
 
   useEffect(() => { fetchData(); }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/settings/favicon`)
+      .then(r => r.json())
+      .then(d => { if (d.value) setFaviconUrl(d.value); })
+      .catch(() => {});
+  }, []);
+
+  const uploadFavicon = async (file: File) => {
+    setFaviconUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const r = await fetch(`${API_BASE.replace("/api","")}/api/upload`, { method: "POST", body: fd });
+      const data = await r.json();
+      if (!data.url) throw new Error("Upload failed");
+      await fetch(`${API_BASE}/settings/favicon`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: data.url }),
+      });
+      setFaviconUrl(data.url);
+      setFaviconMsg("✅ Favicon updated!");
+      // Update in current tab immediately
+      const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+      if (link) link.href = data.url;
+    } catch (e: any) { setFaviconMsg("❌ " + e.message); }
+    setFaviconUploading(false);
+    setTimeout(() => setFaviconMsg(""), 3000);
+  };
 
   // SSE: listen for new orders
   useEffect(() => {
@@ -240,6 +273,26 @@ export default function AdminDashboard() {
               <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Categories</h2>
               <span style={{ padding: "4px 16px", borderRadius: 20, background: "rgba(255,255,255,0.2)", fontSize: 12, fontWeight: 600 }}>Manage →</span>
             </Link>
+          </div>
+
+          {/* Favicon Upload */}
+          <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+              <div style={{ width: 48, height: 48, borderRadius: 10, border: "1.5px solid #eee", overflow: "hidden", background: "#fafafa", flexShrink: 0 }}>
+                {faviconUrl
+                  ? <img src={faviconUrl} alt="favicon" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 20 }}>🖼️</div>}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e", marginBottom: 2 }}>Favicon (Tab Icon)</div>
+                <div style={{ fontSize: 12, color: "#aaa" }}>الصورة الصغيرة اللي بتظهر في تاب المتصفح</div>
+              </div>
+              <label style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", whiteSpace: "nowrap" }}>
+                {faviconUploading ? "Uploading..." : "Upload New"}
+                <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => e.target.files?.[0] && uploadFavicon(e.target.files[0])} disabled={faviconUploading} />
+              </label>
+            </div>
+            {faviconMsg && <div style={{ marginTop: 10, fontSize: 13, color: faviconMsg.includes("✅") ? "#166534" : "#991b1b", fontWeight: 600 }}>{faviconMsg}</div>}
           </div>
 
           {/* Change Password Panel */}
