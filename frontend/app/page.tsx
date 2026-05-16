@@ -85,6 +85,20 @@ export default function HomePage() {
   const [hoverRating, setHoverRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch(`${API}/categories`)
+      .then(r => r.json())
+      .then((d: any[]) => {
+        const map: Record<string, string> = {};
+        (Array.isArray(d) ? d : []).forEach((c: any) => {
+          if (c.slug && c.image) map[c.slug] = c.image;
+        });
+        setCategoryImages(map);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch(`${API}/reviews`)
@@ -230,7 +244,9 @@ export default function HomePage() {
         </div>
 
         <div className="categories-grid-inner">
-          {CATEGORY_CARDS.map((cat) => (
+          {CATEGORY_CARDS.map((cat) => {
+            const img = categoryImages[cat.key] || cat.image;
+            return (
             <Link key={cat.key} href={cat.href} className="cat-card" style={{
               textDecoration: "none", color: "#222", borderRadius: 20,
               boxShadow: "0 6px 20px rgba(0,0,0,0.08)", background: "#fff",
@@ -238,7 +254,7 @@ export default function HomePage() {
               border: "1px solid #eee",
             }}>
               <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#fff", position: "relative" }}>
-                <img src={cat.image} alt={cat.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+                <img src={img} alt={cat.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
                   onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x500/fdf0f3/fda1b7?text=${cat.emoji}`; }} />
               </div>
               <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>
@@ -246,7 +262,8 @@ export default function HomePage() {
                 <div className="cat-desc" style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>{cat.desc}</div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </section>
 
