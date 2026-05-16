@@ -24,7 +24,7 @@ const CATEGORY_CARDS = [
     emoji: "✨",
   },
   {
-    key: "bracelets",
+    key: "bracelet",
     title: "Bracelets",
     desc: "Premium bracelets.",
     image: "/images/bracelets.jpg",
@@ -32,7 +32,7 @@ const CATEGORY_CARDS = [
     emoji: "🌸",
   },
   {
-    key: "necklaces",
+    key: "necklace",
     title: "Necklaces",
     desc: "Luxury necklaces.",
     image: "/images/necklaces.jpg",
@@ -48,7 +48,7 @@ const CATEGORY_CARDS = [
     emoji: "🌙",
   },
   {
-    key: "sets-and-offers",
+    key: "extra-things",
     title: "Sets & Offers",
     desc: "Special sets & deals.",
     image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
@@ -88,7 +88,7 @@ export default function HomePage() {
   const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetch(`${API}/categories`)
+    fetch(`${API}/categories`, { cache: "no-store" })
       .then(r => r.json())
       .then((d: any[]) => {
         const map: Record<string, string> = {};
