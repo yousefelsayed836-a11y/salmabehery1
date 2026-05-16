@@ -1,59 +1,80 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database/db');
-const nodemailer = require('nodemailer');
+const https = require('https');
 
-function getMailer() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_PASS;
-  if (!user || !pass) return null;
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
+async function sendOrderEmail(order, items) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return;
+  const adminEmail = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com';
+
+  const itemsHtml = (items || []).map(i =>
+    `<tr>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee">${i.product_name || i.name || 'منتج'}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${i.price} EGP</td>
+    </tr>`
+  ).join('');
+
+  const html = `
+<div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden">
+  <div style="background:#1a1a2e;color:#fff;padding:20px;text-align:center">
+    <h2 style="margin:0">🛍️ طلب جديد #${order.id}</h2>
+  </div>
+  <div style="padding:20px">
+    <p><strong>العميل:</strong> ${order.customer_name}</p>
+    <p><strong>الهاتف:</strong> ${order.customer_phone}</p>
+    <p><strong>العنوان:</strong> ${order.shipping_address || ''} — ${order.city || order.customer_city || ''} ${order.governorate ? '، ' + order.governorate : ''}</p>
+    ${order.notes ? `<p><strong>ملاحظات:</strong> ${order.notes}</p>` : ''}
+    <table style="width:100%;border-collapse:collapse;margin-top:16px">
+      <thead>
+        <tr style="background:#f5f5f5">
+          <th style="padding:8px 10px;text-align:right">المنتج</th>
+          <th style="padding:8px 10px">الكمية</th>
+          <th style="padding:8px 10px;text-align:right">السعر</th>
+        </tr>
+      </thead>
+      <tbody>${itemsHtml}</tbody>
+    </table>
+    <div style="margin-top:16px;text-align:left">
+      <p style="margin:4px 0"><strong>الشحن:</strong> ${order.shipping_cost} EGP</p>
+      <p style="margin:4px 0;font-size:18px;color:#1a1a2e"><strong>الإجمالي: ${order.total_amount} EGP</strong></p>
+    </div>
+  </div>
+</div>`;
+
+  const body = JSON.stringify({
+    from: 'Salma Behery Store <onboarding@resend.dev>',
+    to: [adminEmail],
+    subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
+    html,
   });
-}
 
-async function sendNewOrderEmail(order, items) {
-  const mailer = getMailer();
-  const adminEmail = process.env.ADMIN_EMAIL || "salmabehery14@gmail.com";
-  if (!mailer) return;
-  const itemsList = (items || []).map(i => `<li>${i.product_name || 'منتج'} x${i.quantity} — ${i.price} EGP</li>`).join('');
-  try {
-    await mailer.sendMail({
-      from: `"Salma Behery Store" <${process.env.GMAIL_USER}>`,
-      to: adminEmail,
-      subject: `🛍️ أوردر جديد #${String(order.id).slice(-6)} — ${order.customer_name}`,
-      html: `
-        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;direction:rtl;">
-          <div style="background:#fda1b7;padding:20px;border-radius:12px 12px 0 0;text-align:center;">
-            <h2 style="color:#fff;margin:0;">🛍️ أوردر جديد!</h2>
-          </div>
-          <div style="background:#fff;padding:24px;border:1px solid #eee;border-radius:0 0 12px 12px;">
-            <p><strong>الاسم:</strong> ${order.customer_name}</p>
-            <p><strong>التليفون:</strong> ${order.customer_phone}</p>
-            <p><strong>العنوان:</strong> ${order.shipping_address || order.address || '-'}</p>
-            <p><strong>المدينة:</strong> ${order.city || '-'}</p>
-            <p><strong>الإجمالي:</strong> <span style="color:#fda1b7;font-weight:bold;">${order.total_amount} EGP</span></p>
-            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
-            <p><strong>المنتجات:</strong></p>
-            <ul>${itemsList}</ul>
-            <a href="https://salmabehery1.vercel.app/admin/orders" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#fda1b7;color:#fff;border-radius:10px;text-decoration:none;font-weight:bold;">
-              افتح الأوردر ←
-            </a>
-          </div>
-        </div>
-      `,
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'api.resend.com',
+      path: '/emails',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, (res) => {
+      res.on('data', () => {});
+      res.on('end', resolve);
     });
-  } catch (e) {
-    console.error('Email send error:', e.message);
-  }
+    req.on('error', (e) => console.error('Email error:', e.message));
+    req.write(body);
+    req.end();
+  });
 }
 
 async function getTableColumns(tableName) {
   try {
     const result = await pool.query(`
-      SELECT column_name 
-      FROM information_schema.columns 
+      SELECT column_name
+      FROM information_schema.columns
       WHERE table_name = $1
     `, [tableName]);
     return result.rows.map(r => r.column_name);
@@ -122,7 +143,8 @@ router.post('/', async (req, res) => {
     `;
 
     const orderResult = await pool.query(orderQuery, orderValues);
-    const orderId = orderResult.rows[0].id;
+    const newOrder = orderResult.rows[0];
+    const orderId = newOrder.id;
 
     const itemColumns = await getTableColumns('order_items');
 
@@ -146,7 +168,6 @@ router.post('/', async (req, res) => {
           itemValues
         );
 
-        // ✅ خصم الستوك لما الأوردر يتعمل
         try {
           await pool.query(
             'UPDATE products SET stock = GREATEST(0, stock - $1) WHERE id = $2',
@@ -157,8 +178,6 @@ router.post('/', async (req, res) => {
         }
       }
     }
-
-    const newOrder = orderResult.rows[0];
 
     // SSE broadcast to admin
     const broadcast = req.app.get('broadcast');
@@ -172,8 +191,8 @@ router.post('/', async (req, res) => {
       if (io) io.to('orders').emit('new_order', { id: newOrder.id, customer_name: finalCustomerName, total_amount: total });
     } catch (e) {}
 
-    // Email notification (non-blocking)
-    sendNewOrderEmail(newOrder, items);
+    // إيميل للأدمن عبر Resend (بدون باسورد)
+    sendOrderEmail(newOrder, items).catch(() => {});
 
     res.status(201).json({
       message: 'Order created successfully',
@@ -189,9 +208,9 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT o.*, 
+      SELECT o.*,
         (SELECT json_agg(oi.*) FROM order_items oi WHERE oi.order_id = o.id) as items
-      FROM orders o 
+      FROM orders o
       ORDER BY o.created_at DESC
     `);
     res.json(result.rows);
@@ -204,7 +223,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT o.*, 
+      SELECT o.*,
         (SELECT json_agg(oi.*) FROM order_items oi WHERE oi.order_id = o.id) as items
       FROM orders o WHERE o.id = $1
     `, [req.params.id]);
@@ -221,12 +240,10 @@ router.put('/:id/status', async (req, res) => {
     const { status } = req.body;
     const orderId = req.params.id;
 
-    // جيب الحالة القديمة
     const oldOrder = await pool.query('SELECT status FROM orders WHERE id = $1', [orderId]);
     if (!oldOrder.rows.length) return res.status(404).json({ error: 'Order not found' });
     const oldStatus = oldOrder.rows[0].status;
 
-    // لو بتكنسل أوردر مش كان كنسل → رجّع الستوك
     if (status === 'cancelled' && oldStatus !== 'cancelled') {
       const items = await pool.query(
         'SELECT product_id, quantity FROM order_items WHERE order_id = $1',
@@ -245,7 +262,6 @@ router.put('/:id/status', async (req, res) => {
       console.log(`✅ Stock restored for cancelled order ${orderId}`);
     }
 
-    // لو بترجع أوردر من كنسل لحاجة تانية → خصم الستوك تاني
     if (oldStatus === 'cancelled' && status !== 'cancelled') {
       const items = await pool.query(
         'SELECT product_id, quantity FROM order_items WHERE order_id = $1',
@@ -279,7 +295,6 @@ router.delete('/:id', async (req, res) => {
   try {
     const orderId = req.params.id;
 
-    // رجّع الستوك
     const items = await pool.query(
       'SELECT product_id, quantity FROM order_items WHERE order_id = $1',
       [orderId]
