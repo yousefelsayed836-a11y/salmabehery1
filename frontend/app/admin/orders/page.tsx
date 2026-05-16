@@ -178,45 +178,89 @@ export default function OrdersPage() {
 
   const waybillCss = `
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
-    @page { size: A4 portrait; margin: 6mm 10mm; }
-    * { box-sizing: border-box; }
-    body { font-family: 'Cairo', Arial, sans-serif; direction: rtl; margin: 0; padding: 0; color: #1a1a2e; font-size: 13px; }
-    .waybill {
-      height: 130mm;
-      border: 1.5px solid #fda1b7;
-      border-radius: 8px;
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      page-break-inside: avoid;
-      break-inside: avoid;
-      overflow: hidden;
+    @page {
+      size: A4 portrait;
+      margin: 5mm 8mm;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: 'Cairo', Arial, sans-serif;
+      direction: rtl;
+      color: #1a1a2e;
+      font-size: 13px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      background: #fff;
+    }
+
+    /* === PAGE WRAPPER: always 1 A4 page === */
     .page-pair {
+      width: 194mm;          /* 210mm - 2×8mm margin */
+      height: 287mm;         /* 297mm - 2×5mm margin */
       display: flex;
       flex-direction: column;
-      gap: 9mm;
+      justify-content: space-between;
       page-break-after: always;
       break-after: page;
-      height: 277mm;
+      overflow: hidden;
     }
-    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #fda1b7; padding-bottom: 5px; margin-bottom: 5px; }
-    .wb-logo { font-size: 17px; font-weight: 800; color: #fda1b7; }
+    .page-pair:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    /* === WAYBILL: exactly half the page === */
+    .waybill {
+      width: 100%;
+      height: 140mm;
+      border: 1.5px solid #fda1b7;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      overflow: hidden;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      background: #fff;
+    }
+
+    /* Dashed cut line between the two waybills */
+    .cut-line {
+      height: 0;
+      border-top: 1.5px dashed #fda1b7;
+      text-align: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .cut-line::before {
+      content: '✂';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 0 6px;
+      font-size: 13px;
+      color: #fda1b7;
+    }
+
+    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #fda1b7; padding-bottom: 5px; margin-bottom: 4px; }
+    .wb-logo { font-size: 16px; font-weight: 800; color: #fda1b7; }
     .wb-order { font-size: 11px; color: #888; }
-    .wb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; min-height: 0; }
+    .wb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 0; }
     .wb-col { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
-    .wb-row { display: flex; gap: 8px; font-size: 11px; padding: 2px 0; border-bottom: 1px solid #f5f5f5; }
-    .wb-label { color: #aaa; min-width: 65px; font-size: 10px; flex-shrink: 0; }
+    .wb-row { display: flex; gap: 6px; font-size: 11px; padding: 2px 0; border-bottom: 1px solid #f5f5f5; }
+    .wb-label { color: #aaa; min-width: 58px; font-size: 10px; flex-shrink: 0; }
     .wb-val { font-weight: 700; flex: 1; font-size: 11px; word-break: break-word; }
-    .wb-items-title { font-size: 10px; color: #fda1b7; font-weight: 700; border-bottom: 1px solid #fda1b7; padding-bottom: 3px; margin-bottom: 3px; }
-    .wb-item { display: flex; gap: 6px; font-size: 10px; padding: 2px 0; border-bottom: 1px dotted #eee; }
+    .wb-items-title { font-size: 10px; color: #fda1b7; font-weight: 700; border-bottom: 1px solid #fda1b7; padding-bottom: 2px; margin-bottom: 2px; }
+    .wb-item { display: flex; gap: 5px; font-size: 10px; padding: 2px 0; border-bottom: 1px dotted #eee; }
     .wb-item-name { flex: 1; font-weight: 600; }
     .wb-item-size { color: #888; }
     .wb-item-qty { color: #fda1b7; font-weight: 700; }
-    .wb-totals { margin-top: auto; border-top: 1.5px solid #fda1b7; padding-top: 5px; }
+    .wb-totals { margin-top: auto; border-top: 1.5px solid #fda1b7; padding-top: 4px; }
     .wb-total-row { display: flex; justify-content: space-between; font-size: 10px; padding: 1px 0; color: #555; }
-    .wb-total-final { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; color: #fda1b7; margin-top: 3px; border-top: 1px solid #eee; padding-top: 3px; }
+    .wb-total-final { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #fda1b7; margin-top: 3px; border-top: 1px solid #eee; padding-top: 3px; }
   `;
 
   const handlePrint = (order: Order) => {
@@ -224,8 +268,9 @@ export default function OrdersPage() {
     const addr = translatedAddresses[order.id];
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
-    const body = `<div class="page-pair">${generateWaybillHtml(order, deposit, productImages, addr)}</div>`;
-    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script></body></html>`);
+    // Single order: one waybill taking the top half, empty bottom half
+    const body = `<div class="page-pair">${generateWaybillHtml(order, deposit, productImages, addr)}<div style="height:140mm"></div></div>`;
+    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script></body></html>`);
     printWindow.document.close();
   };
 
@@ -235,12 +280,17 @@ export default function OrdersPage() {
     const pages: string[] = [];
     for (let i = 0; i < toPrint.length; i += 2) {
       const a = generateWaybillHtml(toPrint[i], deposits[toPrint[i].id] || 0, productImages, translatedAddresses[toPrint[i].id]);
-      const b = i + 1 < toPrint.length ? generateWaybillHtml(toPrint[i + 1], deposits[toPrint[i + 1].id] || 0, productImages, translatedAddresses[toPrint[i + 1].id]) : "";
-      pages.push(`<div class="page-pair">${a}${b}</div>`);
+      const cutOrEmpty = i + 1 < toPrint.length
+        ? `<div class="cut-line"></div>`
+        : `<div style="height:140mm"></div>`;
+      const b = i + 1 < toPrint.length
+        ? generateWaybillHtml(toPrint[i + 1], deposits[toPrint[i + 1].id] || 0, productImages, translatedAddresses[toPrint[i + 1].id])
+        : "";
+      pages.push(`<div class="page-pair">${a}${cutOrEmpty}${b}</div>`);
     }
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
-    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pages.join("")}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`);
+    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pages.join("")}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`);
     printWindow.document.close();
   };
 
