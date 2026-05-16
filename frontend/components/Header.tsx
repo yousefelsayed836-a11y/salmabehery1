@@ -133,10 +133,10 @@ export default function Header() {
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", whiteSpace: "nowrap" }}>
             <span style={{
-              fontFamily: "'HelloParisSerif', 'Cormorant Garamond', 'Didot', 'Bodoni MT', serif",
+              fontFamily: "'Cinzel Decorative', serif",
               fontWeight: 400,
-              fontSize: 30,
-              letterSpacing: 6,
+              fontSize: 26,
+              letterSpacing: 4,
               textTransform: "uppercase",
               color: isTransparent ? "#fff" : "#1a1a2e",
               lineHeight: 1,
@@ -263,12 +263,13 @@ export default function Header() {
       </header>
 
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap');
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-text { font-size: 20px !important; letter-spacing: 3px !important; }
+          .logo-text { font-size: 18px !important; letter-spacing: 2px !important; }
         }
       `}</style>
     </>
