@@ -4,22 +4,26 @@ const fs = require('fs');
 const path = require('path');
 const pool = require('../../database/db');
 
+// Maps CSV collection names → category slugs
 const COLLECTION_MAP = {
   'rings': 'rings',
   'necklace': 'necklace',
   'bracelet': 'bracelet',
   'hand chains': 'hand-chains',
-  'extra things': 'extra-things',
+  'extra things': 'earrings',
   'earrings': 'earrings',
+  'sets': 'sets-and-offers',
+  'sets & offers': 'sets-and-offers',
+  'sets and offers': 'sets-and-offers',
 };
 
-function getCategorySlug(collections) {
-  if (!collections) return null;
-  const parts = collections.split(',').map(s => s.trim().toLowerCase());
-  for (const part of parts) {
-    if (COLLECTION_MAP[part]) return COLLECTION_MAP[part];
-  }
-  return null;
+function getCategorySlugs(collections) {
+  if (!collections) return [];
+  return collections
+    .split(',')
+    .map(s => s.trim().toLowerCase())
+    .map(s => COLLECTION_MAP[s])
+    .filter(Boolean);
 }
 
 function parseCSVLine(line) {
@@ -64,6 +68,17 @@ function stripHtml(html) {
   return (html || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+// Ensure product_categories junction table exists
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS product_categories (
+      product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+      PRIMARY KEY (product_id, category_id)
+    )
+  `);
+}
+
 // GET or POST /api/admin/import-products?secret=salma-import-2026
 async function importHandler(req, res) {
   const secret = req.headers['x-import-secret'] || req.query.secret;
@@ -78,6 +93,8 @@ async function importHandler(req, res) {
   }
 
   try {
+    await ensureSchema();
+
     const text = fs.readFileSync(csvPath, 'utf-8');
     const rows = parseCSV(text);
     const headers = rows[0];
@@ -108,9 +125,11 @@ async function importHandler(req, res) {
     const catMap = {};
     catResult.rows.forEach(c => { catMap[c.slug] = c.id; });
 
-    // Delete all existing products
-    await pool.query('DELETE FROM order_items WHERE product_id IN (SELECT id FROM products)');
-    await pool.query('DELETE FROM products');
+    // Delete existing products (preserve orders by nulling product_id)
+    await pool.query('DELETE FROM product_categories WHERE true');
+    await pool.query('UPDATE order_items SET product_id = NULL WHERE product_id IS NOT NULL');
+    await pool.query('DELETE FROM product_variants WHERE true');
+    await pool.query('DELETE FROM products WHERE true');
 
     let imported = 0;
     let skipped = 0;
@@ -128,33 +147,54 @@ async function importHandler(req, res) {
       const price = salePrice > 0 ? salePrice : regPrice;
       const oldPrice = (salePrice > 0 && regPrice > salePrice) ? regPrice : null;
 
+      // Sum qty across variants (min 0)
       let totalStock = 0;
       for (const row of pRows) {
         const qty = parseInt(row[iQty]?.replace(/"/g, '').trim()) || 0;
         if (qty > 0) totalStock += qty;
       }
 
+      // Collect images (first row that has them)
       let images = [];
       for (const row of pRows) {
         const imgStr = row[iImages]?.replace(/"/g, '').trim();
         if (imgStr) {
-          images = imgStr.split(' ').filter(u => u.startsWith('http'));
-          if (images.length > 0) break;
+          const found = imgStr.split(' ').filter(u => u.startsWith('http'));
+          if (found.length > 0) { images = found; break; }
         }
       }
 
       const status = firstRow[iStatus]?.replace(/"/g, '').trim();
       const isActive = status === 'ACTIVE';
 
+      // Primary category (first match)
       const collections = firstRow[iCollections]?.replace(/"/g, '').trim();
-      const catSlug = getCategorySlug(collections);
-      const categoryId = catSlug ? (catMap[catSlug] || null) : null;
+      const categorySlugs = getCategorySlugs(collections);
+      const primaryCatId = categorySlugs.length > 0 ? (catMap[categorySlugs[0]] || null) : null;
 
-      await pool.query(
+      // images as PostgreSQL text[] format
+      const pgImages = images.length > 0
+        ? `{${images.map(u => `"${u.replace(/"/g, '\\"')}"`).join(',')}}`
+        : null;
+
+      const result = await pool.query(
         `INSERT INTO products (name_en, description_en, price, old_price, main_image, images, stock, is_active, is_featured, category_id)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-        [title, description, price, oldPrice, images[0] || null, JSON.stringify(images), totalStock, isActive, false, categoryId]
+         VALUES ($1,$2,$3,$4,$5,$6::text[],$7,$8,$9,$10) RETURNING id`,
+        [title, description, price, oldPrice, images[0] || null, pgImages, totalStock, isActive, false, primaryCatId]
       );
+      const productId = result.rows[0].id;
+
+      // Insert into product_categories junction for ALL matching categories
+      for (const slug of categorySlugs) {
+        const catId = catMap[slug];
+        if (catId) {
+          await pool.query(
+            `INSERT INTO product_categories (product_id, category_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+            [productId, catId]
+          );
+        }
+      }
+
       imported++;
     }
 

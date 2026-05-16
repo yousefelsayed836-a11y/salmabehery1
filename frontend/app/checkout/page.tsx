@@ -43,7 +43,6 @@ const EGYPT_DATA: Record<string, { nameAr: string; cities: string[] }> = {
 };
 
 const DEFAULT_SHIPPING = 80;
-const STORAGE_KEY = "shipping_rates";
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -65,19 +64,18 @@ export default function CheckoutPage() {
       if (saved) setCart(JSON.parse(saved));
     } catch {}
 
-    // Load shipping rates from admin settings
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.rates) {
+    // Load shipping rates from API
+    fetch(`${API_BASE}/shipping`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.rates) {
           const rateMap: Record<string, number> = {};
-          parsed.rates.forEach((r: any) => { rateMap[r.name] = r.cost; });
+          data.rates.forEach((r: any) => { rateMap[r.name] = r.cost; });
           setShippingRates(rateMap);
         }
-        if (parsed.freeThreshold) setFreeThreshold(parsed.freeThreshold);
-      }
-    } catch {}
+        if (data.free_threshold) setFreeThreshold(data.free_threshold);
+      })
+      .catch(() => {});
   }, []);
 
   const subtotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
@@ -255,9 +253,15 @@ export default function CheckoutPage() {
                     <label style={labelStyle}>Governorate *</label>
                     <select value={form.governorate} onChange={e => setForm(p => ({ ...p, governorate: e.target.value, city: "" }))} style={{ ...inputStyle, cursor: "pointer" }} required>
                       <option value="">Select Governorate</option>
-                      {Object.entries(EGYPT_DATA).map(([key, val]) => (
-                        <option key={key} value={key}>{key} — {val.nameAr}</option>
-                      ))}
+                      {Object.keys(shippingRates).length > 0
+                        ? Object.entries(shippingRates).map(([name]) => {
+                            const ar = EGYPT_DATA[name]?.nameAr || "";
+                            return <option key={name} value={name}>{name}{ar ? ` — ${ar}` : ""}</option>;
+                          })
+                        : Object.entries(EGYPT_DATA).map(([key, val]) => (
+                            <option key={key} value={key}>{key} — {val.nameAr}</option>
+                          ))
+                      }
                     </select>
                   </div>
                   <div>

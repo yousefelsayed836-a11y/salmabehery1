@@ -48,6 +48,9 @@ app.use('/api/admin/products/bulk-upload', upload.single('csv'), bulkUploadRoute
 // ✅ Settings (favicon, etc.)
 app.use('/api/settings', require('./routes/settings'));
 
+// ✅ Shipping rates & governorates
+app.use('/api/shipping', require('./routes/shipping'));
+
 // ✅ One-time CSV import
 app.use('/api/admin/import-products', require('./routes/admin/importProducts'));
 
