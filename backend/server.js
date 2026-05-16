@@ -45,6 +45,9 @@ app.use('/api/reviews', require('./routes/reviews'));
 const bulkUploadRoutes = require('./routes/admin/bulkUpload');
 app.use('/api/admin/products/bulk-upload', upload.single('csv'), bulkUploadRoutes);
 
+// ✅ One-time CSV import
+app.use('/api/admin/import-products', require('./routes/admin/importProducts'));
+
 // ✅ Single image upload
 app.post('/api/upload', upload.single('image'), (req, res) => {
   try {

@@ -15,8 +15,8 @@ function getMailer() {
 
 async function sendNewOrderEmail(order, items) {
   const mailer = getMailer();
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.GMAIL_USER;
-  if (!mailer || !adminEmail) return;
+  const adminEmail = process.env.ADMIN_EMAIL || "salmabehery14@gmail.com";
+  if (!mailer) return;
   const itemsList = (items || []).map(i => `<li>${i.product_name || 'منتج'} x${i.quantity} — ${i.price} EGP</li>`).join('');
   try {
     await mailer.sendMail({
