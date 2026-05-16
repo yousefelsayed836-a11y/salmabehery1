@@ -43,6 +43,7 @@ export default function ProductPage() {
   const [added, setAdded] = useState(false);
   const [similar, setSimilar] = useState<Product[]>([]);
 
+  useEffect(() => { window.scrollTo(0, 0); }, [productId]);
 
   useEffect(() => {
     if (!productId) return;

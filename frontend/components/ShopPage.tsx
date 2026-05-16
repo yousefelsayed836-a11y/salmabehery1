@@ -147,9 +147,9 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                       <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</h3>
                       </Link>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                          {hasD && <span style={{ fontSize: 11, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
                           <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
-                          {hasD && <span style={{ fontSize: 11, color: "#bbb", textDecoration: "line-through", marginLeft: 6 }}>{p.old_price} EGP</span>}
                         </div>
                         {oos ? (
                           <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Out of Stock</span>
