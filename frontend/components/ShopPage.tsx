@@ -103,12 +103,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
       {/* Sort bar */}
       <div style={{ background: "#fff", padding: "12px 24px", borderBottom: "1px solid #eee" }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1a1a2e" }}>{title}</h1>
-            <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>
-              <Link href="/" style={{ color: "#fda1b7", textDecoration: "none" }}>Home</Link><span style={{ margin: "0 6px" }}>/</span><span>{breadcrumb}</span>
-            </div>
-          </div>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1a1a2e" }}>{title}</h1>
           <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ padding: "9px 14px", borderRadius: 25, border: "1.5px solid #f0d4dc", fontSize: 13, cursor: "pointer", background: "#fff", outline: "none" }}>
             <option value="newest">Newest</option><option value="price-low">Price ↑</option><option value="price-high">Price ↓</option><option value="name">Name A-Z</option>
           </select>
@@ -183,7 +178,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
         .pc:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(253,161,183,.15)!important}
         .pc:hover .pi{transform:scale(1.05)}
         .price-block{display:flex;flex-direction:column;gap:2px}
-        @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr);gap:10px}.price-block{flex-direction:row;align-items:baseline;gap:5px}}
+        @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr);gap:10px}}
       `}</style>
     </div>
   );
