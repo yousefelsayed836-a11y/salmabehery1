@@ -196,10 +196,12 @@ export default function ProductPage() {
             </h1>
 
             {/* Price */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              {hasDiscount && <span style={{ fontSize: 28, color: "#bbb", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
-              {hasDiscount && <span style={{ fontSize: 13, background: "#fef2f2", color: "#ef4444", padding: "3px 10px", borderRadius: 20, fontWeight: 700 }}>Save {discount}%</span>}
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {hasDiscount && <span style={{ fontSize: 18, color: "#bbb", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
+                {hasDiscount && <span style={{ fontSize: 13, background: "#fef2f2", color: "#ef4444", padding: "3px 10px", borderRadius: 20, fontWeight: 700 }}>Save {discount}%</span>}
+              </div>
             </div>
 
             {/* Stock */}
