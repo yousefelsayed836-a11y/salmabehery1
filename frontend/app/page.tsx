@@ -48,6 +48,17 @@ export default function HomePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [apiCategories, setApiCategories] = useState<any[]>([]);
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !sessionStorage.getItem("popup_shown")) {
+      const t = setTimeout(() => {
+        setShowPopup(true);
+        sessionStorage.setItem("popup_shown", "1");
+      }, 800);
+      return () => clearTimeout(t);
+    }
+  }, []);
 
   useEffect(() => {
     fetch(`${API}/categories`, { cache: "no-store" })
@@ -138,6 +149,61 @@ export default function HomePage() {
           .cat-title { font-size: 12px !important; }
         }
       `}</style>
+
+      {/* ── POPUP ── */}
+      {showPopup && (
+        <div
+          onClick={() => setShowPopup(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9000,
+            background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "#fff", borderRadius: 24, padding: "36px 32px 28px",
+              maxWidth: 420, width: "100%", textAlign: "center",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+              position: "relative", animation: "fadeUp 0.35s ease",
+            }}
+          >
+            <button
+              onClick={() => setShowPopup(false)}
+              style={{
+                position: "absolute", top: 14, right: 16,
+                background: "none", border: "none", fontSize: 22,
+                cursor: "pointer", color: "#aaa", lineHeight: 1,
+              }}
+            >×</button>
+            <div style={{ fontSize: 42, marginBottom: 12 }}>💍</div>
+            <h2 style={{
+              fontFamily: "'HelloParisSerif', 'Cormorant Garamond', serif",
+              fontSize: 24, fontWeight: 400, color: "#1a1a2e",
+              margin: "0 0 10px", letterSpacing: 2,
+            }}>
+              Welcome to Salma Behery
+            </h2>
+            <p style={{ color: "#888", fontSize: 14, lineHeight: 1.6, margin: "0 0 20px" }}>
+              Free shipping on orders above <strong style={{ color: "#fda1b7" }}>900 EGP</strong>.
+              Cash on delivery available.
+            </p>
+            <button
+              onClick={() => setShowPopup(false)}
+              style={{
+                padding: "13px 40px", borderRadius: 50, border: "none",
+                background: "linear-gradient(135deg,#fda1b7,#f78fa3)",
+                color: "#fff", fontWeight: 600, fontSize: 15,
+                cursor: "pointer", letterSpacing: 1,
+              }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── HERO ── */}
       <section

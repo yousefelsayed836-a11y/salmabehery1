@@ -41,6 +41,8 @@ export default function AdminDashboard() {
   const [faviconUrl, setFaviconUrl] = useState("");
   const [faviconUploading, setFaviconUploading] = useState(false);
   const [faviconMsg, setFaviconMsg] = useState("");
+  const [fbPixelId, setFbPixelId] = useState("");
+  const [fbPixelMsg, setFbPixelMsg] = useState("");
 
   useEffect(() => { fetchData(); }, []);
 
@@ -48,6 +50,10 @@ export default function AdminDashboard() {
     fetch(`${API_BASE}/settings/favicon`)
       .then(r => r.json())
       .then(d => { if (d.value) setFaviconUrl(d.value); })
+      .catch(() => {});
+    fetch(`${API_BASE}/settings/fb_pixel_id`)
+      .then(r => r.json())
+      .then(d => { if (d.value) setFbPixelId(d.value); })
       .catch(() => {});
   }, []);
 
@@ -293,6 +299,48 @@ export default function AdminDashboard() {
               </label>
             </div>
             {faviconMsg && <div style={{ marginTop: 10, fontSize: 13, color: faviconMsg.includes("✅") ? "#166534" : "#991b1b", fontWeight: 600 }}>{faviconMsg}</div>}
+          </div>
+
+          {/* Facebook Settings */}
+          <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+            <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 700, color: "#1a1a2e" }}>📘 Facebook Integration</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: "#888", display: "block", marginBottom: 5 }}>Facebook Pixel ID</label>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <input
+                    value={fbPixelId}
+                    onChange={e => setFbPixelId(e.target.value)}
+                    placeholder="e.g. 1234567890123456"
+                    style={{ flex: 1, padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 14, outline: "none" }}
+                  />
+                  <button
+                    onClick={async () => {
+                      try {
+                        await fetch(`${API_BASE}/settings/fb_pixel_id`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ value: fbPixelId }),
+                        });
+                        setFbPixelMsg("✅ Saved!");
+                      } catch { setFbPixelMsg("❌ Failed"); }
+                      setTimeout(() => setFbPixelMsg(""), 3000);
+                    }}
+                    style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1877f2,#0c5fcf)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", whiteSpace: "nowrap" }}
+                  >
+                    Save
+                  </button>
+                </div>
+                {fbPixelMsg && <div style={{ marginTop: 6, fontSize: 13, fontWeight: 600, color: fbPixelMsg.includes("✅") ? "#166534" : "#991b1b" }}>{fbPixelMsg}</div>}
+              </div>
+              <div style={{ padding: "10px 14px", borderRadius: 10, background: "#f0f4ff", fontSize: 13, color: "#4a5568" }}>
+                <strong>Catalog Feed URL:</strong>{" "}
+                <code style={{ fontSize: 12, background: "#e2e8f0", padding: "2px 6px", borderRadius: 4 }}>
+                  {typeof window !== "undefined" ? window.location.origin : "https://yoursite.com"}/api/fb-feed
+                </code>
+                <span style={{ marginLeft: 8, color: "#888" }}>— ارفعه في Commerce Manager</span>
+              </div>
+            </div>
           </div>
 
           {/* Change Password Panel */}
