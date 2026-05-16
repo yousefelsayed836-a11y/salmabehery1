@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 @font-face {
+  font-family: 'Cinzel Decorative';
+  src: url('/fonts/CinzelDecorative-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cinzel Decorative';
+  src: url('/fonts/CinzelDecorative-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'HelloParisSerif';
   src: url('/fonts/HelloParisSerif-ExtraLight.woff2') format('woff2'),
        url('/fonts/HelloParisSerif-ExtraLight.woff') format('woff');
