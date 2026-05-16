@@ -464,6 +464,11 @@ export default function HomePage() {
             <p style={{ margin: 0, fontSize: 11, color: "#ccc", letterSpacing: 1 }}>© 2026 SALMA BEHERY</p>
             <p style={{ margin: 0, fontSize: 11, color: "#ccc" }}>💵 COD &nbsp;|&nbsp; 🚚 Free Shipping 900+ EGP</p>
           </div>
+          <div style={{ paddingTop: 10, textAlign: "center" }}>
+            <a href="https://wa.me/201023881876" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#ccc", textDecoration: "none" }}>
+              Designed by Yousef El-Sayed
+            </a>
+          </div>
         </div>
       </footer>
     </>
