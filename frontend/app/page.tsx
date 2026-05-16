@@ -162,7 +162,7 @@ export default function HomePage() {
         <div style={{ 
           position: "absolute", 
           inset: 0, 
-          background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.2) 100%)", 
+          background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.45) 100%)",
           pointerEvents: "none" 
         }} />
         
@@ -209,7 +209,7 @@ export default function HomePage() {
               display: "flex", flexDirection: "column", overflow: "hidden",
               border: "1px solid #eee",
             }}>
-              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f9f0f3", position: "relative" }}>
+              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "transparent", position: "relative" }}>
                 <img src={img} alt={cat.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
                   onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x500/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`; }} />
               </div>
