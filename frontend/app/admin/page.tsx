@@ -278,9 +278,9 @@ export default function AdminDashboard() {
           {/* Favicon Upload */}
           <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", marginBottom: 20 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-              <div style={{ width: 48, height: 48, borderRadius: 10, border: "1.5px solid #eee", overflow: "hidden", background: "#fafafa", flexShrink: 0 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 10, border: "1.5px solid #eee", overflow: "hidden", background: "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {faviconUrl
-                  ? <img src={faviconUrl} alt="favicon" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ? <img src={faviconUrl} alt="favicon" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                   : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 20 }}>🖼️</div>}
               </div>
               <div style={{ flex: 1 }}>
