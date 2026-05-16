@@ -2,43 +2,46 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
+// Ensure product_categories junction table exists
+async function ensureProductCategoriesTable() {
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS product_categories (
+      product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+      PRIMARY KEY (product_id, category_id)
+    )
+  `);
+}
+
 // ───────────────────────────────────────────────
 // GET /api/products
 // ───────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
+    await ensureProductCategoriesTable();
     const { collection, status, page = 1, limit = 1000, search, is_active } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     let query = `
-      SELECT 
-        p.id,
-        p.name_en,
-        p.name_ar,
-        p.description_en,
-        p.description_ar,
-        p.price,
-        p.old_price,
-        p.material,
-        p.water_resistance,
-        p.size_info,
-        p.images,
-        p.main_image,
-        p.stock,
-        p.is_active,
-        p.is_featured,
-        p.created_at,
+      SELECT
+        p.id, p.name_en, p.name_ar, p.description_en, p.description_ar,
+        p.price, p.old_price, p.material, p.water_resistance, p.size_info,
+        p.images, p.main_image, p.stock, p.is_active, p.is_featured, p.created_at,
         c.name_en as category_name,
         c.slug as category_slug,
         COALESCE(
+          (SELECT json_agg(json_build_object('id', cat.id, 'name_en', cat.name_en, 'slug', cat.slug))
+           FROM product_categories pc2
+           JOIN categories cat ON cat.id = pc2.category_id
+           WHERE pc2.product_id = p.id),
+          '[]'::json
+        ) as categories,
+        COALESCE(
           json_agg(
             json_build_object(
-              'id', pv.id,
-              'option_name', pv.option_name,
-              'option_value', pv.option_value,
-              'sku', pv.sku,
-              'quantity', pv.quantity,
-              'price_override', pv.price_override
+              'id', pv.id, 'option_name', pv.option_name,
+              'option_value', pv.option_value, 'sku', pv.sku,
+              'quantity', pv.quantity, 'price_override', pv.price_override
             ) ORDER BY pv.option_value
           ) FILTER (WHERE pv.id IS NOT NULL),
           '[]'::json
@@ -53,7 +56,14 @@ router.get('/', async (req, res) => {
     let paramIndex = 1;
 
     if (collection) {
-      query += ` AND c.slug = $${paramIndex}`;
+      // Filter by collection using both category_id and product_categories junction
+      query += `
+        AND (c.slug = $${paramIndex} OR p.id IN (
+          SELECT pc.product_id FROM product_categories pc
+          JOIN categories cj ON cj.id = pc.category_id
+          WHERE cj.slug = $${paramIndex}
+        ))
+      `;
       params.push(collection);
       paramIndex++;
     }
@@ -82,18 +92,23 @@ router.get('/', async (req, res) => {
 
     const result = await db.query(query, params);
 
-    let countQuery = `SELECT COUNT(*) FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE 1=1`;
+    let countQuery = `
+      SELECT COUNT(DISTINCT p.id) FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE 1=1
+    `;
     const countParams = [];
     let countIndex = 1;
 
     if (collection) {
-      countQuery += ` AND c.slug = $${countIndex}`;
+      countQuery += `
+        AND (c.slug = $${countIndex} OR p.id IN (
+          SELECT pc.product_id FROM product_categories pc
+          JOIN categories cj ON cj.id = pc.category_id
+          WHERE cj.slug = $${countIndex}
+        ))
+      `;
       countParams.push(collection);
-      countIndex++;
-    }
-    if (status) {
-      countQuery += ` AND p.status = $${countIndex}`;
-      countParams.push(status);
       countIndex++;
     }
     if (is_active !== undefined) {
@@ -107,12 +122,7 @@ router.get('/', async (req, res) => {
     res.json({
       success: true,
       products: result.rows,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        totalPages: Math.ceil(total / parseInt(limit))
-      }
+      pagination: { page: parseInt(page), limit: parseInt(limit), total, totalPages: Math.ceil(total / parseInt(limit)) }
     });
 
   } catch (error) {
@@ -126,25 +136,28 @@ router.get('/', async (req, res) => {
 // ───────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
+    await ensureProductCategoriesTable();
     const { id } = req.params;
 
     const result = await db.query(`
-      SELECT 
+      SELECT
         p.id, p.name_en, p.name_ar, p.description_en, p.description_ar,
         p.price, p.old_price, p.material, p.water_resistance, p.size_info,
         p.images, p.main_image, p.stock, p.is_active, p.is_featured, p.created_at,
-        c.id as category_id,
-        c.name_en as category_name,
-        c.slug as category_slug,
+        c.id as category_id, c.name_en as category_name, c.slug as category_slug,
+        COALESCE(
+          (SELECT json_agg(json_build_object('id', cat.id, 'name_en', cat.name_en, 'slug', cat.slug))
+           FROM product_categories pc2
+           JOIN categories cat ON cat.id = pc2.category_id
+           WHERE pc2.product_id = p.id),
+          '[]'::json
+        ) as categories,
         COALESCE(
           json_agg(
             json_build_object(
-              'id', pv.id,
-              'option_name', pv.option_name,
-              'option_value', pv.option_value,
-              'sku', pv.sku,
-              'quantity', pv.quantity,
-              'price_override', pv.price_override
+              'id', pv.id, 'option_name', pv.option_name,
+              'option_value', pv.option_value, 'sku', pv.sku,
+              'quantity', pv.quantity, 'price_override', pv.price_override
             ) ORDER BY pv.option_value
           ) FILTER (WHERE pv.id IS NOT NULL),
           '[]'::json
@@ -156,11 +169,15 @@ router.get('/:id', async (req, res) => {
       GROUP BY p.id, c.id, c.name_en, c.slug
     `, [id]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
 
-    res.json({ success: true, product: result.rows[0] });
+    const product = result.rows[0];
+    // Derive category_ids array from categories
+    product.category_ids = Array.isArray(product.categories)
+      ? product.categories.map((c) => c.id)
+      : [];
+
+    res.json({ success: true, product });
   } catch (error) {
     console.error('Get product error:', error);
     res.status(500).json({ error: 'Failed to fetch product' });
@@ -169,35 +186,19 @@ router.get('/:id', async (req, res) => {
 
 // ───────────────────────────────────────────────
 // POST /api/products
-// ✅ FIXED: category_id can be a slug (string) - we resolve it to UUID
 // ───────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
+    await ensureProductCategoriesTable();
     const {
       name_en, name_ar, description_en, description_ar,
       price, old_price, images, main_image,
-      category_id, material, water_resistance, size_info,
+      category_id, category_ids,
+      material, water_resistance, size_info,
       stock, is_active, is_featured, variants
     } = req.body;
 
-    // ✅ FIXED: resolve category_id - could be UUID or slug string
-    let resolvedCategoryId = null;
-    if (category_id) {
-      // Check if it's a valid UUID format
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (uuidRegex.test(category_id)) {
-        resolvedCategoryId = category_id;
-      } else {
-        // Try to find by slug
-        const catResult = await db.query(
-          'SELECT id FROM categories WHERE slug = $1 OR name_en ILIKE $2 LIMIT 1',
-          [category_id.toLowerCase(), category_id]
-        );
-        if (catResult.rows.length > 0) {
-          resolvedCategoryId = catResult.rows[0].id;
-        }
-      }
-    }
+    const resolvedPrimaryId = await resolveCategoryId(category_id || (category_ids && category_ids[0]));
 
     const result = await db.query(`
       INSERT INTO products (
@@ -206,66 +207,42 @@ router.post('/', async (req, res) => {
         material, water_resistance, size_info,
         stock, is_active, is_featured,
         created_at, updated_at
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-      )
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
       RETURNING *
     `, [
-      name_en,
-      name_ar || name_en,
-      description_en || null,
-      description_ar || null,
-      price,
-      old_price || null,
-      images || [],
-      main_image || (images && images.length > 0 ? images[0] : null),
-      resolvedCategoryId,
-      material || null,
-      water_resistance || null,
-      size_info || null,
-      stock || 0,
-      is_active !== undefined ? is_active : true,
-      is_featured || false
+      name_en, name_ar || name_en, description_en || null, description_ar || null,
+      price, old_price || null,
+      images || [], main_image || (images && images.length > 0 ? images[0] : null),
+      resolvedPrimaryId,
+      material || null, water_resistance || null, size_info || null,
+      stock || 0, is_active !== undefined ? is_active : true, is_featured || false
     ]);
 
     const productId = result.rows[0].id;
 
+    // Save to product_categories junction
+    const allCategoryIds = category_ids
+      ? await resolveAllCategoryIds(category_ids)
+      : (resolvedPrimaryId ? [resolvedPrimaryId] : []);
+    for (const catId of allCategoryIds) {
+      await db.query(
+        `INSERT INTO product_categories (product_id, category_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+        [productId, catId]
+      );
+    }
+
     if (variants && variants.length > 0) {
-      for (const variant of variants) {
-        await db.query(`
-          INSERT INTO product_variants 
-          (product_id, option_name, option_value, sku, quantity, price_override)
-          VALUES ($1, $2, $3, $4, $5, $6)
-        `, [
-          productId,
-          variant.option_name || 'default',
-          variant.option_value || 'default',
-          variant.sku || null,
-          variant.quantity || 0,
-          variant.price_override || null
-        ]);
+      for (const v of variants) {
+        await db.query(
+          `INSERT INTO product_variants (product_id, option_name, option_value, sku, quantity, price_override)
+           VALUES ($1,$2,$3,$4,$5,$6)`,
+          [productId, v.option_name || 'default', v.option_value || 'default', v.sku || null, v.quantity || 0, v.price_override || null]
+        );
       }
     }
 
-    const fullProduct = await db.query(`
-      SELECT p.*, c.name_en as category_name, c.slug as category_slug,
-        COALESCE(
-          json_agg(json_build_object(
-            'id', pv.id, 'option_name', pv.option_name,
-            'option_value', pv.option_value, 'sku', pv.sku,
-            'quantity', pv.quantity, 'price_override', pv.price_override
-          )) FILTER (WHERE pv.id IS NOT NULL), '[]'::json
-        ) as variants
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_variants pv ON p.id = pv.product_id
-      WHERE p.id = $1
-      GROUP BY p.id, c.name_en, c.slug
-    `, [productId]);
-
-    res.json({ success: true, product: fullProduct.rows[0] });
-
+    const full = await getFullProduct(productId);
+    res.json({ success: true, product: full });
   } catch (error) {
     console.error('Add product error:', error);
     res.status(500).json({ error: 'Failed to add product', details: error.message });
@@ -274,43 +251,29 @@ router.post('/', async (req, res) => {
 
 // ───────────────────────────────────────────────
 // PUT /api/products/:id
-// ✅ FIXED: category_id resolution + proper null handling
 // ───────────────────────────────────────────────
 router.put('/:id', async (req, res) => {
   try {
+    await ensureProductCategoriesTable();
     const { id } = req.params;
     const {
       name_en, name_ar, description_en, description_ar,
       price, old_price, images, main_image,
-      category_id, material, water_resistance, size_info,
+      category_id, category_ids,
+      material, water_resistance, size_info,
       stock, is_active, is_featured, variants
     } = req.body;
 
     const existing = await db.query('SELECT id FROM products WHERE id = $1', [id]);
-    if (existing.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+    if (existing.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
 
-    // ✅ FIXED: resolve category_id
-    let resolvedCategoryId = undefined;
-    if (category_id !== undefined) {
-      if (!category_id) {
-        resolvedCategoryId = null;
-      } else {
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (uuidRegex.test(category_id)) {
-          resolvedCategoryId = category_id;
-        } else {
-          const catResult = await db.query(
-            'SELECT id FROM categories WHERE slug = $1 OR name_en ILIKE $2 LIMIT 1',
-            [category_id.toLowerCase(), category_id]
-          );
-          resolvedCategoryId = catResult.rows.length > 0 ? catResult.rows[0].id : null;
-        }
-      }
-    }
+    const resolvedPrimaryId = category_ids
+      ? await resolveCategoryId(category_ids[0] || null)
+      : category_id !== undefined
+        ? await resolveCategoryId(category_id)
+        : undefined;
 
-    const result = await db.query(`
+    await db.query(`
       UPDATE products SET
         name_en = COALESCE($1, name_en),
         name_ar = COALESCE($2, name_ar),
@@ -329,53 +292,40 @@ router.put('/:id', async (req, res) => {
         is_featured = COALESCE($15, is_featured),
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $16
-      RETURNING *
     `, [
       name_en, name_ar, description_en, description_ar,
-      price, old_price,
+      price, old_price !== undefined ? (old_price || null) : undefined,
       images, main_image,
-      resolvedCategoryId !== undefined ? resolvedCategoryId : null,
+      resolvedPrimaryId !== undefined ? resolvedPrimaryId : null,
       material, water_resistance, size_info,
-      stock, is_active, is_featured,
-      id
+      stock, is_active, is_featured, id
     ]);
 
-    if (variants && Array.isArray(variants)) {
-      await db.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
-      for (const variant of variants) {
-        await db.query(`
-          INSERT INTO product_variants 
-          (product_id, option_name, option_value, sku, quantity, price_override)
-          VALUES ($1, $2, $3, $4, $5, $6)
-        `, [
-          id,
-          variant.option_name || 'default',
-          variant.option_value || 'default',
-          variant.sku || null,
-          variant.quantity || 0,
-          variant.price_override || null
-        ]);
+    // Update product_categories junction if category_ids provided
+    if (category_ids !== undefined) {
+      await db.query('DELETE FROM product_categories WHERE product_id = $1', [id]);
+      const allCatIds = await resolveAllCategoryIds(category_ids);
+      for (const catId of allCatIds) {
+        await db.query(
+          `INSERT INTO product_categories (product_id, category_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+          [id, catId]
+        );
       }
     }
 
-    const fullProduct = await db.query(`
-      SELECT p.*, c.name_en as category_name, c.slug as category_slug,
-        COALESCE(
-          json_agg(json_build_object(
-            'id', pv.id, 'option_name', pv.option_name,
-            'option_value', pv.option_value, 'sku', pv.sku,
-            'quantity', pv.quantity, 'price_override', pv.price_override
-          )) FILTER (WHERE pv.id IS NOT NULL), '[]'::json
-        ) as variants
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_variants pv ON p.id = pv.product_id
-      WHERE p.id = $1
-      GROUP BY p.id, c.name_en, c.slug
-    `, [id]);
+    if (variants && Array.isArray(variants)) {
+      await db.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
+      for (const v of variants) {
+        await db.query(
+          `INSERT INTO product_variants (product_id, option_name, option_value, sku, quantity, price_override)
+           VALUES ($1,$2,$3,$4,$5,$6)`,
+          [id, v.option_name || 'default', v.option_value || 'default', v.sku || null, v.quantity || 0, v.price_override || null]
+        );
+      }
+    }
 
-    res.json({ success: true, product: fullProduct.rows[0] });
-
+    const full = await getFullProduct(id);
+    res.json({ success: true, product: full });
   } catch (error) {
     console.error('Update product error:', error);
     res.status(500).json({ error: 'Failed to update product', details: error.message });
@@ -389,29 +339,14 @@ router.patch('/:id/toggle', async (req, res) => {
   try {
     const { id } = req.params;
     const { is_active } = req.body;
-
-    if (is_active === undefined) {
-      return res.status(400).json({ error: 'is_active is required' });
-    }
-
-    const result = await db.query(`
-      UPDATE products 
-      SET is_active = $1, updated_at = CURRENT_TIMESTAMP 
-      WHERE id = $2 
-      RETURNING id, name_en, is_active
-    `, [is_active, id]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    res.json({
-      success: true,
-      message: `Product ${is_active ? 'activated' : 'set to draft'}`,
-      product: result.rows[0]
-    });
+    if (is_active === undefined) return res.status(400).json({ error: 'is_active required' });
+    const result = await db.query(
+      `UPDATE products SET is_active=$1, updated_at=CURRENT_TIMESTAMP WHERE id=$2 RETURNING id, name_en, is_active`,
+      [is_active, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
+    res.json({ success: true, product: result.rows[0] });
   } catch (error) {
-    console.error('Toggle product error:', error);
     res.status(500).json({ error: 'Failed to toggle product status' });
   }
 });
@@ -422,20 +357,65 @@ router.patch('/:id/toggle', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-
     const existing = await db.query('SELECT id FROM products WHERE id = $1', [id]);
-    if (existing.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
+    if (existing.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
+    await db.query('DELETE FROM product_categories WHERE product_id = $1', [id]);
     await db.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
     await db.query('DELETE FROM products WHERE id = $1', [id]);
-
-    res.json({ success: true, message: 'Product deleted successfully' });
+    res.json({ success: true, message: 'Product deleted' });
   } catch (error) {
-    console.error('Delete product error:', error);
     res.status(500).json({ error: 'Failed to delete product' });
   }
 });
+
+// ─── Helpers ──────────────────────────────────
+
+async function resolveCategoryId(category_id) {
+  if (!category_id) return null;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(category_id)) return category_id;
+  const r = await db.query('SELECT id FROM categories WHERE slug=$1 OR name_en ILIKE $2 LIMIT 1', [category_id.toLowerCase(), category_id]);
+  return r.rows[0]?.id || null;
+}
+
+async function resolveAllCategoryIds(ids) {
+  if (!ids || !ids.length) return [];
+  const resolved = [];
+  for (const id of ids) {
+    const r = await resolveCategoryId(id);
+    if (r) resolved.push(r);
+  }
+  return resolved;
+}
+
+async function getFullProduct(id) {
+  const r = await db.query(`
+    SELECT p.*, c.name_en as category_name, c.slug as category_slug,
+      COALESCE(
+        (SELECT json_agg(json_build_object('id', cat.id, 'name_en', cat.name_en, 'slug', cat.slug))
+         FROM product_categories pc2
+         JOIN categories cat ON cat.id = pc2.category_id
+         WHERE pc2.product_id = p.id),
+        '[]'::json
+      ) as categories,
+      COALESCE(
+        json_agg(json_build_object(
+          'id', pv.id, 'option_name', pv.option_name,
+          'option_value', pv.option_value, 'sku', pv.sku,
+          'quantity', pv.quantity, 'price_override', pv.price_override
+        )) FILTER (WHERE pv.id IS NOT NULL), '[]'::json
+      ) as variants
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    LEFT JOIN product_variants pv ON p.id = pv.product_id
+    WHERE p.id = $1
+    GROUP BY p.id, c.name_en, c.slug
+  `, [id]);
+  const product = r.rows[0];
+  if (product) {
+    product.category_ids = Array.isArray(product.categories) ? product.categories.map(c => c.id) : [];
+  }
+  return product;
+}
 
 module.exports = router;

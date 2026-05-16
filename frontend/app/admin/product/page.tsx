@@ -9,6 +9,8 @@ interface Product {
   price: number; old_price?: number; stock: number; material?: string; is_active: boolean;
   images?: string[]; main_image?: string; image_url?: string; category_id?: string;
   category_name?: string; water_resistance?: string; size_info?: string;
+  categories?: { id: string; name_en: string; slug: string }[];
+  category_ids?: string[];
 }
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
@@ -23,7 +25,7 @@ function getProductImage(p: Product) {
 const emptyForm = {
   name_en: "", name_ar: "", description_en: "", description_ar: "",
   price: "", old_price: "", stock: "", material: "", main_image: "",
-  category_id: "", water_resistance: "", size_info: "", is_active: true,
+  category_id: "", category_ids: [] as string[], water_resistance: "", size_info: "", is_active: true,
 };
 
 export default function ProductsPage() {
@@ -97,7 +99,9 @@ export default function ProductsPage() {
           price: Number(addForm.price), old_price: addForm.old_price ? Number(addForm.old_price) : undefined,
           stock: Number(addForm.stock) || 0, material: addForm.material || undefined,
           main_image: addForm.main_image || undefined, images: addForm.main_image ? [addForm.main_image] : [],
-          category_id: addForm.category_id || undefined, water_resistance: addForm.water_resistance || undefined,
+          category_id: addForm.category_ids[0] || addForm.category_id || undefined,
+          category_ids: addForm.category_ids.length > 0 ? addForm.category_ids : undefined,
+          water_resistance: addForm.water_resistance || undefined,
           size_info: addForm.size_info || undefined, is_active: addForm.is_active,
         }),
       });
@@ -126,7 +130,9 @@ export default function ProductsPage() {
           price: Number(fullEditForm.price), old_price: fullEditForm.old_price ? Number(fullEditForm.old_price) : null,
           stock: Number(fullEditForm.stock) || 0, material: fullEditForm.material || undefined,
           main_image: fullEditForm.main_image || undefined, images: fullEditForm.main_image ? [fullEditForm.main_image] : undefined,
-          category_id: fullEditForm.category_id || undefined, water_resistance: fullEditForm.water_resistance || undefined,
+          category_id: fullEditForm.category_ids[0] || fullEditForm.category_id || undefined,
+          category_ids: fullEditForm.category_ids.length > 0 ? fullEditForm.category_ids : undefined,
+          water_resistance: fullEditForm.water_resistance || undefined,
           size_info: fullEditForm.size_info || undefined, is_active: fullEditForm.is_active,
         }),
       });
@@ -181,6 +187,7 @@ export default function ProductsPage() {
 
   const openFullEdit = (p: Product) => {
     setFullEditProduct(p);
+    const existingCatIds = p.category_ids || (p.categories?.map(c => c.id)) || (p.category_id ? [p.category_id] : []);
     setFullEditForm({
       name_en: p.name_en || "", name_ar: p.name_ar || "",
       description_en: p.description_en || "", description_ar: p.description_ar || "",
@@ -188,6 +195,7 @@ export default function ProductsPage() {
       stock: String(p.stock || 0), material: p.material || "",
       main_image: p.main_image || p.image_url || "",
       category_id: p.category_id || "",
+      category_ids: existingCatIds,
       water_resistance: p.water_resistance || "", size_info: p.size_info || "",
       is_active: p.is_active ?? true,
     });
@@ -279,7 +287,14 @@ export default function ProductsPage() {
                           {p.material && <div style={{ fontSize: 11, color: "#aaa" }}>{p.material}</div>}
                         </td>
                         <td style={{ padding: 12 }}>
-                          <span style={{ fontSize: 12, color: "#555", background: "#fff", padding: "4px 10px", borderRadius: 8 }}>{p.category_name || "—"}</span>
+                          {p.categories && p.categories.length > 0
+                            ? <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                                {p.categories.map(c => (
+                                  <span key={c.id} style={{ fontSize: 11, color: "#fff", background: "#fda1b7", padding: "2px 8px", borderRadius: 20, fontWeight: 600 }}>{c.name_en}</span>
+                                ))}
+                              </div>
+                            : <span style={{ fontSize: 12, color: "#aaa" }}>—</span>
+                          }
                         </td>
                         <td style={{ padding: 12 }}>
                           {isEditing
