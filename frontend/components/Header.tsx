@@ -84,8 +84,8 @@ export default function Header() {
     <>
       {/* Header */}
       <header style={{
-        position: isHome ? "absolute" : "sticky",
-        top: isHome ? "40px" : "40px",
+        position: isHome ? "fixed" : "sticky",
+        top: "40px",
         left: 0,
         right: 0,
         zIndex: 100,

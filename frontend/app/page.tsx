@@ -143,10 +143,10 @@ export default function HomePage() {
       <section
         className="hero-section"
         style={{
-          width: "100%", 
-          height: "75vh",
-          minHeight: "500px",
-          maxHeight: "700px",
+          width: "100%",
+          height: "85vh",
+          minHeight: "550px",
+          maxHeight: "800px",
           backgroundImage: 'url("/images/hero-bg.jpg")',
           backgroundSize: "cover", 
           backgroundPosition: "center", 
