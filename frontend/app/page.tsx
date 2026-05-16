@@ -48,7 +48,7 @@ const CATEGORY_CARDS = [
     emoji: "🌙",
   },
   {
-    slugs: ["sets-and-offers", "extra-things", "sets", "offers", "jewelry"],
+    slugs: ["sets-and-offers", "extra-things", "sets", "offers", "jewelry", "sets & offers", "extra things"],
     title: "Sets & Offers",
     desc: "Special sets & deals.",
     image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
@@ -96,7 +96,10 @@ export default function HomePage() {
 
   const getCatImage = (slugs: string[], fallback: string) => {
     for (const s of slugs) {
-      const found = apiCategories.find(c => c.slug?.toLowerCase() === s.toLowerCase());
+      const found = apiCategories.find(c =>
+        c.slug?.toLowerCase() === s.toLowerCase() ||
+        c.name_en?.toLowerCase() === s.toLowerCase()
+      );
       if (found?.image) return found.image;
     }
     return fallback;
@@ -256,7 +259,7 @@ export default function HomePage() {
               border: "1px solid #eee",
             }}>
               <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#fff", position: "relative" }}>
-                <img src={img} alt={cat.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+                <img src={img} alt={cat.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "opacity 0.3s" }}
                   onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x500/fdf0f3/fda1b7?text=${cat.emoji}`; }} />
               </div>
               <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>
