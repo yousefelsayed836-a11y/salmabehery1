@@ -300,7 +300,7 @@ export default function ProductsPage() {
                           {isEditing
                             ? <input type="number" value={editPrice} onChange={e => setEditPrice(e.target.value)} style={{ width: 100, padding: "6px 10px", borderRadius: 6, border: "1px solid #fda1b7", fontSize: 14 }} autoFocus />
                             : <div>
-                              <span style={{ fontWeight: 700, color: "#fda1b7", fontSize: 16 }}>{p.price} EGP</span>
+                              <span style={{ fontWeight: 700, color: "#1a1a2e", fontSize: 16 }}>{p.price} EGP</span>
                               {p.old_price && p.old_price > 0 && <div style={{ fontSize: 11, color: "#999", textDecoration: "line-through" }}>{p.old_price} EGP</div>}
                             </div>
                           }

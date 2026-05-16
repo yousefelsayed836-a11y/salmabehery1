@@ -43,6 +43,11 @@ export default function AdminDashboard() {
   const [faviconMsg, setFaviconMsg] = useState("");
   const [fbPixelId, setFbPixelId] = useState("");
   const [fbPixelMsg, setFbPixelMsg] = useState("");
+  const [featuredTitle, setFeaturedTitle] = useState("Featured Products");
+  const [featuredEnabled, setFeaturedEnabled] = useState(false);
+  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
+  const [featuredMsg, setFeaturedMsg] = useState("");
+  const [featuredSearch, setFeaturedSearch] = useState("");
 
   useEffect(() => { fetchData(); }, []);
 
@@ -54,6 +59,19 @@ export default function AdminDashboard() {
     fetch(`${API_BASE}/settings/fb_pixel_id`)
       .then(r => r.json())
       .then(d => { if (d.value) setFbPixelId(d.value); })
+      .catch(() => {});
+    fetch(`${API_BASE}/settings/featured_section`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.value) {
+          try {
+            const parsed = JSON.parse(d.value);
+            setFeaturedTitle(parsed.title || "Featured Products");
+            setFeaturedEnabled(parsed.enabled || false);
+            setFeaturedIds(parsed.product_ids || []);
+          } catch {}
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -340,6 +358,102 @@ export default function AdminDashboard() {
                 </code>
                 <span style={{ marginLeft: 8, color: "#888" }}>— ارفعه في Commerce Manager</span>
               </div>
+            </div>
+          </div>
+
+          {/* Featured Products Section */}
+          <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1a1a2e" }}>⭐ Featured Products Section</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 13, color: featuredEnabled ? "#166534" : "#888", fontWeight: 600 }}>{featuredEnabled ? "ON" : "OFF"}</span>
+                <div
+                  onClick={() => setFeaturedEnabled(v => !v)}
+                  style={{
+                    width: 46, height: 26, borderRadius: 13,
+                    background: featuredEnabled ? "#22c55e" : "#d1d5db",
+                    position: "relative", cursor: "pointer", transition: "background 0.2s",
+                  }}
+                >
+                  <div style={{
+                    position: "absolute", top: 3, left: featuredEnabled ? 23 : 3,
+                    width: 20, height: 20, borderRadius: "50%", background: "#fff",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s",
+                  }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, color: "#888", display: "block", marginBottom: 5 }}>Section Title (shown on homepage)</label>
+              <input
+                value={featuredTitle}
+                onChange={e => setFeaturedTitle(e.target.value)}
+                placeholder="e.g. Our Picks, Best Sellers..."
+                style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 14, outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, color: "#888", display: "block", marginBottom: 5 }}>
+                Select Products ({featuredIds.length} selected)
+              </label>
+              <input
+                value={featuredSearch}
+                onChange={e => setFeaturedSearch(e.target.value)}
+                placeholder="Search products..."
+                style={{ width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 13, outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+              />
+              <div style={{ maxHeight: 220, overflowY: "auto", border: "1.5px solid #eee", borderRadius: 10, padding: "4px 0" }}>
+                {products
+                  .filter(p => {
+                    const s = featuredSearch.toLowerCase();
+                    return !s || p.name_en?.toLowerCase().includes(s);
+                  })
+                  .slice(0, 60)
+                  .map(p => (
+                    <label key={p.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 12px", cursor: "pointer", borderBottom: "1px solid #f5f5f5", background: featuredIds.includes(p.id) ? "#fdf0f3" : "transparent" }}>
+                      <input
+                        type="checkbox"
+                        checked={featuredIds.includes(p.id)}
+                        onChange={() => setFeaturedIds(ids =>
+                          ids.includes(p.id) ? ids.filter(id => id !== p.id) : [...ids, p.id]
+                        )}
+                        style={{ accentColor: "#fda1b7", width: 16, height: 16 }}
+                      />
+                      <span style={{ fontSize: 13, color: "#333", flex: 1 }}>{p.name_en}</span>
+                      <span style={{ fontSize: 12, color: "#888" }}>{p.price} EGP</span>
+                    </label>
+                  ))}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <button
+                onClick={async () => {
+                  try {
+                    await fetch(`${API_BASE}/settings/featured_section`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ value: JSON.stringify({ title: featuredTitle, enabled: featuredEnabled, product_ids: featuredIds }) }),
+                    });
+                    setFeaturedMsg("✅ Saved!");
+                  } catch { setFeaturedMsg("❌ Failed to save"); }
+                  setTimeout(() => setFeaturedMsg(""), 3000);
+                }}
+                style={{ padding: "10px 24px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+              >
+                Save Featured Section
+              </button>
+              {featuredIds.length > 0 && (
+                <button
+                  onClick={() => setFeaturedIds([])}
+                  style={{ padding: "10px 16px", borderRadius: 10, border: "1.5px solid #eee", background: "#fff", color: "#888", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                >
+                  Clear All
+                </button>
+              )}
+              {featuredMsg && <span style={{ fontSize: 13, fontWeight: 600, color: featuredMsg.includes("✅") ? "#166534" : "#991b1b" }}>{featuredMsg}</span>}
             </div>
           </div>
 

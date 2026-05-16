@@ -49,6 +49,7 @@ export default function HomePage() {
   const [submitted, setSubmitted] = useState(false);
   const [apiCategories, setApiCategories] = useState<any[]>([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [featuredSection, setFeaturedSection] = useState<{ title: string; enabled: boolean; products: any[] } | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && !sessionStorage.getItem("popup_shown")) {
@@ -64,6 +65,23 @@ export default function HomePage() {
     fetch(`${API}/categories`, { cache: "no-store" })
       .then(r => r.json())
       .then((d: any[]) => setApiCategories(Array.isArray(d) ? d : []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API}/settings/featured_section`)
+      .then(r => r.json())
+      .then(async d => {
+        if (!d.value) return;
+        const cfg = JSON.parse(d.value);
+        if (!cfg.enabled || !cfg.product_ids?.length) return;
+        const ids: string[] = cfg.product_ids;
+        const res = await fetch(`${API}/products?limit=1000`);
+        const data = await res.json();
+        const all: any[] = Array.isArray(data) ? data : data.products || [];
+        const picked = ids.map(id => all.find(p => String(p.id) === String(id))).filter(Boolean);
+        setFeaturedSection({ title: cfg.title || "Featured Products", enabled: true, products: picked });
+      })
       .catch(() => {});
   }, []);
 
@@ -288,6 +306,37 @@ export default function HomePage() {
           })}
         </div>
       </section>
+
+      {/* ── FEATURED PRODUCTS ── */}
+      {featuredSection && featuredSection.enabled && featuredSection.products.length > 0 && (
+        <section style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 20px 24px", background: "#fff" }}>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <p style={{ fontSize: 11, letterSpacing: 5, textTransform: "uppercase", color: "#fda1b7", marginBottom: 8, fontFamily: "sans-serif" }}>Handpicked</p>
+            <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 22, fontWeight: 600, color: "#1a1a2e", margin: 0, letterSpacing: 2, textTransform: "uppercase" }}>
+              {featuredSection.title}
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
+            {featuredSection.products.map(p => {
+              const img = Array.isArray(p.images) ? p.images[0] : (p.images || "");
+              return (
+                <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: "none", color: "#222", borderRadius: 16, boxShadow: "0 4px 16px rgba(0,0,0,0.07)", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden", border: "1px solid #eee", transition: "transform 0.2s, box-shadow 0.2s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 12px 32px rgba(253,161,183,0.2)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.07)"; }}>
+                  <div style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f9f0f3" }}>
+                    <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/300x400/fdf0f3/fda1b7?text=✨`; }} />
+                  </div>
+                  <div style={{ padding: "10px 12px 12px", textAlign: "center" }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a2e", marginBottom: 4, lineHeight: 1.3 }}>{p.name_en}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fda1b7" }}>{p.price} EGP</div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── REVIEWS ── */}
       <section style={{ textAlign: "center", padding: "28px 20px 24px", background: "#fff", borderTop: "1px solid #eee", fontFamily: "sans-serif" }}>
