@@ -6,56 +6,18 @@ import Link from "next/link";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 
-const CATEGORY_CARDS = [
-  {
-    slugs: ["rings"],
-    title: "Rings",
-    desc: "Colorful gemstone rings.",
-    image: "/images/rings.jpg",
-    href: "/shop/rings",
-    emoji: "💍",
-  },
-  {
-    slugs: ["hand-chains", "hand chains"],
-    title: "Hand Chains",
-    desc: "Elegant hand chains.",
-    image: "/images/hand-chains.jpg",
-    href: "/shop/hand-chains",
-    emoji: "✨",
-  },
-  {
-    slugs: ["bracelet", "bracelets"],
-    title: "Bracelets",
-    desc: "Premium bracelets.",
-    image: "/images/bracelets.jpg",
-    href: "/shop/bracelet",
-    emoji: "🌸",
-  },
-  {
-    slugs: ["necklace", "necklaces"],
-    title: "Necklaces",
-    desc: "Luxury necklaces.",
-    image: "/images/necklaces.jpg",
-    href: "/shop/necklace",
-    emoji: "📿",
-  },
-  {
-    slugs: ["earrings"],
-    title: "Earrings",
-    desc: "Delicate earrings.",
-    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=500&fit=crop",
-    href: "/shop/earrings",
-    emoji: "🌙",
-  },
-  {
-    slugs: ["sets-and-offers", "extra-things", "sets", "offers", "jewelry", "sets & offers", "extra things"],
-    title: "Sets & Offers",
-    desc: "Special sets & deals.",
-    image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
-    href: "/shop/sets-and-offers",
-    emoji: "💫",
-  },
-];
+// Fallback images by slug if DB has none
+const FALLBACK_IMAGES: Record<string, string> = {
+  "rings": "/images/rings.jpg",
+  "hand-chains": "/images/hand-chains.jpg",
+  "bracelet": "/images/bracelets.jpg",
+  "bracelets": "/images/bracelets.jpg",
+  "necklace": "/images/necklaces.jpg",
+  "necklaces": "/images/necklaces.jpg",
+  "earrings": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=500&fit=crop",
+  "sets-and-offers": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
+  "extra-things": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
+};
 
 const SEED_REVIEWS = [
   { id: "s1",  customer_name: "Sara M.",    review_text: "Wallahi el khatm da te7fa! Galy fast w el shoghol na3em awy, msh shayfah 3ala edy khales. Ha2oleb tany akeed 100%", rating: 5 },
@@ -93,17 +55,6 @@ export default function HomePage() {
       .then((d: any[]) => setApiCategories(Array.isArray(d) ? d : []))
       .catch(() => {});
   }, []);
-
-  const getCatImage = (slugs: string[], fallback: string) => {
-    for (const s of slugs) {
-      const found = apiCategories.find(c =>
-        c.slug?.toLowerCase() === s.toLowerCase() ||
-        c.name_en?.toLowerCase() === s.toLowerCase()
-      );
-      if (found?.image) return found.image;
-    }
-    return fallback;
-  };
 
   useEffect(() => {
     fetch(`${API}/reviews`)
@@ -249,22 +200,21 @@ export default function HomePage() {
         </div>
 
         <div className="categories-grid-inner">
-          {CATEGORY_CARDS.map((cat) => {
-            const img = getCatImage(cat.slugs, cat.image);
+          {apiCategories.map((cat) => {
+            const img = cat.image || FALLBACK_IMAGES[cat.slug] || `https://placehold.co/400x500/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`;
             return (
-            <Link key={cat.slugs[0]} href={cat.href} className="cat-card" style={{
+            <Link key={cat.id} href={`/shop/${cat.slug}`} className="cat-card" style={{
               textDecoration: "none", color: "#222", borderRadius: 20,
               boxShadow: "0 6px 20px rgba(0,0,0,0.08)", background: "#fff",
               display: "flex", flexDirection: "column", overflow: "hidden",
               border: "1px solid #eee",
             }}>
-              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#fff", position: "relative" }}>
-                <img src={img} alt={cat.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "opacity 0.3s" }}
-                  onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x500/fdf0f3/fda1b7?text=${cat.emoji}`; }} />
+              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f9f0f3", position: "relative" }}>
+                <img src={img} alt={cat.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+                  onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x500/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`; }} />
               </div>
               <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>
-                <div className="cat-title" style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4, letterSpacing: 0.5 }}>{cat.title}</div>
-                <div className="cat-desc" style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>{cat.desc}</div>
+                <div className="cat-title" style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4, letterSpacing: 0.5 }}>{cat.name_en}</div>
               </div>
             </Link>
             );
@@ -381,9 +331,9 @@ export default function HomePage() {
             </div>
             <div>
               <p style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#fda1b7", marginBottom: 10 }}>Shop</p>
-              {CATEGORY_CARDS.map(c => (
-                <Link key={c.slugs[0]} href={c.href} style={{ display: "block", fontSize: 12, color: "#bbb", textDecoration: "none", marginBottom: 6 }}>
-                  {c.title}
+              {apiCategories.map(c => (
+                <Link key={c.id} href={`/shop/${c.slug}`} style={{ display: "block", fontSize: 12, color: "#bbb", textDecoration: "none", marginBottom: 6 }}>
+                  {c.name_en}
                 </Link>
               ))}
             </div>
