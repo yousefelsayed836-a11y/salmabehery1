@@ -193,26 +193,25 @@ export default function OrdersPage() {
       background: #fff;
     }
 
-    /* === PAGE WRAPPER: always 1 A4 page === */
+    /* === PAGE WRAPPER: always 1 page === */
     .page-pair {
-      width: 194mm;          /* 210mm - 2×8mm margin */
-      height: 287mm;         /* 297mm - 2×5mm margin */
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      gap: 7mm;
       page-break-after: always;
       break-after: page;
-      overflow: hidden;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .page-pair:last-child {
       page-break-after: auto;
       break-after: auto;
     }
 
-    /* === WAYBILL: exactly half the page === */
+    /* === WAYBILL: compact enough that 2 fit on any page === */
     .waybill {
       width: 100%;
-      height: 140mm;
+      height: 128mm;
       border: 1.5px solid #000;
       border-radius: 6px;
       padding: 8px 12px;
@@ -268,8 +267,7 @@ export default function OrdersPage() {
     const addr = translatedAddresses[order.id];
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
-    // Single order: one waybill taking the top half, empty bottom half
-    const body = `<div class="page-pair">${generateWaybillHtml(order, deposit, productImages, addr)}<div style="height:140mm"></div></div>`;
+    const body = `<div class="page-pair">${generateWaybillHtml(order, deposit, productImages, addr)}</div>`;
     printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script></body></html>`);
     printWindow.document.close();
   };
