@@ -132,7 +132,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                 const low = !oos && (p.stock ?? 99) <= 3;
                 const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
                 return (
-                  <div key={p.id} className="pc" style={{ opacity: oos ? 0.65 : 1 }}>
+                  <div key={p.id} className="pc">
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ position: "relative", aspectRatio: "1/1", background: "#fafafa", overflow: "hidden" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi" loading="lazy" onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
@@ -147,12 +147,14 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                       <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</h3>
                       </Link>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                          {hasD && <span style={{ fontSize: 11, color: "#bbb", textDecoration: "line-through" }}>{p.old_price} EGP</span>}
+                        <div style={{ display: "flex", flexDirection: "row", alignItems: "baseline", gap: 7 }}>
+                          {hasD && <span style={{ fontSize: 14, color: "#c8c8c8", textDecoration: "line-through", fontWeight: 400 }}>{p.old_price}</span>}
                           <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
                         </div>
                         {oos ? (
-                          <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Out of Stock</span>
+                          <button disabled style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "#e5e7eb", color: "#9ca3af", cursor: "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                          </button>
                         ) : cartQty > 0 ? (
                           <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #fda1b7", borderRadius: 20, overflow: "hidden" }}>
                             <button onClick={e => { e.preventDefault(); updateQty(p.id, p.size_info || "One Size", -1); }} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>−</button>

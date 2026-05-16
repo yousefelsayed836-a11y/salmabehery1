@@ -187,7 +187,7 @@ export default function ProductPage() {
 
             {product.category_name && (
               <Link href={`/shop/${product.category_slug || ""}`}
-                style={{ fontSize: 11, fontWeight: 700, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 2, textDecoration: "none" }}>
+                style={{ fontSize: 11, fontWeight: 400, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 2, textDecoration: "none" }}>
                 {product.category_name}
               </Link>
             )}
@@ -201,12 +201,12 @@ export default function ProductPage() {
               {hasDiscount && <span style={{ fontSize: 18, color: "#bbb", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
-                {hasDiscount && <span style={{ fontSize: 13, background: "#fef2f2", color: "#ef4444", padding: "3px 10px", borderRadius: 20, fontWeight: 700 }}>Save {discount}%</span>}
+                {hasDiscount && <span style={{ fontSize: 13, background: "#fef2f2", color: "#ef4444", padding: "3px 10px", borderRadius: 20, fontWeight: 400 }}>Save {discount}%</span>}
               </div>
             </div>
 
             {/* Stock */}
-            <div style={{ fontSize: 13, fontWeight: 700 }}>
+            <div style={{ fontSize: 13, fontWeight: 400 }}>
               {!inStock
                 ? <span style={{ color: "#ef4444" }}>Out of Stock</span>
                 : product.stock && product.stock <= 5
@@ -216,15 +216,15 @@ export default function ProductPage() {
 
             {/* Badges */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {product.material && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#fdf4f7", color: "#c97a8a", fontSize: 12, fontWeight: 700, border: "1px solid #fce4ec" }}>{product.material}</span>}
-              {product.water_resistance && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#eff6ff", color: "#1e40af", fontSize: 12, fontWeight: 700, border: "1px solid #dbeafe" }}>{product.water_resistance}</span>}
-              {product.size_info && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#f0fdf4", color: "#166534", fontSize: 12, fontWeight: 700, border: "1px solid #dcfce7" }}>{product.size_info}</span>}
+              {product.material && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#fdf4f7", color: "#c97a8a", fontSize: 12, fontWeight: 400, border: "1px solid #fce4ec" }}>{product.material}</span>}
+              {product.water_resistance && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#eff6ff", color: "#1e40af", fontSize: 12, fontWeight: 400, border: "1px solid #dbeafe" }}>{product.water_resistance}</span>}
+              {product.size_info && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#f0fdf4", color: "#166534", fontSize: 12, fontWeight: 400, border: "1px solid #dcfce7" }}>{product.size_info}</span>}
             </div>
 
             {/* Description */}
             {product.description_en && (
               <div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: "#aaa", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
+                <p style={{ fontSize: 12, fontWeight: 400, color: "#aaa", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
                 <div style={{ fontSize: 14, lineHeight: 1.9, color: "#666", padding: "14px 16px", background: "#f9f9f9", borderRadius: 12, borderLeft: "3px solid #eee" }}
                   dangerouslySetInnerHTML={{ __html: product.description_en }} />
               </div>

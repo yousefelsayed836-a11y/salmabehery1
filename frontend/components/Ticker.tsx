@@ -14,7 +14,7 @@ export default function Ticker() {
             {[1, 2].map(k => (
               <span key={k} style={{
                 flex: "0 0 50%", textAlign: "center", color: "#1a1a2e",
-                fontFamily: "'Segoe UI', sans-serif", fontSize: 14, fontWeight: 600,
+                fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 400,
                 letterSpacing: 1, whiteSpace: "nowrap",
               }}>
                 Enjoy FREE shipping on orders above 900 EGP
