@@ -213,7 +213,7 @@ export default function OrdersPage() {
     .waybill {
       width: 100%;
       height: 140mm;
-      border: 1.5px solid #fda1b7;
+      border: 1.5px solid #000;
       border-radius: 6px;
       padding: 8px 12px;
       display: flex;
@@ -228,7 +228,7 @@ export default function OrdersPage() {
     /* Dashed cut line between the two waybills */
     .cut-line {
       height: 0;
-      border-top: 1.5px dashed #fda1b7;
+      border-top: 1.5px dashed #000;
       text-align: center;
       position: relative;
       flex-shrink: 0;
@@ -242,25 +242,25 @@ export default function OrdersPage() {
       background: #fff;
       padding: 0 6px;
       font-size: 13px;
-      color: #fda1b7;
+      color: #000;
     }
 
-    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #fda1b7; padding-bottom: 5px; margin-bottom: 4px; }
-    .wb-logo { font-size: 16px; font-weight: 800; color: #fda1b7; }
-    .wb-order { font-size: 11px; color: #888; }
+    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 5px; margin-bottom: 4px; }
+    .wb-logo { font-size: 16px; font-weight: 800; color: #000; }
+    .wb-order { font-size: 11px; color: #555; }
     .wb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 0; }
     .wb-col { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
-    .wb-row { display: flex; gap: 6px; font-size: 11px; padding: 2px 0; border-bottom: 1px solid #f5f5f5; }
-    .wb-label { color: #aaa; min-width: 58px; font-size: 10px; flex-shrink: 0; }
-    .wb-val { font-weight: 700; flex: 1; font-size: 11px; word-break: break-word; }
-    .wb-items-title { font-size: 10px; color: #fda1b7; font-weight: 700; border-bottom: 1px solid #fda1b7; padding-bottom: 2px; margin-bottom: 2px; }
-    .wb-item { display: flex; gap: 5px; font-size: 10px; padding: 2px 0; border-bottom: 1px dotted #eee; }
-    .wb-item-name { flex: 1; font-weight: 600; }
-    .wb-item-size { color: #888; }
-    .wb-item-qty { color: #fda1b7; font-weight: 700; }
-    .wb-totals { margin-top: auto; border-top: 1.5px solid #fda1b7; padding-top: 4px; }
+    .wb-row { display: flex; gap: 6px; font-size: 11px; padding: 2px 0; border-bottom: 1px solid #ddd; }
+    .wb-label { color: #555; min-width: 58px; font-size: 10px; flex-shrink: 0; }
+    .wb-val { font-weight: 700; flex: 1; font-size: 11px; word-break: break-word; color: #000; }
+    .wb-items-title { font-size: 10px; color: #000; font-weight: 700; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 2px; }
+    .wb-item { display: flex; gap: 5px; font-size: 10px; padding: 2px 0; border-bottom: 1px dotted #ccc; }
+    .wb-item-name { flex: 1; font-weight: 600; color: #000; }
+    .wb-item-size { color: #555; }
+    .wb-item-qty { color: #000; font-weight: 700; }
+    .wb-totals { margin-top: auto; border-top: 1.5px solid #000; padding-top: 4px; }
     .wb-total-row { display: flex; justify-content: space-between; font-size: 10px; padding: 1px 0; color: #555; }
-    .wb-total-final { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #fda1b7; margin-top: 3px; border-top: 1px solid #eee; padding-top: 3px; }
+    .wb-total-final { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #000; margin-top: 3px; border-top: 1px solid #999; padding-top: 3px; }
   `;
 
   const handlePrint = (order: Order) => {
