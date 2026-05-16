@@ -8,7 +8,7 @@ const API = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onre
 
 const CATEGORY_CARDS = [
   {
-    key: "rings",
+    slugs: ["rings"],
     title: "Rings",
     desc: "Colorful gemstone rings.",
     image: "/images/rings.jpg",
@@ -16,7 +16,7 @@ const CATEGORY_CARDS = [
     emoji: "💍",
   },
   {
-    key: "hand-chains",
+    slugs: ["hand-chains", "hand chains"],
     title: "Hand Chains",
     desc: "Elegant hand chains.",
     image: "/images/hand-chains.jpg",
@@ -24,7 +24,7 @@ const CATEGORY_CARDS = [
     emoji: "✨",
   },
   {
-    key: "bracelet",
+    slugs: ["bracelet", "bracelets"],
     title: "Bracelets",
     desc: "Premium bracelets.",
     image: "/images/bracelets.jpg",
@@ -32,7 +32,7 @@ const CATEGORY_CARDS = [
     emoji: "🌸",
   },
   {
-    key: "necklace",
+    slugs: ["necklace", "necklaces"],
     title: "Necklaces",
     desc: "Luxury necklaces.",
     image: "/images/necklaces.jpg",
@@ -40,7 +40,7 @@ const CATEGORY_CARDS = [
     emoji: "📿",
   },
   {
-    key: "earrings",
+    slugs: ["earrings"],
     title: "Earrings",
     desc: "Delicate earrings.",
     image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=500&fit=crop",
@@ -48,7 +48,7 @@ const CATEGORY_CARDS = [
     emoji: "🌙",
   },
   {
-    key: "sets-and-offers",
+    slugs: ["sets-and-offers", "extra-things", "sets", "offers", "jewelry"],
     title: "Sets & Offers",
     desc: "Special sets & deals.",
     image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
@@ -85,25 +85,25 @@ export default function HomePage() {
   const [hoverRating, setHoverRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+  const [apiCategories, setApiCategories] = useState<any[]>([]);
 
   useEffect(() => {
     fetch(`${API}/categories`, { cache: "no-store" })
       .then(r => r.json())
-      .then((d: any[]) => {
-        const map: Record<string, string> = {};
-        (Array.isArray(d) ? d : []).forEach((c: any) => {
-          if (c.slug && c.image) {
-            map[c.slug] = c.image;
-            // also map extra-things <-> sets-and-offers as aliases
-            if (c.slug === "extra-things") map["sets-and-offers"] = c.image;
-            if (c.slug === "sets-and-offers") map["extra-things"] = c.image;
-          }
-        });
-        setCategoryImages(map);
-      })
+      .then((d: any[]) => setApiCategories(Array.isArray(d) ? d : []))
       .catch(() => {});
   }, []);
+
+  const getCatImage = (slugs: string[], fallback: string) => {
+    for (const s of slugs) {
+      const found = apiCategories.find(c =>
+        c.slug?.toLowerCase() === s.toLowerCase() ||
+        c.name_en?.toLowerCase().includes(s.toLowerCase())
+      );
+      if (found?.image) return found.image;
+    }
+    return fallback;
+  };
 
   useEffect(() => {
     fetch(`${API}/reviews`)
@@ -250,9 +250,9 @@ export default function HomePage() {
 
         <div className="categories-grid-inner">
           {CATEGORY_CARDS.map((cat) => {
-            const img = categoryImages[cat.key] || cat.image;
+            const img = getCatImage(cat.slugs, cat.image);
             return (
-            <Link key={cat.key} href={cat.href} className="cat-card" style={{
+            <Link key={cat.slugs[0]} href={cat.href} className="cat-card" style={{
               textDecoration: "none", color: "#222", borderRadius: 20,
               boxShadow: "0 6px 20px rgba(0,0,0,0.08)", background: "#fff",
               display: "flex", flexDirection: "column", overflow: "hidden",
@@ -382,7 +382,7 @@ export default function HomePage() {
             <div>
               <p style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#fda1b7", marginBottom: 10 }}>Shop</p>
               {CATEGORY_CARDS.map(c => (
-                <Link key={c.key} href={c.href} style={{ display: "block", fontSize: 12, color: "#bbb", textDecoration: "none", marginBottom: 6 }}>
+                <Link key={c.slugs[0]} href={c.href} style={{ display: "block", fontSize: 12, color: "#bbb", textDecoration: "none", marginBottom: 6 }}>
                   {c.title}
                 </Link>
               ))}
