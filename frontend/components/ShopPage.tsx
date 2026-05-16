@@ -147,9 +147,9 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                       <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</h3>
                       </Link>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", flexDirection: "row", alignItems: "baseline", gap: 7 }}>
-                          {hasD && <span style={{ fontSize: 14, color: "#c8c8c8", textDecoration: "line-through", fontWeight: 400 }}>{p.old_price}</span>}
-                          <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
+                        <div className="price-block">
+                          {hasD && <span style={{ fontSize: 13, color: "#1a1a2e", textDecoration: "line-through", fontWeight: 400 }}>{p.old_price} EGP</span>}
+                          <span style={{ fontSize: 16, fontWeight: 600, color: "#1a1a2e" }}>{p.price} EGP</span>
                         </div>
                         {oos ? (
                           <button disabled style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "#e5e7eb", color: "#9ca3af", cursor: "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -182,7 +182,8 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
         .pc{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #eee;box-shadow:0 2px 12px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s}
         .pc:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(253,161,183,.15)!important}
         .pc:hover .pi{transform:scale(1.05)}
-        @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr);gap:10px}}
+        .price-block{display:flex;flex-direction:column;gap:2px}
+        @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr);gap:10px}.price-block{flex-direction:row;align-items:baseline;gap:5px}}
       `}</style>
     </div>
   );
