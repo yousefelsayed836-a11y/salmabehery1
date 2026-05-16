@@ -18,6 +18,7 @@ interface Product {
   price: number;
   stock: number;
   is_active: boolean;
+  images?: string | string[];
 }
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
@@ -404,27 +405,50 @@ export default function AdminDashboard() {
                 placeholder="Search products..."
                 style={{ width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 13, outline: "none", boxSizing: "border-box", marginBottom: 8 }}
               />
-              <div style={{ maxHeight: 220, overflowY: "auto", border: "1.5px solid #eee", borderRadius: 10, padding: "4px 0" }}>
-                {products
-                  .filter(p => {
-                    const s = featuredSearch.toLowerCase();
-                    return !s || p.name_en?.toLowerCase().includes(s);
-                  })
-                  .slice(0, 60)
-                  .map(p => (
-                    <label key={p.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 12px", cursor: "pointer", borderBottom: "1px solid #f5f5f5", background: featuredIds.includes(p.id) ? "#fdf0f3" : "transparent" }}>
-                      <input
-                        type="checkbox"
-                        checked={featuredIds.includes(p.id)}
-                        onChange={() => setFeaturedIds(ids =>
-                          ids.includes(p.id) ? ids.filter(id => id !== p.id) : [...ids, p.id]
-                        )}
-                        style={{ accentColor: "#fda1b7", width: 16, height: 16 }}
-                      />
-                      <span style={{ fontSize: 13, color: "#333", flex: 1 }}>{p.name_en}</span>
-                      <span style={{ fontSize: 12, color: "#888" }}>{p.price} EGP</span>
-                    </label>
-                  ))}
+              <div style={{ maxHeight: 320, overflowY: "auto", border: "1.5px solid #eee", borderRadius: 10, padding: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: 8 }}>
+                  {products
+                    .filter(p => {
+                      const s = featuredSearch.toLowerCase();
+                      return !s || p.name_en?.toLowerCase().includes(s);
+                    })
+                    .slice(0, 80)
+                    .map(p => {
+                      const img = Array.isArray(p.images) ? p.images[0] : (p.images || "");
+                      const selected = featuredIds.includes(p.id);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => setFeaturedIds(ids =>
+                            ids.includes(p.id) ? ids.filter(id => id !== p.id) : [...ids, p.id]
+                          )}
+                          style={{
+                            position: "relative", cursor: "pointer", borderRadius: 10,
+                            border: `2.5px solid ${selected ? "#fda1b7" : "#eee"}`,
+                            overflow: "hidden", background: "#f9f0f3",
+                            boxShadow: selected ? "0 0 0 3px rgba(253,161,183,0.25)" : "none",
+                            transition: "border-color 0.15s, box-shadow 0.15s",
+                          }}
+                        >
+                          <div style={{ aspectRatio: "3/4", width: "100%", overflow: "hidden" }}>
+                            <img
+                              src={img || `https://placehold.co/120x160/fdf0f3/fda1b7?text=✨`}
+                              alt={p.name_en}
+                              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                              onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/120x160/fdf0f3/fda1b7?text=✨`; }}
+                            />
+                          </div>
+                          {selected && (
+                            <div style={{ position: "absolute", top: 5, right: 5, width: 22, height: 22, borderRadius: "50%", background: "#fda1b7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#fff", fontWeight: 700 }}>✓</div>
+                          )}
+                          <div style={{ padding: "5px 6px", background: "#fff" }}>
+                            <div style={{ fontSize: 10, color: "#333", fontWeight: 600, lineHeight: 1.3, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{p.name_en}</div>
+                            <div style={{ fontSize: 10, color: "#fda1b7", fontWeight: 700, marginTop: 2 }}>{p.price} EGP</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
             </div>
 
