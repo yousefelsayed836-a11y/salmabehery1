@@ -170,14 +170,14 @@ export default function ProductPage() {
           {/* ── Info ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16, fontFamily: "'Inter', sans-serif", fontWeight: 400, color: "#1a1a2e" }}>
 
-            <h1 style={{ fontSize: 22, fontWeight: 400, color: "#1a1a2e", margin: 0, lineHeight: 1.4 }}>
+            <h1 style={{ fontSize: 17, fontWeight: 600, color: "#1a1a2e", margin: 0, lineHeight: 1.4 }}>
               {product.name_en}
             </h1>
 
             {/* Price */}
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {hasDiscount && <span style={{ fontSize: 22, color: "#1a1a2e", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1a2e" }}>{product.price} EGP</span>
+              {hasDiscount && <span style={{ fontSize: 16, color: "#1a1a2e", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
+              <span style={{ fontSize: 28, fontWeight: 600, color: "#1a1a2e" }}>{product.price} EGP</span>
             </div>
 
             {/* Stock */}
