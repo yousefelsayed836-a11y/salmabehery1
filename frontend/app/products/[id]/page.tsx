@@ -229,8 +229,12 @@ export default function ProductPage() {
 
             {/* Description — below buttons, no box */}
             {product.description_en && (
-              <div style={{ fontSize: 14, lineHeight: 1.8, color: "#888", fontWeight: 400 }}
-                dangerouslySetInnerHTML={{ __html: product.description_en }} />
+              <div>
+                <div style={{ borderTop: "1px solid #eee", margin: "4px 0 12px" }} />
+                <p style={{ fontSize: 11, fontWeight: 400, color: "#aaa", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
+                <div style={{ fontSize: 14, lineHeight: 1.8, color: "#888", fontWeight: 400 }}
+                  dangerouslySetInnerHTML={{ __html: product.description_en }} />
+              </div>
             )}
 
           </div>
