@@ -192,7 +192,7 @@ export default function ProductPage() {
               </Link>
             )}
 
-            <h1 style={{ fontSize: 24, fontWeight: 400, color: "#1a1a2e", margin: 0, lineHeight: 1.35 }}>
+            <h1 style={{ fontSize: 17, fontWeight: 400, color: "#1a1a2e", margin: 0, lineHeight: 1.4 }}>
               {product.name_en}
             </h1>
 
@@ -221,15 +221,6 @@ export default function ProductPage() {
               {product.size_info && <span style={{ padding: "6px 14px", borderRadius: 20, background: "#f0fdf4", color: "#166534", fontSize: 12, fontWeight: 400, border: "1px solid #dcfce7" }}>{product.size_info}</span>}
             </div>
 
-            {/* Description */}
-            {product.description_en && (
-              <div>
-                <p style={{ fontSize: 12, fontWeight: 400, color: "#aaa", letterSpacing: 2, textTransform: "uppercase", margin: "0 0 8px" }}>Description</p>
-                <div style={{ fontSize: 14, lineHeight: 1.9, color: "#666", padding: "14px 16px", background: "#f9f9f9", borderRadius: 12, borderLeft: "3px solid #eee" }}
-                  dangerouslySetInnerHTML={{ __html: product.description_en }} />
-              </div>
-            )}
-
             {/* Qty + Add to cart */}
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #f0d4dc", borderRadius: 12, overflow: "hidden" }}>
@@ -257,6 +248,12 @@ export default function ProductPage() {
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; }}>
               Buy Now
             </Link>
+
+            {/* Description — below buttons, no box */}
+            {product.description_en && (
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: "#888", fontWeight: 400 }}
+                dangerouslySetInnerHTML={{ __html: product.description_en }} />
+            )}
 
           </div>
         </div>
