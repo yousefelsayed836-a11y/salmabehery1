@@ -257,7 +257,7 @@ export default function Header() {
                   color: pathname === item.href ? "#fda1b7" : "#1a1a2e",
                   textDecoration: "none",
                   borderBottom: "1px solid #fdf0f3",
-                  fontFamily: "var(--font-cormorant), serif",
+                  fontFamily: "inherit",
                 }}
               >
                 {item.label}
