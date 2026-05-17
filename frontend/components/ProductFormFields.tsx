@@ -4,6 +4,14 @@ import React from "react";
 
 interface Category { id: string; name_en: string; slug: string; }
 
+export interface Variant {
+  option_name: string;
+  option_value: string;
+  quantity: number;
+  price_override: number | null;
+  sku: string;
+}
+
 interface ProductFormFieldsProps {
   form: any;
   onChange: (field: string, value: any) => void;
@@ -124,6 +132,77 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
           {form.is_active ? "● ACTIVE" : "○ DRAFT"}
         </span>
       </div>
+
+      {/* ===== Variants Section ===== */}
+      <div style={{ gridColumn: "1 / -1", borderRadius: 12, border: "1.5px solid #fce7ef", overflow: "hidden" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "#fff0f5" }}>
+          <div>
+            <span style={{ fontWeight: 700, fontSize: 14, color: "#9d174d" }}>🎨 المتغيرات (Variants)</span>
+            <span style={{ marginLeft: 8, fontSize: 12, color: "#888" }}>
+              {(form.variants || []).length > 0 ? `${(form.variants || []).length} variant` : "No variants"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const v: Variant = { option_name: "", option_value: "", quantity: 1, price_override: null, sku: "" };
+              onChange("variants", [...(form.variants || []), v]);
+            }}
+            style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+          >
+            + Add Variant
+          </button>
+        </div>
+
+        {(form.variants || []).length > 0 && (
+          <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 80px 100px 90px 36px", gap: 8, padding: "0 4px" }}>
+              {["Option Name", "Value", "Qty", "Price Override", "SKU", ""].map((h, i) => (
+                <span key={i} style={{ fontSize: 11, fontWeight: 700, color: "#888" }}>{h}</span>
+              ))}
+            </div>
+            {(form.variants as Variant[]).map((v, i) => (
+              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 80px 100px 90px 36px", gap: 8, alignItems: "center", background: "#fafafa", borderRadius: 8, padding: "8px" }}>
+                <input
+                  value={v.option_name}
+                  onChange={e => { const u = [...form.variants]; u[i] = { ...u[i], option_name: e.target.value }; onChange("variants", u); }}
+                  placeholder="e.g. Color"
+                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 13, width: "100%", boxSizing: "border-box" as const }}
+                />
+                <input
+                  value={v.option_value}
+                  onChange={e => { const u = [...form.variants]; u[i] = { ...u[i], option_value: e.target.value }; onChange("variants", u); }}
+                  placeholder="e.g. Red"
+                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 13, width: "100%", boxSizing: "border-box" as const }}
+                />
+                <input
+                  type="number" value={v.quantity} min={0}
+                  onChange={e => { const u = [...form.variants]; u[i] = { ...u[i], quantity: Number(e.target.value) }; onChange("variants", u); }}
+                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 13, width: "100%", boxSizing: "border-box" as const }}
+                />
+                <input
+                  type="number" value={v.price_override ?? ""} min={0}
+                  onChange={e => { const u = [...form.variants]; u[i] = { ...u[i], price_override: e.target.value ? Number(e.target.value) : null }; onChange("variants", u); }}
+                  placeholder="Optional"
+                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 13, width: "100%", boxSizing: "border-box" as const }}
+                />
+                <input
+                  value={v.sku}
+                  onChange={e => { const u = [...form.variants]; u[i] = { ...u[i], sku: e.target.value }; onChange("variants", u); }}
+                  placeholder="SKU"
+                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 13, width: "100%", boxSizing: "border-box" as const }}
+                />
+                <button
+                  type="button"
+                  onClick={() => onChange("variants", (form.variants as Variant[]).filter((_, j) => j !== i))}
+                  style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: "#fee2e2", color: "#ef4444", fontWeight: 700, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                >×</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
