@@ -331,12 +331,44 @@ export default function OrdersPage() {
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
         .orders-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
         .orders-table-wrap table { min-width: 900px; }
-        @media (max-width: 640px) {
+        .orders-mobile-cards { display: none; }
+        @media (max-width: 700px) {
           .orders-outer { padding: 10px !important; }
           .orders-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
           .modal-grid { grid-template-columns: 1fr !important; }
           .modal-inner { padding: 14px !important; }
           .modal-header { padding: 14px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
+          .orders-table-wrap { display: none; }
+          .orders-mobile-cards { display: flex; flex-direction: column; gap: 12px; }
+        }
+        .order-card {
+          background: #fff;
+          border-radius: 14px;
+          padding: 14px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+          border: 1px solid #f0d4dc;
+        }
+        .order-card-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        .order-card-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 10px;
+          flex-wrap: wrap;
+        }
+        .order-card-actions button, .order-card-actions select {
+          flex: 1;
+          min-width: 0;
+          padding: 9px 10px;
+          border-radius: 10px;
+          border: none;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
         }
       `}</style>
 
@@ -492,6 +524,47 @@ export default function OrdersPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile card view */}
+            <div className="orders-mobile-cards">
+              {filteredOrders.map(order => {
+                const dep = deposits[order.id] || 0;
+                const remaining = Math.max(0, (order.total_amount || 0) - dep);
+                return (
+                  <div key={order.id} className="order-card">
+                    <div className="order-card-row">
+                      <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 16 }}>#{order.id.slice(-6)}</span>
+                      <select value={order.status} onChange={e => updateStatus(order.id, e.target.value)}
+                        style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #ddd", fontSize: 12, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="partially_shipped">Part. Shipped</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e", marginBottom: 2 }}>{order.customer_name}</div>
+                    <div style={{ fontSize: 13, color: "#555", marginBottom: 2 }}>📞 {order.customer_phone}</div>
+                    {order.phone2 && <div style={{ fontSize: 12, color: "#25d366", marginBottom: 2 }}>💬 {order.phone2}</div>}
+                    <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>{order.city || ""}{order.governorate ? ` · ${order.governorate}` : ""}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <span style={{ fontWeight: 800, fontSize: 15, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</span>
+                      {dep > 0 && <span style={{ fontSize: 12, color: "#22c55e" }}>متبقي: {fmt(remaining)}</span>}
+                    </div>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
+                      <input type="number" value={dep === 0 ? "" : dep}
+                        onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
+                        placeholder="مقدم (EGP)"
+                        style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none" }} />
+                    </div>
+                    <div className="order-card-actions">
+                      <button onClick={() => openOrder(order)} style={{ background: "#1a1a2e", color: "#fff" }}>👁️ View</button>
+                      <button onClick={() => openOrder(order).then(() => handlePrint(order))} style={{ background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff" }}>🖨️ Print</button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

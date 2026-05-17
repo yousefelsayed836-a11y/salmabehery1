@@ -142,9 +142,26 @@ export default function HomePage() {
           100% { background-position: 200% center; }
         }
         .cat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(253,161,183,0.25) !important; }
-        .cat-card:hover img { transform: scale(1.07); }
         .cat-card img { transition: transform 0.45s ease; }
+        @media (hover: hover) {
+          .cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(253,161,183,0.25) !important; }
+          .cat-card:hover img { transform: scale(1.07); }
+        }
+        .feat-card {
+          border-radius: 16px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+          background: #fff;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          border: 1px solid #eee;
+          transition: transform 0.2s, box-shadow 0.2s;
+          text-decoration: none;
+          color: #222;
+        }
+        @media (hover: hover) {
+          .feat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(253,161,183,0.2); }
+        }
 
         .categories-grid-inner {
           display: grid;
@@ -321,9 +338,7 @@ export default function HomePage() {
             {featuredSection.products.map(p => {
               const img = Array.isArray(p.images) ? p.images[0] : (p.images || "");
               return (
-                <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: "none", color: "#222", borderRadius: 16, boxShadow: "0 4px 16px rgba(0,0,0,0.07)", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden", border: "1px solid #eee", transition: "transform 0.2s, box-shadow 0.2s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 12px 32px rgba(253,161,183,0.2)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.07)"; }}>
+                <Link key={p.id} href={`/products/${p.id}`} className="feat-card">
                   <div style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f9f0f3" }}>
                     <img src={img} alt={p.name_en}
                       loading="lazy" decoding="async"
