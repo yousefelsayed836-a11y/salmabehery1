@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Cairo, Cormorant_Garamond, Cinzel_Decorative } from 'next/font/google';
+import { Inter, Cairo, Cormorant_Garamond, Cinzel_Decorative, Roboto_Condensed } from 'next/font/google';
 import './globals.css';
 import Header from '../components/Header';
 import Ticker from '../components/Ticker';
@@ -20,6 +20,11 @@ const cinzelDecorative = Cinzel_Decorative({
   weight: ['400', '700', '900'],
   variable: '--font-cinzel',
 });
+const robotoCondensed = Roboto_Condensed({
+  subsets: ['latin'],
+  weight: ['300', '400', '700'],
+  variable: '--font-roboto-condensed',
+});
 
 export const metadata: Metadata = {
   title: 'Salma Behery - Jewelry Store',
@@ -38,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,700&display=swap" rel="stylesheet" />
       </head>
-      <body className={`${inter.className} ${cairo.variable} ${cormorant.variable} ${cinzelDecorative.variable}`} style={{ background: '#fff', margin: 0 }}>
+      <body className={`${inter.className} ${cairo.variable} ${cormorant.variable} ${cinzelDecorative.variable} ${robotoCondensed.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
           <FaviconUpdater />
           <FacebookPixel />
