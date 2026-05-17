@@ -31,8 +31,8 @@ export const metadata: Metadata = {
   title: 'Salma Behery - Jewelry Store',
   description: 'Premium handcrafted jewelry collection',
   icons: {
-    icon: '/favicon.png',
-    apple: '/favicon.png',
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
   },
 };
 
