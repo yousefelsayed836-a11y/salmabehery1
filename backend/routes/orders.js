@@ -210,8 +210,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Test email endpoint
-router.post('/test-email', async (req, res) => {
+// Test email endpoint (GET so it can be opened from browser)
+router.get('/test-email', async (req, res) => {
   const fakeOrder = { id: 'TEST-001', customer_name: 'Test', customer_phone: '01000000000', shipping_address: 'Test Address', city: 'Cairo', governorate: '', notes: '', shipping_cost: 50, total_amount: 550 };
   try {
     await sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 500 }]);
