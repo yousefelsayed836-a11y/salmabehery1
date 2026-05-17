@@ -244,7 +244,6 @@ export default function HomePage() {
           paddingBottom: "60px",
         }}
       >
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.05) 60%, transparent 100%)", pointerEvents: "none" }} />
 
         <div style={{
           position: "relative",
