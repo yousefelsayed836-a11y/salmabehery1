@@ -78,25 +78,28 @@ export default function AdminDashboard() {
 
   const uploadFavicon = async (file: File) => {
     setFaviconUploading(true);
+    setFaviconMsg("");
     try {
-      const fd = new FormData();
-      fd.append("image", file);
-      const r = await fetch(`${API_BASE.replace("/api","")}/api/upload`, { method: "POST", body: fd });
-      const data = await r.json();
-      if (!data.url) throw new Error("Upload failed");
-      await fetch(`${API_BASE}/settings/favicon`, {
+      // Convert to base64 and save directly in DB — no server file upload needed
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const r = await fetch(`${API_BASE}/settings/favicon`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: data.url }),
+        body: JSON.stringify({ value: dataUrl }),
       });
-      setFaviconUrl(data.url);
-      setFaviconMsg("✅ Favicon updated!");
-      // Update in current tab immediately
+      if (!r.ok) throw new Error(`Server error ${r.status}`);
+      setFaviconUrl(dataUrl);
+      setFaviconMsg("✅ تم تحديث الـ Favicon!");
       const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-      if (link) link.href = data.url;
+      if (link) link.href = dataUrl;
     } catch (e: any) { setFaviconMsg("❌ " + e.message); }
     setFaviconUploading(false);
-    setTimeout(() => setFaviconMsg(""), 3000);
+    setTimeout(() => setFaviconMsg(""), 4000);
   };
 
   // SSE: listen for new orders
