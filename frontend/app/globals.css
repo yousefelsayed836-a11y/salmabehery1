@@ -2,25 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
-
 @font-face {
-  font-family: 'HelloParisSerif';
-  src: url('/fonts/HelloParisSerif-ExtraLight.woff2') format('woff2'),
-       url('/fonts/HelloParisSerif-ExtraLight.woff') format('woff');
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'HelloParisSerif';
-  src: url('/fonts/HelloParisSerif-Regular.woff2') format('woff2'),
-       url('/fonts/HelloParisSerif-Regular.woff') format('woff');
+  font-family: 'CinzelDeco';
+  src: url('/fonts/CinzelDecorative-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: block;
 }
+
+.logo-cinzel {
+  font-family: 'CinzelDeco', serif !important;
+}
+
+
+
+
+
 
 :root {
   --foreground-rgb: 42, 21, 32;
