@@ -28,17 +28,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" dir="ltr">
-      <head>
-        <style dangerouslySetInnerHTML={{ __html: `
-          @font-face {
-            font-family: 'CinzelDeco';
-            src: url('/fonts/CinzelDecorative.otf') format('opentype');
-            font-weight: 400;
-            font-style: normal;
-            font-display: block;
-          }
-        `}} />
-      </head>
       <body className={`${inter.variable} ${cairo.variable} ${cormorant.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
           <FaviconUpdater />
