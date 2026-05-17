@@ -34,6 +34,9 @@ main {
 }
 
 html { scroll-behavior: smooth; }
+
+/* Single-tap navigation on all touch devices */
+a, button { touch-action: manipulation; }
 .font-arabic { font-family: 'Cairo', 'Tahoma', sans-serif; }
 
 ::-webkit-scrollbar { width: 6px; }
