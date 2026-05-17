@@ -138,7 +138,7 @@ export default function Header() {
               fontFamily: "var(--font-roboto-condensed), sans-serif",
               fontWeight: 400,
               fontSize: 24,
-              letterSpacing: 5,
+              letterSpacing: 2,
               whiteSpace: "nowrap",
               textTransform: "uppercase" as const,
               color: isTransparent ? "#fff" : "#1a1a2e",

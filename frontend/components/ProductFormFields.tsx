@@ -139,86 +139,92 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
       </div>
 
       {/* ── VARIANTS ── */}
-      <div style={{ gridColumn: "1 / -1" }}>
-        <label style={{ ...labelStyle, fontSize: 13, color: "#1a1a2e", marginBottom: 10 }}>🎨 Variants (Size / Color / etc.)</label>
+      <div style={{ gridColumn: "1 / -1", border: "1px solid #e5e7eb", borderRadius: 12, overflow: "hidden" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #e5e7eb", background: "#fafafa" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: "#6b7280", textTransform: "uppercase" as const }}>Configure Variants</span>
+          <button type="button" onClick={addVariant}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#1a1a2e" }}>
+            + Add Variant
+          </button>
+        </div>
 
-        {/* Existing variants table */}
-        {variants.length > 0 && (
-          <div style={{ marginBottom: 12, border: "1px solid #eee", borderRadius: 10, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-              <thead>
-                <tr style={{ background: "#f9f0f3" }}>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700, color: "#1a1a2e" }}>نوع</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700, color: "#1a1a2e" }}>القيمة</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700, color: "#1a1a2e" }}>كمية</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700, color: "#1a1a2e" }}>سعر خاص</th>
-                  <th style={{ padding: "8px 12px" }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {variants.map((v, i) => (
-                  <tr key={i} style={{ borderTop: "1px solid #f0f0f0" }}>
-                    <td style={{ padding: "6px 12px" }}>
-                      <input value={v.option_name} onChange={e => updateVariant(i, "option_name", e.target.value)}
-                        style={{ width: "100%", padding: "5px 8px", border: "1px solid #ddd", borderRadius: 6, fontSize: 13 }} />
-                    </td>
-                    <td style={{ padding: "6px 12px" }}>
-                      <input value={v.option_value} onChange={e => updateVariant(i, "option_value", e.target.value)}
-                        style={{ width: "100%", padding: "5px 8px", border: "1px solid #ddd", borderRadius: 6, fontSize: 13 }} />
-                    </td>
-                    <td style={{ padding: "6px 12px" }}>
-                      <input type="number" value={v.quantity} onChange={e => updateVariant(i, "quantity", parseInt(e.target.value) || 0)}
-                        style={{ width: 70, padding: "5px 8px", border: "1px solid #ddd", borderRadius: 6, fontSize: 13 }} />
-                    </td>
-                    <td style={{ padding: "6px 12px" }}>
-                      <input type="number" value={v.price_override ?? ""} onChange={e => updateVariant(i, "price_override", e.target.value ? parseFloat(e.target.value) : null)}
-                        placeholder="—" style={{ width: 80, padding: "5px 8px", border: "1px solid #ddd", borderRadius: 6, fontSize: 13 }} />
-                    </td>
-                    <td style={{ padding: "6px 12px", textAlign: "center" }}>
-                      <button type="button" onClick={() => removeVariant(i)}
-                        style={{ background: "#ef4444", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12 }}>
-                        حذف
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Add new variant row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 80px 90px auto", gap: 8, alignItems: "end" }}>
+        {/* Add row */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 110px 110px 90px", gap: 8, padding: "12px 16px", background: "#fff", borderBottom: variants.length > 0 ? "1px solid #e5e7eb" : "none", alignItems: "end" }}>
           <div>
-            <label style={{ ...labelStyle, fontWeight: 600 }}>نوع</label>
+            <label style={{ ...labelStyle, fontSize: 11 }}>Type</label>
             <input value={newVariant.option_name} onChange={e => setNewVariant(v => ({ ...v, option_name: e.target.value }))}
-              placeholder="Size / Color / مقاس"
-              style={{ width: "100%", padding: "9px 12px", border: "1px solid #ddd", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
+              placeholder="Size / Color"
+              style={{ width: "100%", padding: "8px 10px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
           </div>
           <div>
-            <label style={{ ...labelStyle, fontWeight: 600 }}>القيمة</label>
+            <label style={{ ...labelStyle, fontSize: 11 }}>Value</label>
             <input value={newVariant.option_value} onChange={e => setNewVariant(v => ({ ...v, option_value: e.target.value }))}
-              placeholder="S / M / L / Gold"
-              style={{ width: "100%", padding: "9px 12px", border: "1px solid #ddd", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
+              placeholder="S / M / Gold"
+              style={{ width: "100%", padding: "8px 10px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
           </div>
           <div>
-            <label style={{ ...labelStyle, fontWeight: 600 }}>كمية</label>
-            <input type="number" value={newVariant.quantity} onChange={e => setNewVariant(v => ({ ...v, quantity: parseInt(e.target.value) || 0 }))}
-              style={{ width: "100%", padding: "9px 12px", border: "1px solid #ddd", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
-          </div>
-          <div>
-            <label style={{ ...labelStyle, fontWeight: 600 }}>سعر خاص</label>
+            <label style={{ ...labelStyle, fontSize: 11 }}>Price (EGP)</label>
             <input type="number" value={newVariant.price_override ?? ""} onChange={e => setNewVariant(v => ({ ...v, price_override: e.target.value ? parseFloat(e.target.value) : null }))}
-              placeholder="اختياري"
-              style={{ width: "100%", padding: "9px 12px", border: "1px solid #ddd", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
+              placeholder="—"
+              style={{ width: "100%", padding: "8px 10px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
           </div>
-          <div style={{ paddingTop: 18 }}>
+          <div>
+            <label style={{ ...labelStyle, fontSize: 11 }}>Quantity</label>
+            <input type="number" value={newVariant.quantity} onChange={e => setNewVariant(v => ({ ...v, quantity: parseInt(e.target.value) || 0 }))}
+              style={{ width: "100%", padding: "8px 10px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, boxSizing: "border-box" }} />
+          </div>
+          <div style={{ paddingTop: 16 }}>
             <button type="button" onClick={addVariant}
-              style={{ padding: "9px 16px", background: "#fda1b7", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13, whiteSpace: "nowrap" }}>
-              + إضافة
+              style={{ width: "100%", padding: "8px 0", background: "#fda1b7", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
+              Add
             </button>
           </div>
         </div>
+
+        {/* Existing variants */}
+        {variants.length > 0 && (
+          <>
+            {/* Column headers */}
+            <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 120px 120px 100px 60px", gap: 8, padding: "8px 16px", background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+              <div />
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>Variant</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>Price</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>Sale Price</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>Quantity</div>
+              <div />
+            </div>
+            {variants.map((v, i) => (
+              <div key={i} style={{ display: "grid", gridTemplateColumns: "32px 1fr 120px 120px 100px 60px", gap: 8, padding: "12px 16px", borderBottom: i < variants.length - 1 ? "1px solid #f3f4f6" : "none", alignItems: "center", background: "#fff" }}>
+                <div style={{ width: 28, height: 28, borderRadius: 6, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🏷</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <input value={v.option_value} onChange={e => updateVariant(i, "option_value", e.target.value)}
+                    style={{ padding: "6px 8px", border: "1px solid #e5e7eb", borderRadius: 6, fontSize: 13, fontWeight: 600 }} />
+                  <input value={v.option_name} onChange={e => updateVariant(i, "option_name", e.target.value)}
+                    style={{ padding: "4px 8px", border: "1px solid #e5e7eb", borderRadius: 6, fontSize: 11, color: "#6b7280" }} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <input type="number" value={v.price_override ?? ""} onChange={e => updateVariant(i, "price_override", e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="—" style={{ width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, boxSizing: "border-box" as const }} />
+                  <span style={{ fontSize: 11, color: "#9ca3af", whiteSpace: "nowrap" as const }}>EGP</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <input type="number" placeholder="—"
+                    style={{ width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, background: "#f9fafb", boxSizing: "border-box" as const }} readOnly />
+                  <span style={{ fontSize: 11, color: "#9ca3af", whiteSpace: "nowrap" as const }}>EGP</span>
+                </div>
+                <div>
+                  <input type="number" value={v.quantity} onChange={e => updateVariant(i, "quantity", parseInt(e.target.value) || 0)}
+                    style={{ width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 13, boxSizing: "border-box" as const }} />
+                </div>
+                <button type="button" onClick={() => removeVariant(i)}
+                  style={{ padding: "6px 8px", background: "none", border: "1px solid #e5e7eb", borderRadius: 6, cursor: "pointer", fontSize: 13, color: "#ef4444" }}>
+                  ✕
+                </button>
+              </div>
+            ))}
+          </>
+        )}
       </div>
 
       <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: "#fff", borderRadius: 10 }}>
