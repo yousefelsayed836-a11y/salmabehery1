@@ -65,11 +65,11 @@ export default function ProductPage() {
         setProduct(p);
         setLoading(false);
         if (p.category_slug) {
-          fetch(`${API}/products?collection=${p.category_slug}&limit=8`)
+          fetch(`${API}/products?collection=${p.category_slug}&is_active=true&limit=8`)
             .then(r => r.json())
             .then(data => {
               const all: Product[] = data.products || data.data || [];
-              setSimilar(all.filter((x: Product) => x.id !== productId).slice(0, 4));
+              setSimilar(all.filter((x: Product) => x.id !== productId && x.is_active !== false).slice(0, 4));
             })
             .catch(() => {});
         }

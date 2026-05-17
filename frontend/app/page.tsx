@@ -82,7 +82,10 @@ export default function HomePage() {
             const fetched = await Promise.all(
               ids.map(id => fetch(`${API}/products/${id}`).then(r => r.json()).catch(() => null))
             );
-            const picked = fetched.filter(Boolean);
+            const picked = fetched.filter(Boolean).filter((p: any) => {
+              const prod = p.product || p;
+              return prod.is_active !== false;
+            }).map((p: any) => p.product || p);
             if (picked.length) setFeaturedSection({ title: cfg.title || "Featured Products", enabled: true, products: picked });
           }
         } catch {}
@@ -223,6 +226,9 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Preload hero image for fastest first paint */}
+      <link rel="preload" as="image" href="/images/hero-bg.jpg" />
+
       {/* ── HERO ── */}
       <section
         className="hero-section"
@@ -288,8 +294,10 @@ export default function HomePage() {
               border: "1px solid #eee",
             }}>
               <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f9f0f3", position: "relative" }}>
-                <img src={img} alt={cat.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
-                  onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x500/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`; }} />
+                <img src={img} alt={cat.name_en}
+                  loading="eager" decoding="async" fetchPriority="high"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+                  onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/200x260/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`; }} />
               </div>
               <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>
                 <div className="cat-title" style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4, letterSpacing: 0.5 }}>{cat.name_en}</div>
@@ -317,7 +325,9 @@ export default function HomePage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 12px 32px rgba(253,161,183,0.2)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.07)"; }}>
                   <div style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f9f0f3" }}>
-                    <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    <img src={img} alt={p.name_en}
+                      loading="lazy" decoding="async"
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                       onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/300x400/fdf0f3/fda1b7?text=✨`; }} />
                   </div>
                   <div style={{ padding: "10px 12px 12px", textAlign: "center" }}>
@@ -410,6 +420,7 @@ export default function HomePage() {
           {["sparkle-1", "sparkle-2", "sparkle-3", "sparkle-4"].map((s, i) => (
             <div key={s} style={{ overflow: "hidden", aspectRatio: "1/1", background: "#fff" }}>
               <img src={`/images/${s}.jpg`} alt={`Sparkle ${i + 1}`}
+                loading="lazy" decoding="async"
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s ease" }}
                 onMouseEnter={e => (e.target as HTMLImageElement).style.transform = "scale(1.05)"}
                 onMouseLeave={e => (e.target as HTMLImageElement).style.transform = "scale(1)"}
