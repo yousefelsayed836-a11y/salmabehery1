@@ -87,11 +87,6 @@ function ShopContent() {
         </div>
       )}
 
-      {/* Floating Cart */}
-      <button onClick={() => setShowCart(true)} style={{ position: "fixed", bottom: 24, right: 24, width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", border: "none", fontSize: 24, cursor: "pointer", zIndex: 100, boxShadow: "0 4px 16px rgba(253,161,183,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        🛒
-        {cartCount > 0 && <span style={{ position: "absolute", top: -4, right: -4, background: "#ef4444", color: "#fff", borderRadius: "50%", width: 22, height: 22, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{cartCount}</span>}
-      </button>
 
       {/* Cart Sidebar */}
       {showCart && (
@@ -136,27 +131,6 @@ function ShopContent() {
         </div>
       )}
 
-      {/* Sort bar */}
-      <div style={{ background: "#fff", padding: "12px 24px", borderBottom: "1px solid #f0dde3", boxShadow: "0 2px 8px rgba(253,161,183,0.08)" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1a1a2e" }}>
-              {searchQuery ? `Results for "${searchQuery}"` : "All Products"}
-            </h1>
-            <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>
-              <Link href="/" style={{ color: "#fda1b7", textDecoration: "none" }}>Home</Link>
-              <span style={{ margin: "0 6px" }}>/</span>
-              <span>Shop</span>
-            </div>
-          </div>
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ padding: "9px 14px", borderRadius: 25, border: "1.5px solid #f0d4dc", fontSize: 13, cursor: "pointer", background: "#fff", color: "#333", outline: "none" }}>
-            <option value="newest">Newest</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="name">Name A-Z</option>
-          </select>
-        </div>
-      </div>
 
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px" }}>
         {error && (
