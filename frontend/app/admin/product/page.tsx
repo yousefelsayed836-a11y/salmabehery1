@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import ProductFormFields, { Variant } from "@/components/ProductFormFields";
+import ProductFormFields from "@/components/ProductFormFields";
 
 interface Category { id: string; name_en: string; slug: string; }
+interface Variant { option_name: string; option_value: string; quantity: number; price_override: number | null; }
 interface Product {
   id: string; name_en: string; name_ar?: string; description_en?: string; description_ar?: string;
   price: number; old_price?: number; stock: number; material?: string; is_active: boolean;
@@ -202,10 +203,7 @@ export default function ProductsPage() {
       category_ids: existingCatIds,
       water_resistance: p.water_resistance || "", size_info: p.size_info || "",
       is_active: p.is_active ?? true,
-      variants: (p.variants || []).map(v => ({
-        option_name: v.option_name, option_value: v.option_value,
-        quantity: v.quantity, price_override: v.price_override, sku: v.sku || "",
-      })),
+      variants: Array.isArray(p.variants) ? p.variants : [],
     });
     setFullEditError("");
   };

@@ -7,6 +7,14 @@ import { useParams } from "next/navigation";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
 const API = BACKEND + "/api";
 
+interface Variant {
+  id?: number;
+  option_name: string;
+  option_value: string;
+  quantity: number;
+  price_override: number | null;
+}
+
 interface Product {
   id: string;
   name_en: string;
@@ -22,6 +30,7 @@ interface Product {
   is_active: boolean;
   category_name?: string;
   category_slug?: string;
+  variants?: Variant[];
 }
 
 
@@ -42,6 +51,7 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [similar, setSimilar] = useState<Product[]>([]);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 
   useEffect(() => { window.scrollTo(0, 0); }, [productId]);
 
@@ -70,10 +80,13 @@ export default function ProductPage() {
 
   const addToCart = (p: Product, count = 1) => {
     const img = getImg(p);
+    const price = selectedVariant?.price_override ?? p.price;
+    const size = selectedVariant ? `${selectedVariant.option_name}: ${selectedVariant.option_value}` : (p.size_info || "One Size");
+    const cartKey = `${p.id}-${size}`;
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const idx = cart.findIndex((i: any) => i.product.id === p.id);
+    const idx = cart.findIndex((i: any) => i.cartKey === cartKey);
     if (idx >= 0) cart[idx].qty = Math.min(10, cart[idx].qty + count);
-    else cart.push({ product: { id: p.id, name_en: p.name_en, price: p.price, image_url: img }, qty: count, size: p.size_info || "One Size" });
+    else cart.push({ cartKey, product: { id: p.id, name_en: p.name_en, price, image_url: img }, qty: count, size });
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
   };
@@ -108,7 +121,16 @@ export default function ProductPage() {
 
   const hasDiscount = product.old_price && product.old_price > product.price;
   const discount = hasDiscount ? Math.round((1 - product.price / product.old_price!) * 100) : 0;
-  const inStock = (product.stock ?? 1) > 0;
+  const activePrice = selectedVariant?.price_override ?? product.price;
+  const activeStock = selectedVariant ? selectedVariant.quantity : (product.stock ?? 1);
+  const inStock = activeStock > 0;
+
+  // Group variants by option_name
+  const variantGroups: Record<string, Variant[]> = {};
+  (product.variants || []).forEach(v => {
+    if (!variantGroups[v.option_name]) variantGroups[v.option_name] = [];
+    variantGroups[v.option_name].push(v);
+  });
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
@@ -177,23 +199,58 @@ export default function ProductPage() {
             {/* Price */}
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {hasDiscount && <span style={{ fontSize: 16, color: "#1a1a2e", textDecoration: "line-through", fontWeight: 400 }}>{product.old_price} EGP</span>}
-              <span style={{ fontSize: 22, fontWeight: 600, color: "#1a1a2e" }}>{product.price} EGP</span>
+              <span style={{ fontSize: 22, fontWeight: 600, color: "#1a1a2e" }}>{activePrice} EGP</span>
             </div>
 
             {/* Stock */}
             <div style={{ fontSize: 13, fontWeight: 400 }}>
               {!inStock
                 ? <span style={{ color: "#ef4444" }}>Out of Stock</span>
-                : product.stock && product.stock <= 5
-                  ? <span style={{ color: "#ef4444" }}>Only {product.stock} left</span>
+                : activeStock <= 5
+                  ? <span style={{ color: "#ef4444" }}>Only {activeStock} left</span>
                   : <span style={{ color: "#22c55e" }}>In Stock</span>}
             </div>
+
+            {/* Variants */}
+            {Object.keys(variantGroups).length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {Object.entries(variantGroups).map(([groupName, groupVariants]) => (
+                  <div key={groupName}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a2e", marginBottom: 8 }}>{groupName}</div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {groupVariants.map((v, i) => {
+                        const isSelected = selectedVariant?.option_name === v.option_name && selectedVariant?.option_value === v.option_value;
+                        const outOfStock = v.quantity === 0;
+                        return (
+                          <button key={i} onClick={() => setSelectedVariant(isSelected ? null : v)}
+                            disabled={outOfStock}
+                            style={{
+                              padding: "8px 18px", borderRadius: 8, cursor: outOfStock ? "not-allowed" : "pointer",
+                              border: `2px solid ${isSelected ? "#fda1b7" : "#ddd"}`,
+                              background: isSelected ? "#fff5f8" : "#fff",
+                              color: outOfStock ? "#bbb" : "#1a1a2e",
+                              fontWeight: isSelected ? 700 : 400, fontSize: 14,
+                              textDecoration: outOfStock ? "line-through" : "none",
+                              transition: "all 0.15s",
+                            }}>
+                            {v.option_value}
+                            {v.price_override && v.price_override !== product.price && (
+                              <span style={{ fontSize: 11, color: "#fda1b7", marginLeft: 4 }}>({v.price_override} EGP)</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Badges */}
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 13, color: "#1a1a2e" }}>
               {product.material && <span>{product.material}</span>}
               {product.water_resistance && <span>{product.water_resistance}</span>}
-              {product.size_info && <span>{product.size_info}</span>}
+              {!Object.keys(variantGroups).length && product.size_info && <span>{product.size_info}</span>}
             </div>
 
             {/* Qty + Add to cart */}
