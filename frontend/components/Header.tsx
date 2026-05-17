@@ -134,7 +134,12 @@ export default function Header() {
 
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <span className="logo-cinzel" style={{
+            <span style={{
+              fontFamily: "'Cairo', sans-serif",
+              fontWeight: 600,
+              fontSize: 22,
+              letterSpacing: 3,
+              whiteSpace: "nowrap",
               color: isTransparent ? "#fff" : "#1a1a2e",
               transition: "color 0.3s ease",
               display: "block",
