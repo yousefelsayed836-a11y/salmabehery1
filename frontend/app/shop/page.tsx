@@ -40,25 +40,36 @@ function ShopContent() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showCart, setShowCart] = useState(false);
   const [toast, setToast] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const PAGE_SIZE = 24;
 
-  useEffect(() => { fetchProducts(); }, [searchQuery]);
+  useEffect(() => { fetchProducts(1, false); }, [searchQuery]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (pageNum = 1, append = false) => {
     try {
-      setLoading(true); setError("");
-      let url = `${API_BASE}/products?is_active=true&limit=500`;
+      if (!append) setLoading(true); else setLoadingMore(true);
+      setError("");
+      let url = `${API_BASE}/products?is_active=true&limit=${PAGE_SIZE}&page=${pageNum}`;
       if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
       const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
-      setProducts(data.products || []);
+      const fetched = data.products || [];
+      const tot = data.pagination?.total ?? fetched.length;
+      setTotal(tot);
+      setProducts(prev => append ? [...prev, ...fetched] : fetched);
+      setHasMore((pageNum * PAGE_SIZE) < tot);
+      setPage(pageNum);
     } catch (err: any) { setError(err?.message || "Failed to load products"); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setLoadingMore(false); }
   };
 
   const addToCart = (product: Product) => {
@@ -160,7 +171,7 @@ function ShopContent() {
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: 16, fontSize: 13, color: "#888" }}>{sorted.length} products</div>
+            <div style={{ marginBottom: 16, fontSize: 13, color: "#888" }}>{products.length}{total > products.length ? ` of ${total}` : ""} products</div>
             <div className="products-grid">
               {sorted.map(p => {
                 const img = getProductImage(p);
@@ -216,6 +227,14 @@ function ShopContent() {
                 );
               })}
             </div>
+            {hasMore && (
+              <div style={{ textAlign: "center", marginTop: 40 }}>
+                <button onClick={() => fetchProducts(page + 1, true)} disabled={loadingMore}
+                  style={{ padding: "14px 48px", borderRadius: 30, border: "2px solid #fda1b7", background: "#fff", color: "#fda1b7", fontSize: 15, fontWeight: 700, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.7 : 1 }}>
+                  {loadingMore ? "Loading..." : `Load More (${total - products.length} remaining)`}
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
