@@ -262,10 +262,9 @@ export default function Header() {
       </header>
 
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap');
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .logo-cinzel {
-          font-family: 'Cinzel Decorative', serif;
+          font-family: var(--font-cinzel), serif;
           font-weight: 400;
           font-size: 22px;
           letter-spacing: 3px;

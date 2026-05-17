@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Cairo, Cormorant_Garamond } from 'next/font/google';
+import { Inter, Cairo, Cormorant_Garamond, Cinzel_Decorative } from 'next/font/google';
 import './globals.css';
 import Header from '../components/Header';
 import Ticker from '../components/Ticker';
@@ -15,6 +15,11 @@ const cormorant = Cormorant_Garamond({
   style: ['normal', 'italic'],
   variable: '--font-cormorant',
 });
+const cinzelDecorative = Cinzel_Decorative({
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  variable: '--font-cinzel',
+});
 
 export const metadata: Metadata = {
   title: 'Salma Behery - Jewelry Store',
@@ -28,7 +33,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" dir="ltr">
-      <body className={`${inter.className} ${cairo.variable} ${cormorant.variable}`} style={{ background: '#fff', margin: 0 }}>
+      <body className={`${inter.className} ${cairo.variable} ${cormorant.variable} ${cinzelDecorative.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
           <FaviconUpdater />
           <FacebookPixel />
