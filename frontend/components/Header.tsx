@@ -134,12 +134,13 @@ export default function Header() {
 
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <img
-              src={isTransparent ? "/images/logo-white.png" : "/images/logo-dark.png"}
-              alt="Salma Behery"
-              className="logo-text"
-              style={{ height: 36, width: "auto", display: "block", transition: "opacity 0.3s ease" }}
-            />
+            <span className="logo-cinzel" style={{
+              color: isTransparent ? "#fff" : "#1a1a2e",
+              transition: "color 0.3s ease",
+              display: "block",
+            }}>
+              SALMA BEHERY
+            </span>
           </Link>
 
           {/* Right: Cart Only (No User Icon) */}
@@ -261,12 +262,20 @@ export default function Header() {
       </header>
 
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap');
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .logo-cinzel {
+          font-family: 'Cinzel Decorative', serif;
+          font-weight: 400;
+          font-size: 22px;
+          letter-spacing: 3px;
+          white-space: nowrap;
+        }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-text { height: 24px !important; }
+          .logo-cinzel { font-size: 15px !important; letter-spacing: 2px !important; }
         }
       `}</style>
     </>
