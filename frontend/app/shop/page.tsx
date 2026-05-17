@@ -194,7 +194,7 @@ function ShopContent() {
                 const discount = hasDiscount ? Math.round((1 - p.price / p.old_price!) * 100) : 0;
 
                 return (
-                  <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(253,161,183,0.1)", transition: "transform 0.2s, box-shadow 0.2s" }}>
+                  <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", transition: "transform 0.2s, box-shadow 0.2s" }}>
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
                     <div className="product-image-wrapper" style={{ position: "relative", aspectRatio: "1/1", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="product-image" loading="lazy"
@@ -279,7 +279,8 @@ function ShopContent() {
 
       <style jsx global>{`
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.2) !important; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.15) !important; }
+        .product-card:hover .product-image { transform: scale(1.05); }
         .product-image-wrapper:hover .product-image { transform: scale(1.05); }
         @media (max-width: 768px) {
           .products-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
