@@ -176,7 +176,7 @@ function ShopContent() {
                       {p.water_resistance && <span style={{ position: "absolute", top: 8, right: 8, background: "#3b82f6", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 600 }}>💧</span>}
                       {p.stock !== undefined && p.stock > 0 && (
                         <span style={{ position: "absolute", bottom: 6, left: 6, background: p.stock <= 3 ? "#ef4444" : "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>
-                          {p.stock <= 5 ? `${p.stock} left` : "In stock"}
+                          {p.stock <= 5 ? `${p.stock} left` : "متوفر"}
                         </span>
                       )}
                       {p.stock === 0 && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
