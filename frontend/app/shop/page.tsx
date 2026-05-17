@@ -199,7 +199,6 @@ function ShopContent() {
                     <div className="product-image-wrapper" style={{ position: "relative", aspectRatio: "1/1", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="product-image" loading="lazy"
                         onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`; }} />
-                      {hasDiscount && <span style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>-{discount}%</span>}
                       {p.water_resistance && <span style={{ position: "absolute", top: 10, right: 10, background: "#3b82f6", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 600 }}>💧</span>}
                       {p.stock !== undefined && p.stock > 0 && (
                       <span style={{ position: "absolute", bottom: 8, left: 8, background: p.stock <= 3 ? "#ef4444" : "#22c55e", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>
