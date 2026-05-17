@@ -105,6 +105,7 @@ export default function OrdersPage() {
   const [depositInput, setDepositInput] = useState<string>("");
   const [selectedForPrint, setSelectedForPrint] = useState<Set<string>>(new Set());
   const [translatedAddresses, setTranslatedAddresses] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchOrders();
@@ -310,6 +311,19 @@ export default function OrdersPage() {
   };
   const fmt = (n: number) => (n || 0).toLocaleString();
 
+  const filteredOrders = searchQuery.trim()
+    ? orders.filter(o => {
+        const q = searchQuery.trim().toLowerCase();
+        return (
+          o.id.slice(-6).toLowerCase().includes(q) ||
+          o.customer_name.toLowerCase().includes(q) ||
+          o.customer_phone.includes(q) ||
+          (o.phone2 || "").includes(q) ||
+          (o.shipping_address || o.address || "").toLowerCase().includes(q)
+        );
+      })
+    : orders;
+
   return (
     <>
       <style jsx global>{`
@@ -345,13 +359,42 @@ export default function OrdersPage() {
             </div>
           </div>
 
+          {/* Search bar */}
+          <div style={{ marginBottom: 16 }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="🔍 ابحث برقم الأوردر، الاسم، التليفون، أو العنوان..."
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                borderRadius: 12,
+                border: "1.5px solid #eee",
+                fontSize: 14,
+                outline: "none",
+                background: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                fontFamily: "inherit",
+                direction: "rtl",
+              }}
+              onFocus={e => (e.target.style.borderColor = "#fda1b7")}
+              onBlur={e => (e.target.style.borderColor = "#eee")}
+            />
+            {searchQuery && (
+              <div style={{ marginTop: 6, fontSize: 12, color: "#888", textAlign: "right" }}>
+                {filteredOrders.length} نتيجة من {orders.length}
+              </div>
+            )}
+          </div>
+
           {error && <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 12, padding: 16, marginBottom: 24, color: "#ef4444", fontWeight: 600 }}>⚠️ {error}</div>}
 
           {loading ? (
             <div style={{ textAlign: "center", padding: 60, color: "#888" }}>Loading orders...</div>
-          ) : orders.length === 0 ? (
+          ) : filteredOrders.length === 0 ? (
             <div style={{ textAlign: "center", padding: 60, background: "#fff", borderRadius: 16, color: "#888" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div><p>No orders found</p>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div><p>{searchQuery ? "لا توجد نتائج" : "No orders found"}</p>
             </div>
           ) : (
             <div className="orders-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
@@ -360,9 +403,9 @@ export default function OrdersPage() {
                   <tr style={{ background: "#1a1a2e", color: "#fff" }}>
                     <th style={{ padding: 14, width: 40 }}>
                       <input type="checkbox" onChange={e => {
-                        if (e.target.checked) setSelectedForPrint(new Set(orders.map(o => o.id)));
+                        if (e.target.checked) setSelectedForPrint(new Set(filteredOrders.map(o => o.id)));
                         else setSelectedForPrint(new Set());
-                      }} checked={selectedForPrint.size === orders.length && orders.length > 0} />
+                      }} checked={selectedForPrint.size === filteredOrders.length && filteredOrders.length > 0} />
                     </th>
                     {["ORDER", "CUSTOMER", "PHONE", "ADDRESS", "CITY", "ITEMS", "TOTAL", "DEPOSIT", "STATUS", "ACTIONS"].map(h => (
                       <th key={h} style={{ padding: 14, textAlign: "left", fontSize: 12, fontWeight: 600 }}>{h}</th>
@@ -370,7 +413,7 @@ export default function OrdersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map(order => {
+                  {filteredOrders.map(order => {
                     const dep = deposits[order.id] || 0;
                     const remaining = Math.max(0, (order.total_amount || 0) - dep);
                     return (
