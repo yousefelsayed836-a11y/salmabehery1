@@ -19,6 +19,16 @@ const FALLBACK_IMAGES: Record<string, string> = {
   "extra-things": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
 };
 
+// Static categories shown instantly before API responds
+const STATIC_CATEGORIES = [
+  { id: "rings",           name_en: "Rings",         slug: "rings",          image: "" },
+  { id: "necklace",        name_en: "Necklaces",     slug: "necklace",       image: "" },
+  { id: "bracelet",        name_en: "Bracelets",     slug: "bracelet",       image: "" },
+  { id: "earrings",        name_en: "Earrings",      slug: "earrings",       image: "" },
+  { id: "hand-chains",     name_en: "Hand Chains",   slug: "hand-chains",    image: "" },
+  { id: "sets-and-offers", name_en: "Sets & Offers", slug: "sets-and-offers",image: "" },
+];
+
 const SEED_REVIEWS = [
   { id: "s1",  customer_name: "Sara M.",    review_text: "Wallahi el khatm da te7fa! Galy fast w el shoghol na3em awy, msh shayfah 3ala edy khales. Ha2oleb tany akeed 100%", rating: 5 },
   { id: "s2",  customer_name: "Nour",       review_text: "El delivery kan super fast w el packaging 7elw awy! El 2erd elly shtrytu a7la mn el sora b kteer, colors zay ma howa", rating: 5 },
@@ -47,7 +57,7 @@ export default function HomePage() {
   const [hoverRating, setHoverRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [apiCategories, setApiCategories] = useState<any[]>([]);
+  const [apiCategories, setApiCategories] = useState<any[]>(STATIC_CATEGORIES);
   const [showPopup, setShowPopup] = useState(false);
   const [featuredSection, setFeaturedSection] = useState<{ title: string; enabled: boolean; products: any[] } | null>(null);
 
@@ -62,18 +72,13 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Ping backend to wake it from Render sleep before user interactions
-    fetch(`${API}/ping`).catch(() => {});
-
+    // Fetch categories + featured in parallel — critical path (updates static fallback)
     Promise.all([
-      fetch(`${API}/categories`).then(r => r.json()).catch(() => []),
+      fetch(`${API}/categories`).then(r => r.json()).catch(() => null),
       fetch(`${API}/settings/featured_section`).then(r => r.json()).catch(() => null),
-      fetch(`${API}/reviews`).then(r => r.json()).catch(() => null),
-    ]).then(async ([cats, featuredRaw, reviewsRaw]) => {
-      // Categories
-      setApiCategories(Array.isArray(cats) ? cats : []);
+    ]).then(async ([cats, featuredRaw]) => {
+      if (Array.isArray(cats) && cats.length > 0) setApiCategories(cats);
 
-      // Featured products — fetch only the specific IDs, not all 1000
       if (featuredRaw?.value) {
         try {
           const cfg = JSON.parse(featuredRaw.value);
@@ -90,13 +95,15 @@ export default function HomePage() {
           }
         } catch {}
       }
+    });
 
-      // Reviews
+    // Reviews are non-critical — load separately without blocking above
+    fetch(`${API}/reviews`).then(r => r.json()).then(reviewsRaw => {
       if (reviewsRaw?.reviews?.length) {
         const seedIds = new Set(SEED_REVIEWS.map((r: any) => r.id));
         setAllReviews([...reviewsRaw.reviews, ...SEED_REVIEWS.filter((r: any) => !seedIds.has(r.id))]);
       }
-    });
+    }).catch(() => {});
   }, []);
 
   const nextReview = () => setCurrentReview((p) => (p + 1) % allReviews.length);
