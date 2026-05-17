@@ -286,19 +286,10 @@ export default function Header() {
       </header>
 
       <style jsx global>{`
-        @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .logo-cinzel {
-          font-family: var(--font-cairo), sans-serif;
-          font-weight: 600;
-          font-size: 22px;
-          letter-spacing: 3px;
-          white-space: nowrap;
-        }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-cinzel { font-size: 15px !important; letter-spacing: 2px !important; }
         }
       `}</style>
     </>
