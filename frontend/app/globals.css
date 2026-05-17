@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix double-tap on iOS: hover effects only when device supports true hover */
+@custom-variant hover {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 @font-face {
   font-family: 'CinzelDeco';
   src: url('/fonts/CinzelDecorative.otf') format('opentype');
