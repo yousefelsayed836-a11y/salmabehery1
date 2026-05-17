@@ -270,33 +270,25 @@ export default function AdminDashboard() {
 
           {/* Nav Cards */}
           <div className="admin-nav-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
-            <Link href="/admin/orders" style={{ background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(253,161,183,0.3)", transition: "transform 0.2s" }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"}>
+            <Link href="/admin/orders" style={{ background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(253,161,183,0.3)" }}>
               <div style={{ fontSize: 36 }}>📦</div>
               <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Orders</h2>
               <span style={{ padding: "4px 16px", borderRadius: 20, background: "rgba(255,255,255,0.25)", fontSize: 12, fontWeight: 600 }}>{totalOrders} orders →</span>
             </Link>
 
-            <Link href="/admin/product" style={{ background: "#1a1a2e", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(26,26,46,0.3)", transition: "transform 0.2s" }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"}>
+            <Link href="/admin/product" style={{ background: "#1a1a2e", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(26,26,46,0.3)" }}>
               <div style={{ fontSize: 36 }}>🛍️</div>
               <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Products</h2>
               <span style={{ padding: "4px 16px", borderRadius: 20, background: "rgba(255,255,255,0.1)", fontSize: 12, fontWeight: 600 }}>{totalProducts} products →</span>
             </Link>
 
-            <Link href="/admin/shipping" style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(99,102,241,0.3)", transition: "transform 0.2s" }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"}>
+            <Link href="/admin/shipping" style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(99,102,241,0.3)" }}>
               <div style={{ fontSize: 36 }}>🚚</div>
               <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Shipping</h2>
               <span style={{ padding: "4px 16px", borderRadius: 20, background: "rgba(255,255,255,0.2)", fontSize: 12, fontWeight: 600 }}>Manage rates →</span>
             </Link>
 
-            <Link href="/admin/categories" style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(245,158,11,0.3)", transition: "transform 0.2s" }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"}>
+            <Link href="/admin/categories" style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)", color: "#fff", borderRadius: 16, padding: "24px 20px", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 4px 20px rgba(245,158,11,0.3)" }}>
               <div style={{ fontSize: 36 }}>🗂️</div>
               <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Categories</h2>
               <span style={{ padding: "4px 16px", borderRadius: 20, background: "rgba(255,255,255,0.2)", fontSize: 12, fontWeight: 600 }}>Manage →</span>

@@ -642,8 +642,6 @@ export default function BraceletPage() {
                     cursor: "pointer",
                     transition: "0.2s",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.02)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
                 >
                   🛒 Add to Cart
                 </button>

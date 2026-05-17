@@ -281,8 +281,7 @@ export default function ProductPage() {
               style={{ display: "block", textAlign: "center", padding: "14px", borderRadius: 12,
                 border: "2px solid #fda1b7", color: "#fda1b7", fontSize: 15, fontWeight: 400,
                 textDecoration: "none", transition: "all 0.2s" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "#fda1b7"; (e.currentTarget as HTMLAnchorElement).style.color = "#fff"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; }}>
+>
               Buy Now
             </Link>
 
