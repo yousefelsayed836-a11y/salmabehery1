@@ -8,6 +8,7 @@ router.get('/', async (req, res) => {
     const admin = req.query.admin === 'true';
     const where = admin ? '' : 'WHERE is_active = true';
     const result = await db.query(`SELECT * FROM categories ${where} ORDER BY sort_order ASC NULLS LAST, name_en ASC`);
+    if (!admin) res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60');
     res.json(result.rows);
   } catch (error) {
     console.error('Get categories error:', error);

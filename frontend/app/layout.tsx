@@ -6,6 +6,7 @@ import Ticker from '../components/Ticker';
 import { CartProvider } from '../components/CartContext';
 import FaviconUpdater from '../components/FaviconUpdater';
 import FacebookPixel from '../components/FacebookPixel';
+import KeepAlive from '../components/KeepAlive';
 
 const inter = Inter({ subsets: ['latin'] });
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' });
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.className} ${cairo.variable} ${cormorant.variable} ${cinzelDecorative.variable} ${robotoCondensed.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
+          <KeepAlive />
           <FaviconUpdater />
           <FacebookPixel />
           <Ticker />
