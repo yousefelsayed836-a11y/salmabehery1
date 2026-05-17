@@ -133,20 +133,13 @@ export default function Header() {
           </div>
 
           {/* Center: Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <span className="logo-text" style={{
-              fontFamily: "'CinzelDeco', 'Cinzel Decorative', serif",
-              fontWeight: 400,
-              fontSize: 22,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              color: isTransparent ? "#fff" : "#1a1a2e",
-              lineHeight: 1,
-              display: "block",
-              transition: "color 0.3s ease",
-            }}>
-              Salma Behery
-            </span>
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
+            <img
+              src={isTransparent ? "/images/logo-white.png" : "/images/logo-dark.png"}
+              alt="Salma Behery"
+              className="logo-text"
+              style={{ height: 32, width: "auto", display: "block", transition: "opacity 0.3s ease" }}
+            />
           </Link>
 
           {/* Right: Cart Only (No User Icon) */}
@@ -247,14 +240,17 @@ export default function Header() {
                 key={item.href} 
                 href={item.href} 
                 onClick={() => setMobileMenuOpen(false)}
-                style={{ 
-                  display: "block", 
-                  padding: "10px 0", 
-                  fontSize: 15, 
-                  fontWeight: 600, 
-                  color: pathname === item.href ? "#fda1b7" : "#333", 
-                  textDecoration: "none", 
-                  borderBottom: "1px solid #fdf0f3" 
+                style={{
+                  display: "block",
+                  padding: "10px 0",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                  color: pathname === item.href ? "#fda1b7" : "#1a1a2e",
+                  textDecoration: "none",
+                  borderBottom: "1px solid #fdf0f3",
+                  fontFamily: "var(--font-cormorant), serif",
                 }}
               >
                 {item.label}
@@ -270,7 +266,7 @@ export default function Header() {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
-          .logo-text { font-size: 15px !important; letter-spacing: 1px !important; }
+          .logo-text { height: 24px !important; }
         }
       `}</style>
     </>
