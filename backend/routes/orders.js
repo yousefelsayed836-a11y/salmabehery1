@@ -1,15 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database/db');
-const nodemailer = require('nodemailer');
+const https = require('https');
 
-async function sendOrderEmail(order, items) {
-  const gmailUser = process.env.GMAIL_USER;
-  const gmailPass = process.env.GMAIL_PASS;
-  if (!gmailUser || !gmailPass) return;
-
-  const adminEmail = process.env.ADMIN_EMAIL || gmailUser;
-
+function buildEmailHtml(order, items) {
   const itemsHtml = (items || []).map(i =>
     `<tr>
       <td style="padding:6px 10px;border-bottom:1px solid #eee">${i.product_name || i.name || 'منتج'}</td>
@@ -17,8 +11,7 @@ async function sendOrderEmail(order, items) {
       <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${i.price} EGP</td>
     </tr>`
   ).join('');
-
-  const html = `
+  return `
 <div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden">
   <div style="background:#1a1a2e;color:#fff;padding:20px;text-align:center">
     <h2 style="margin:0">🛍️ طلب جديد #${order.id}</h2>
@@ -29,13 +22,11 @@ async function sendOrderEmail(order, items) {
     <p><strong>العنوان:</strong> ${order.shipping_address || ''} — ${order.city || order.customer_city || ''} ${order.governorate ? '، ' + order.governorate : ''}</p>
     ${order.notes ? `<p><strong>ملاحظات:</strong> ${order.notes}</p>` : ''}
     <table style="width:100%;border-collapse:collapse;margin-top:16px">
-      <thead>
-        <tr style="background:#f5f5f5">
-          <th style="padding:8px 10px;text-align:right">المنتج</th>
-          <th style="padding:8px 10px">الكمية</th>
-          <th style="padding:8px 10px;text-align:right">السعر</th>
-        </tr>
-      </thead>
+      <thead><tr style="background:#f5f5f5">
+        <th style="padding:8px 10px;text-align:right">المنتج</th>
+        <th style="padding:8px 10px">الكمية</th>
+        <th style="padding:8px 10px;text-align:right">السعر</th>
+      </tr></thead>
       <tbody>${itemsHtml}</tbody>
     </table>
     <div style="margin-top:16px;text-align:left">
@@ -44,17 +35,45 @@ async function sendOrderEmail(order, items) {
     </div>
   </div>
 </div>`;
+}
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: gmailUser, pass: gmailPass },
+async function sendOrderEmail(order, items) {
+  const key = process.env.RESEND_API_KEY;
+  const adminEmail = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com';
+  if (!key) { console.log('[Email] No RESEND_API_KEY set, skipping email'); return; }
+
+  const body = JSON.stringify({
+    from: 'Salma Behery Store <onboarding@resend.dev>',
+    to: [adminEmail],
+    subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
+    html: buildEmailHtml(order, items),
   });
 
-  await transporter.sendMail({
-    from: `"Salma Behery Store" <${gmailUser}>`,
-    to: adminEmail,
-    subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
-    html,
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'api.resend.com',
+      path: '/emails',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log('[Email] Sent successfully to', adminEmail);
+        } else {
+          console.error('[Email] Resend error:', res.statusCode, data);
+        }
+        resolve();
+      });
+    });
+    req.on('error', e => { console.error('[Email] Request error:', e.message); resolve(); });
+    req.write(body);
+    req.end();
   });
 }
 
@@ -179,8 +198,7 @@ router.post('/', async (req, res) => {
       if (io) io.to('orders').emit('new_order', { id: newOrder.id, customer_name: finalCustomerName, total_amount: total });
     } catch (e) {}
 
-    // إيميل للأدمن عبر Resend (بدون باسورد)
-    sendOrderEmail(newOrder, items).catch(() => {});
+    sendOrderEmail(newOrder, items).catch(e => console.error('[Email] Failed:', e.message));
 
     res.status(201).json({
       message: 'Order created successfully',
@@ -189,6 +207,17 @@ router.post('/', async (req, res) => {
   } catch (error) {
     console.error('Order creation error:', error);
     res.status(500).json({ error: error.message, detail: error.detail });
+  }
+});
+
+// Test email endpoint
+router.post('/test-email', async (req, res) => {
+  const fakeOrder = { id: 'TEST-001', customer_name: 'Test', customer_phone: '01000000000', shipping_address: 'Test Address', city: 'Cairo', governorate: '', notes: '', shipping_cost: 50, total_amount: 550 };
+  try {
+    await sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 500 }]);
+    res.json({ ok: true, to: process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
