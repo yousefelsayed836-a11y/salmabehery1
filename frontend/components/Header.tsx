@@ -134,8 +134,8 @@ export default function Header() {
 
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <span className="logo-cinzel logo-text" style={{
-              fontFamily: "CinzelDeco, serif",
+            <span className="logo-text" style={{
+              fontFamily: "'CinzelDeco', 'Cinzel Decorative', serif",
               fontWeight: 400,
               fontSize: 22,
               letterSpacing: 3,
