@@ -134,11 +134,19 @@ export default function Header() {
 
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <img
-              src={isTransparent ? "/images/logo-white.png" : "/images/logo-dark.png"}
-              alt="Salma Behery"
-              style={{ height: 36, width: "auto", display: "block", transition: "opacity 0.3s ease" }}
-            />
+            <span style={{
+              fontFamily: "var(--font-cormorant), serif",
+              fontWeight: 300,
+              fontSize: 26,
+              letterSpacing: 6,
+              whiteSpace: "nowrap",
+              textTransform: "uppercase" as const,
+              color: isTransparent ? "#fff" : "#1a1a2e",
+              transition: "color 0.3s ease",
+              display: "block",
+            }}>
+              Salma Behery
+            </span>
           </Link>
 
           {/* Right: Cart Only (No User Icon) */}
