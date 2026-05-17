@@ -264,8 +264,8 @@ export default function Header() {
       <style jsx global>{`
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .logo-cinzel {
-          font-family: var(--font-cinzel), serif;
-          font-weight: 400;
+          font-family: var(--font-cairo), sans-serif;
+          font-weight: 600;
           font-size: 22px;
           letter-spacing: 3px;
           white-space: nowrap;
