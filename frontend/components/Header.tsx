@@ -133,7 +133,7 @@ export default function Header() {
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", whiteSpace: "nowrap" }}>
             <span style={{
-              fontFamily: "'Cinzel Decorative', serif",
+              fontFamily: "CinzelDeco, serif",
               fontWeight: 400,
               fontSize: 22,
               letterSpacing: 3,
@@ -263,6 +263,13 @@ export default function Header() {
       </header>
 
       <style jsx global>{`
+        @font-face {
+          font-family: 'CinzelDeco';
+          src: url('/fonts/CinzelDecorative-Regular.ttf') format('truetype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: block;
+        }
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
