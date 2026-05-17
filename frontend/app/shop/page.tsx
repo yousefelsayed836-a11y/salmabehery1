@@ -170,16 +170,16 @@ function ShopContent() {
                 return (
                   <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", transition: "transform 0.2s, box-shadow 0.2s" }}>
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
-                    <div className="product-image-wrapper" style={{ position: "relative", aspectRatio: "1/1", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
-                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="product-image" loading="lazy"
+                    <div className="product-image-wrapper" style={{ position: "relative", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
+                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "transform 0.3s" }} className="product-image" loading="lazy"
                         onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`; }} />
-                      {p.water_resistance && <span style={{ position: "absolute", top: 10, right: 10, background: "#3b82f6", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 600 }}>💧</span>}
+                      {p.water_resistance && <span style={{ position: "absolute", top: 8, right: 8, background: "#3b82f6", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 600 }}>💧</span>}
                       {p.stock !== undefined && p.stock > 0 && (
-                      <span style={{ position: "absolute", bottom: 8, left: 8, background: p.stock <= 3 ? "#ef4444" : "#22c55e", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>
-                        {p.stock <= 5 ? `Only ${p.stock} left!` : `In stock: ${p.stock}`}
-                      </span>
-                    )}
-                    {p.stock === 0 && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#6b7280", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>Out of stock</span>}
+                        <span style={{ position: "absolute", bottom: 6, left: 6, background: p.stock <= 3 ? "#ef4444" : "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>
+                          {p.stock <= 5 ? `${p.stock} left` : "In stock"}
+                        </span>
+                      )}
+                      {p.stock === 0 && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
                       
                     </div>
                     </Link>
@@ -255,14 +255,13 @@ function ShopContent() {
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.15) !important; }
         .product-card:hover .product-image { transform: scale(1.05); }
-        .product-image-wrapper:hover .product-image { transform: scale(1.05); }
+        .product-image-wrapper { aspect-ratio: 1/1; }
+        .product-image-wrapper img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
         @media (max-width: 768px) {
           .products-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
-          .product-image-wrapper { height: 180px !important; }
         }
         @media (max-width: 480px) {
           .products-grid { gap: 8px; }
-          .product-image-wrapper { height: 150px !important; }
         }
       `}</style>
     </div>

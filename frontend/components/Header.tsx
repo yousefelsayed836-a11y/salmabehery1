@@ -136,7 +136,7 @@ export default function Header() {
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <span style={{
               fontFamily: "var(--font-roboto-condensed), sans-serif",
-              fontWeight: 400,
+              fontWeight: 500,
               fontSize: 24,
               letterSpacing: 2,
               whiteSpace: "nowrap",
@@ -232,9 +232,9 @@ export default function Header() {
 
         {/* Mobile dropdown */}
         {mobileMenuOpen && (
-          <div style={{ 
-            background: "#fff", 
-            borderTop: "1px solid #fdf0f3", 
+          <div style={{
+            background: "#fff",
+            borderTop: "1px solid #fdf0f3",
             padding: "12px 24px",
             position: "absolute",
             top: "100%",
@@ -242,6 +242,24 @@ export default function Header() {
             right: 0,
             boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
           }}>
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                display: "block",
+                padding: "10px 0",
+                fontSize: 13,
+                fontWeight: 500,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+                color: pathname === "/" ? "#fda1b7" : "#1a1a2e",
+                textDecoration: "none",
+                borderBottom: "1px solid #fdf0f3",
+                fontFamily: "inherit",
+              }}
+            >
+              Home
+            </Link>
             {NAV_LINKS.map(item => (
               <Link 
                 key={item.href} 
