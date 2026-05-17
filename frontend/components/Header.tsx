@@ -135,10 +135,10 @@ export default function Header() {
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <span style={{
-              fontFamily: "var(--font-cormorant), serif",
-              fontWeight: 300,
-              fontSize: 26,
-              letterSpacing: 6,
+              fontFamily: "var(--font-roboto-condensed), sans-serif",
+              fontWeight: 400,
+              fontSize: 24,
+              letterSpacing: 5,
               whiteSpace: "nowrap",
               textTransform: "uppercase" as const,
               color: isTransparent ? "#fff" : "#1a1a2e",
