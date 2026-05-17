@@ -275,8 +275,10 @@ function ShopContent() {
         @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.15) !important; }
-        .product-card:hover .product-image { transform: scale(1.05); }
+        @media (hover: hover) {
+          .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.15) !important; }
+          .product-card:hover .product-image { transform: scale(1.05); }
+        }
         .product-image-wrapper { aspect-ratio: 1/1; }
         .product-image-wrapper img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
         @media (max-width: 768px) {

@@ -695,10 +695,11 @@ export default function BraceletPage() {
           box-shadow: 0 2px 12px rgba(0,0,0,0.06);
           transition: transform 0.2s, box-shadow 0.2s;
         }
-        .product-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-        }
+        @media (hover: hover) {
+          .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+          }
 
         /* ====== Image ====== */
         .product-image-wrapper {
@@ -721,8 +722,9 @@ export default function BraceletPage() {
           object-fit: cover;
           transition: transform 0.3s;
         }
-        .product-card:hover .product-image {
-          transform: scale(1.05);
+          .product-card:hover .product-image {
+            transform: scale(1.05);
+          }
         }
 
         /* ====== Badges ====== */
@@ -909,8 +911,8 @@ export default function BraceletPage() {
           align-items: center;
             justify-content: center;
         }
-        .add-cart-btn:hover {
-          transform: scale(1.02);
+        @media (hover: hover) {
+          .add-cart-btn:hover { transform: scale(1.02); }
         }
         @media (min-width: 640px) {
           .add-cart-btn { height: 36px; font-size: 13px; }
