@@ -28,6 +28,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" dir="ltr">
+      <head>
+        <link rel="preconnect" href="https://salma-backend-4imp.onrender.com" />
+        <link rel="dns-prefetch" href="https://salma-backend-4imp.onrender.com" />
+      </head>
       <body className={`${inter.className} ${robotoCondensed.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
           <KeepAlive />
