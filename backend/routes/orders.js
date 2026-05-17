@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database/db');
-const https = require('https');
+const nodemailer = require('nodemailer');
 
 async function sendOrderEmail(order, items) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return;
-  const adminEmail = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com';
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_PASS;
+  if (!gmailUser || !gmailPass) return;
+
+  const adminEmail = process.env.ADMIN_EMAIL || gmailUser;
 
   const itemsHtml = (items || []).map(i =>
     `<tr>
@@ -43,30 +45,16 @@ async function sendOrderEmail(order, items) {
   </div>
 </div>`;
 
-  const body = JSON.stringify({
-    from: 'Salma Behery Store <onboarding@resend.dev>',
-    to: [adminEmail],
-    subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
-    html,
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: gmailUser, pass: gmailPass },
   });
 
-  return new Promise((resolve) => {
-    const req = https.request({
-      hostname: 'api.resend.com',
-      path: '/emails',
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body),
-      },
-    }, (res) => {
-      res.on('data', () => {});
-      res.on('end', resolve);
-    });
-    req.on('error', (e) => console.error('Email error:', e.message));
-    req.write(body);
-    req.end();
+  await transporter.sendMail({
+    from: `"Salma Behery Store" <${gmailUser}>`,
+    to: adminEmail,
+    subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
+    html,
   });
 }
 
