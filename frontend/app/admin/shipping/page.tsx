@@ -116,7 +116,6 @@ export default function ShippingPage() {
   };
 
   const deleteRate = async (r: Rate) => {
-    if (!confirm(`Delete "${r.name}"?`)) return;
     await fetch(`${API}/shipping/${r.id}`, { method: "DELETE" });
     if (expandedGov === r.id) setExpandedGov(null);
     fetchRates();
@@ -184,7 +183,6 @@ export default function ShippingPage() {
   };
 
   const deleteCity = async (cityId: number, govId: number) => {
-    if (!confirm("حذف المدينة؟")) return;
     await fetch(`${API}/shipping/city/${cityId}`, { method: "DELETE" });
     await fetchCities(govId);
   };
