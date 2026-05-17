@@ -135,8 +135,8 @@ export default function Header() {
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <span style={{
-              fontFamily: "'Cairo', sans-serif",
-              fontWeight: 600,
+              fontFamily: "var(--font-cinzel), serif",
+              fontWeight: 400,
               fontSize: 22,
               letterSpacing: 3,
               whiteSpace: "nowrap",
