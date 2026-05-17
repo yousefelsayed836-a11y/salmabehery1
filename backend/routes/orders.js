@@ -132,6 +132,7 @@ router.post('/', async (req, res) => {
 
     addField('customer_name', finalCustomerName);
     addField('customer_phone', finalPhone);
+    addField('phone2', phone2 || '');
     addField('shipping_address', finalAddress);
     if (!orderColumns.includes('shipping_address') && orderColumns.includes('address')) {
       orderFields.push('address'); orderValues.push(finalAddress);

@@ -209,10 +209,10 @@ export default function OrdersPage() {
       break-after: auto;
     }
 
-    /* === WAYBILL: compact enough that 2 fit on any page === */
+    /* === WAYBILL: 2 fit in 80% of A4 page === */
     .waybill {
       width: 100%;
-      height: 128mm;
+      height: 111mm;
       border: 1.5px solid #000;
       border-radius: 6px;
       padding: 8px 12px;
@@ -257,7 +257,7 @@ export default function OrdersPage() {
     .wb-item { display: flex; gap: 5px; font-size: 10px; padding: 2px 0; border-bottom: 1px dotted #ccc; }
     .wb-item-name { flex: 1; font-weight: 600; color: #000; }
     .wb-item-size { color: #555; }
-    .wb-item-qty { color: #000; font-weight: 700; }
+    .wb-item-qty { color: #000; font-weight: 700; direction: ltr; unicode-bidi: embed; }
     .wb-totals { margin-top: auto; border-top: 1.5px solid #000; padding-top: 4px; }
     .wb-total-row { display: flex; justify-content: space-between; font-size: 10px; padding: 1px 0; color: #555; }
     .wb-total-final { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #000; margin-top: 3px; border-top: 1px solid #999; padding-top: 3px; }

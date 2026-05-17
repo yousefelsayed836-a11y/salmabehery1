@@ -69,7 +69,7 @@ export default function ProductPage() {
             .then(r => r.json())
             .then(data => {
               const all: Product[] = data.products || data.data || [];
-              setSimilar(all.filter((x: Product) => x.id !== productId).slice(0, 4));
+              setSimilar(all.filter((x: Product) => x.id !== productId && x.is_active !== false).slice(0, 4));
             })
             .catch(() => {});
         }
