@@ -429,6 +429,7 @@ export default function OrdersPage() {
               <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div><p>{searchQuery ? "لا توجد نتائج" : "No orders found"}</p>
             </div>
           ) : (
+            <>
             <div className="orders-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
@@ -566,6 +567,7 @@ export default function OrdersPage() {
                 );
               })}
             </div>
+            </>
           )}
         </div>
       </div>
