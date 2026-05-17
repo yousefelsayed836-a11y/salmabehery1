@@ -131,9 +131,9 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ position: "relative", aspectRatio: "1/1", background: "#fafafa", overflow: "hidden" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi" loading="lazy" onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
-                      {oos && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#6b7280", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>Out of stock</span>}
-                      {low && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>Only {p.stock} left!</span>}
-                      {!oos && !low && p.stock !== undefined && <span style={{ position: "absolute", bottom: 8, left: 8, background: "#22c55e", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700 }}>In stock: {p.stock}</span>}
+                      {oos && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
+                      {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>{p.stock} left</span>}
+                      {!oos && !low && p.stock !== undefined && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>In stock</span>}
                     </div>
                     </Link>
                     <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
