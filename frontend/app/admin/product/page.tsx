@@ -4,6 +4,7 @@ import Link from "next/link";
 import ProductFormFields from "@/components/ProductFormFields";
 
 interface Category { id: string; name_en: string; slug: string; }
+interface Variant { option_name: string; option_value: string; quantity: number; price_override: number | null; }
 interface Product {
   id: string; name_en: string; name_ar?: string; description_en?: string; description_ar?: string;
   price: number; old_price?: number; stock: number; material?: string; is_active: boolean;
@@ -11,6 +12,7 @@ interface Product {
   category_name?: string; water_resistance?: string; size_info?: string;
   categories?: { id: string; name_en: string; slug: string }[];
   category_ids?: string[];
+  variants?: Variant[];
 }
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
@@ -26,6 +28,7 @@ const emptyForm = {
   name_en: "", name_ar: "", description_en: "", description_ar: "",
   price: "", old_price: "", stock: "", material: "", main_image: "",
   category_id: "", category_ids: [] as string[], water_resistance: "", size_info: "", is_active: true,
+  variants: [] as Variant[],
 };
 
 export default function ProductsPage() {
@@ -103,6 +106,7 @@ export default function ProductsPage() {
           category_ids: addForm.category_ids.length > 0 ? addForm.category_ids : undefined,
           water_resistance: addForm.water_resistance || undefined,
           size_info: addForm.size_info || undefined, is_active: addForm.is_active,
+          variants: addForm.variants || [],
         }),
       });
       if (res.ok) {
@@ -134,6 +138,7 @@ export default function ProductsPage() {
           category_ids: fullEditForm.category_ids.length > 0 ? fullEditForm.category_ids : undefined,
           water_resistance: fullEditForm.water_resistance || undefined,
           size_info: fullEditForm.size_info || undefined, is_active: fullEditForm.is_active,
+          variants: fullEditForm.variants || [],
         }),
       });
       if (res.ok) {
@@ -198,6 +203,7 @@ export default function ProductsPage() {
       category_ids: existingCatIds,
       water_resistance: p.water_resistance || "", size_info: p.size_info || "",
       is_active: p.is_active ?? true,
+      variants: Array.isArray(p.variants) ? p.variants : [],
     });
     setFullEditError("");
   };
