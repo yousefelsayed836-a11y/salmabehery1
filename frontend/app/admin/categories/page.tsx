@@ -97,7 +97,6 @@ export default function AdminCategories() {
   };
 
   const deleteCat = async (id: string) => {
-    if (!confirm("Delete this category?")) return;
     await fetch(`${API}/categories/${id}`, { method: "DELETE" });
     flash("Deleted");
     fetchCats();
