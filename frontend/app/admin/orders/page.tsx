@@ -450,9 +450,7 @@ export default function OrdersPage() {
                     const dep = deposits[order.id] || 0;
                     const remaining = Math.max(0, (order.total_amount || 0) - dep);
                     return (
-                      <tr key={order.id} style={{ borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}
-                        onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = "#fef9fb"}
-                        onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = "transparent"}>
+                      <tr key={order.id} style={{ borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}>
                         <td style={{ padding: "0 14px" }} onClick={e => e.stopPropagation()}>
                           <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)} />
                         </td>

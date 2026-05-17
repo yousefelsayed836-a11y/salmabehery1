@@ -1,0 +1,24 @@
+name: Auto merge to main
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Merge to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/yousefelsayed836-a11y/salmabehery1.git
+          git checkout main
+          git merge --strategy-option=theirs origin/${{ github.ref_name }} --allow-unrelated-histories -m "Auto-merge ${{ github.ref_name }} → main"
+          git push origin main
