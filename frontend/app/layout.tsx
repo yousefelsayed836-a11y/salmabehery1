@@ -7,7 +7,7 @@ import { CartProvider } from '../components/CartContext';
 import FaviconUpdater from '../components/FaviconUpdater';
 import FacebookPixel from '../components/FacebookPixel';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const inter = Inter({ subsets: ['latin'] });
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' });
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" dir="ltr">
-      <body className={`${inter.variable} ${cairo.variable} ${cormorant.variable}`} style={{ background: '#fff', margin: 0 }}>
+      <body className={`${inter.className} ${cairo.variable} ${cormorant.variable}`} style={{ background: '#fff', margin: 0 }}>
         <CartProvider>
           <FaviconUpdater />
           <FacebookPixel />
