@@ -147,7 +147,7 @@ function ShopContent() {
         {error && (
           <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 12, padding: 16, marginBottom: 24, textAlign: "center" }}>
             <span style={{ color: "#ef4444", fontWeight: 600 }}>{error}</span>
-            <button onClick={fetchProducts} style={{ marginLeft: 12, padding: "6px 12px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", cursor: "pointer" }}>Retry</button>
+            <button onClick={() => fetchProducts(1, false)} style={{ marginLeft: 12, padding: "6px 12px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", cursor: "pointer" }}>Retry</button>
           </div>
         )}
 
