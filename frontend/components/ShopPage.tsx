@@ -154,7 +154,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ position: "relative", aspectRatio: "1/1", background: "#fafafa", overflow: "hidden" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi"
-                        loading={idx < 8 ? "eager" : "lazy"}
+                        loading={idx < 4 ? "eager" : "lazy"} decoding="async"
                         onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
                       {oos && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
                       {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>{p.stock} left</span>}
