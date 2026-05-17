@@ -69,7 +69,11 @@ export default function ProductPage() {
             .then(r => r.json())
             .then(data => {
               const all: Product[] = data.products || data.data || [];
-              setSimilar(all.filter((x: Product) => x.id !== productId && x.is_active !== false).slice(0, 4));
+              setSimilar(all.filter((x: Product) =>
+                x.id !== productId &&
+                x.is_active !== false &&
+                (x.stock === undefined || x.stock === null || x.stock > 0)
+              ).slice(0, 4));
             })
             .catch(() => {});
         }
@@ -371,8 +375,10 @@ export default function ProductPage() {
           box-shadow: 0 2px 10px rgba(253,161,183,0.08);
           transition: transform 0.2s, box-shadow 0.2s;
         }
-        .sim-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.18) !important; }
-        .sim-card:hover .sim-img { transform: scale(1.06); }
+        @media (hover: hover) {
+          .sim-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.18) !important; }
+          .sim-card:hover .sim-img { transform: scale(1.06); }
+        }
 
         @media (max-width: 768px) {
           .pd-layout {

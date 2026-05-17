@@ -96,6 +96,13 @@ export default function CheckoutPage() {
       .finally(() => setLoadingCities(false));
   }, [form.governorate, shippingRates]);
 
+  const removeItem = (index: number) => {
+    const updated = cart.filter((_, i) => i !== index);
+    setCart(updated);
+    localStorage.setItem("cart", JSON.stringify(updated));
+    window.dispatchEvent(new Event("cartUpdated"));
+  };
+
   const subtotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
   const govShipping = form.governorate ? (shippingRates[form.governorate]?.cost ?? DEFAULT_SHIPPING) : DEFAULT_SHIPPING;
 
@@ -224,9 +231,10 @@ export default function CheckoutPage() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 12, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product.name_en}</div>
-                          <div style={{ fontSize: 11, color: "#aaa" }}>x{item.qty}</div>
+                          <div style={{ fontSize: 11, color: "#aaa" }}>x{item.qty}{item.size ? ` · ${item.size}` : ""}</div>
                         </div>
                         <div style={{ fontWeight: 700, color: "#fda1b7", fontSize: 13 }}>{item.product.price * item.qty} EGP</div>
+                        <button onClick={() => removeItem(i)} style={{ background: "none", border: "none", color: "#bbb", fontSize: 18, cursor: "pointer", padding: "0 2px", lineHeight: 1, flexShrink: 0 }} title="Remove">×</button>
                       </div>
                     ))}
                   </div>
