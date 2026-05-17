@@ -321,7 +321,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <label style={labelStyle}>Street Address *</label>
-                  <p style={{ margin: "0 0 6px", fontSize: 12, color: "#888", direction: "rtl", textAlign: "right" }}>برجاء كتابة العنوان باللغة العربية</p>
+                  <p style={{ margin: "0 0 6px", fontSize: 13, color: "#c0185a", direction: "rtl", textAlign: "right", fontFamily: "Cairo, Tahoma, sans-serif" }}>برجاء الكتابة باللغة العربية</p>
                   <input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="العنوان بالعربية" style={{ ...inputStyle, direction: "rtl" }} required />
                 </div>
 
