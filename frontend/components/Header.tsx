@@ -263,13 +263,6 @@ export default function Header() {
       </header>
 
       <style jsx global>{`
-        @font-face {
-          font-family: 'CinzelDeco';
-          src: url('/fonts/CinzelDecorative-Regular.ttf') format('truetype');
-          font-weight: 400;
-          font-style: normal;
-          font-display: block;
-        }
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
