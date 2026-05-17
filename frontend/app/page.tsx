@@ -62,39 +62,38 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API}/categories`, { cache: "no-store" })
-      .then(r => r.json())
-      .then((d: any[]) => setApiCategories(Array.isArray(d) ? d : []))
-      .catch(() => {});
-  }, []);
+    // Ping backend to wake it from Render sleep before user interactions
+    fetch(`${API}/ping`).catch(() => {});
 
-  useEffect(() => {
-    fetch(`${API}/settings/featured_section`)
-      .then(r => r.json())
-      .then(async d => {
-        if (!d.value) return;
-        const cfg = JSON.parse(d.value);
-        if (!cfg.enabled || !cfg.product_ids?.length) return;
-        const ids: string[] = cfg.product_ids;
-        const res = await fetch(`${API}/products?limit=1000`);
-        const data = await res.json();
-        const all: any[] = Array.isArray(data) ? data : data.products || [];
-        const picked = ids.map(id => all.find(p => String(p.id) === String(id))).filter(Boolean);
-        setFeaturedSection({ title: cfg.title || "Featured Products", enabled: true, products: picked });
-      })
-      .catch(() => {});
-  }, []);
+    Promise.all([
+      fetch(`${API}/categories`).then(r => r.json()).catch(() => []),
+      fetch(`${API}/settings/featured_section`).then(r => r.json()).catch(() => null),
+      fetch(`${API}/reviews`).then(r => r.json()).catch(() => null),
+    ]).then(async ([cats, featuredRaw, reviewsRaw]) => {
+      // Categories
+      setApiCategories(Array.isArray(cats) ? cats : []);
 
-  useEffect(() => {
-    fetch(`${API}/reviews`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.reviews && d.reviews.length > 0) {
-          const seedIds = new Set(SEED_REVIEWS.map(r => r.id));
-          setAllReviews([...d.reviews, ...SEED_REVIEWS.filter(r => !seedIds.has(r.id))]);
-        }
-      })
-      .catch(() => {});
+      // Featured products — fetch only the specific IDs, not all 1000
+      if (featuredRaw?.value) {
+        try {
+          const cfg = JSON.parse(featuredRaw.value);
+          if (cfg.enabled && cfg.product_ids?.length) {
+            const ids: string[] = cfg.product_ids;
+            const fetched = await Promise.all(
+              ids.map(id => fetch(`${API}/products/${id}`).then(r => r.json()).catch(() => null))
+            );
+            const picked = fetched.filter(Boolean);
+            if (picked.length) setFeaturedSection({ title: cfg.title || "Featured Products", enabled: true, products: picked });
+          }
+        } catch {}
+      }
+
+      // Reviews
+      if (reviewsRaw?.reviews?.length) {
+        const seedIds = new Set(SEED_REVIEWS.map((r: any) => r.id));
+        setAllReviews([...reviewsRaw.reviews, ...SEED_REVIEWS.filter((r: any) => !seedIds.has(r.id))]);
+      }
+    });
   }, []);
 
   const nextReview = () => setCurrentReview((p) => (p + 1) % allReviews.length);

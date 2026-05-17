@@ -119,6 +119,8 @@ router.get('/', async (req, res) => {
     const countResult = await db.query(countQuery, countParams);
     const total = parseInt(countResult.rows[0].count);
 
+    const isPublicRead = !search && is_active !== 'false' && !status;
+    if (isPublicRead) res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=30');
     res.json({
       success: true,
       products: result.rows,

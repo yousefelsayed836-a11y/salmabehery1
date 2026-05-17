@@ -5,11 +5,14 @@ const path = require('path');
 const http = require('http');
 const multer = require('multer');
 const fs = require('fs');
+const compression = require('compression');
 const { initSocket } = require('./config/socket');
 
 dotenv.config();
 
 const app = express();
+
+app.use(compression());
 
 // ✅ CORS
 app.use(cors({
@@ -137,6 +140,9 @@ app.set('broadcast', (data) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+// ✅ Keepalive ping (prevents Render cold start)
+app.get('/api/ping', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
