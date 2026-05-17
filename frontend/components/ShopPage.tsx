@@ -209,8 +209,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
         @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
         .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
         .pc{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #eee;box-shadow:0 2px 12px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s}
-        .pc:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(253,161,183,.15)!important}
-        .pc:hover .pi{transform:scale(1.05)}
+        @media(hover:hover){.pc:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(253,161,183,.15)!important}.pc:hover .pi{transform:scale(1.05)}}
         .price-block{display:flex;flex-direction:column;gap:2px}
         .pc-skeleton{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #eee}
         .sk-img{aspect-ratio:1/1;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:400px 100%;animation:shimmer 1.2s infinite}

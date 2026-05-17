@@ -163,8 +163,6 @@ export default function Header() {
                 borderRadius: 10, 
                 transition: "all 0.2s" 
               }}
-              onMouseEnter={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "#fef4f0")}
-              onMouseLeave={e => !isTransparent && ((e.currentTarget as HTMLAnchorElement).style.background = "transparent")}
             >
               <BagIcon />
               {cartCount > 0 && (
@@ -217,12 +215,6 @@ export default function Header() {
                 color: pathname === item.href ? "#fda1b7" : (isTransparent ? "#fff" : "#555"),
                 background: pathname === item.href ? (isTransparent ? "rgba(255,255,255,0.15)" : "#fef4f0") : "transparent",
                 transition: "all 0.2s",
-              }}
-              onMouseEnter={e => { 
-                if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = "#fda1b7"; 
-              }}
-              onMouseLeave={e => { 
-                if (pathname !== item.href) (e.currentTarget as HTMLAnchorElement).style.color = isTransparent ? "#fff" : "#555"; 
               }}
             >
               {item.label}
