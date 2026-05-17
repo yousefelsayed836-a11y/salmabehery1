@@ -132,15 +132,7 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Center: Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <img
-              src={isTransparent ? "/images/logo-white.png" : "/images/logo-dark.png"}
-              alt="Salma Behery"
-              className="logo-text"
-              style={{ height: 32, width: "auto", display: "block", transition: "opacity 0.3s ease" }}
-            />
-          </Link>
+          {/* Center: empty - no logo */}
 
           {/* Right: Cart Only (No User Icon) */}
           <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, justifyContent: "flex-end" }}>
