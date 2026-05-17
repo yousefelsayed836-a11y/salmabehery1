@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "./CartContext";
@@ -12,6 +12,7 @@ interface Product {
 }
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
+const PAGE_SIZE = 24;
 
 function getImg(p: Product) {
   const img = p.main_image || (p.images && p.images[0]);
@@ -26,21 +27,36 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   const { cartItems, cartCount, cartTotal, addToCart, removeFromCart, updateQty } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showCart, setShowCart] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = useCallback(async (pageNum = 1, append = false) => {
     try {
-      setLoading(true); setError("");
-      const res = await fetch(`${API_BASE}/products?is_active=true&collection=${collectionSlug}&limit=500`, { cache: "no-store" });
+      if (!append) setLoading(true);
+      else setLoadingMore(true);
+      setError("");
+      const res = await fetch(
+        `${API_BASE}/products?is_active=true&collection=${collectionSlug}&limit=${PAGE_SIZE}&page=${pageNum}&sort=${sortBy}`
+      );
       const data = await res.json();
-      setProducts(data.products || []);
+      const fetched: Product[] = data.products || [];
+      const tot = data.pagination?.total ?? fetched.length;
+      setTotal(tot);
+      setProducts(prev => append ? [...prev, ...fetched] : fetched);
+      setHasMore((pageNum * PAGE_SIZE) < tot);
+      setPage(pageNum);
     } catch (e: any) { setError(e.message || "Failed"); }
-    finally { setLoading(false); }
-  }, [collectionSlug]);
+    finally { setLoading(false); setLoadingMore(false); }
+  }, [collectionSlug, sortBy]);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => { fetchProducts(1, false); }, [fetchProducts]);
+
+  const loadMore = () => fetchProducts(page + 1, true);
 
   const handleAdd = (product: Product) => {
     if ((product.stock ?? 1) === 0) return;
@@ -112,14 +128,21 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
 
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px" }}>
         {loading ? (
-          <div className="sg"><div/><div/><div/><div/><div/><div/></div>
+          <div className="sg">{Array.from({length: 8}).map((_,i) => (
+            <div key={i} className="pc-skeleton"><div className="sk-img"/><div style={{padding:"12px 14px"}}><div className="sk-line" style={{width:"80%",marginBottom:8}}/><div className="sk-line" style={{width:"50%"}}/></div></div>
+          ))}</div>
+        ) : error ? (
+          <div style={{ textAlign: "center", padding: 60, color: "#999" }}>
+            <p>{error}</p>
+            <button onClick={() => fetchProducts(1)} style={{ padding: "8px 20px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", cursor: "pointer" }}>Retry</button>
+          </div>
         ) : sorted.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60, color: "#999" }}><div style={{ fontSize: 48 }}>📦</div><p>No products found</p></div>
         ) : (
           <>
-            <div style={{ marginBottom: 16, fontSize: 13, color: "#888" }}>{sorted.length} products</div>
+            <div style={{ marginBottom: 16, fontSize: 13, color: "#888" }}>{products.length} of {total} products</div>
             <div className="sg">
-              {sorted.map(p => {
+              {sorted.map((p, idx) => {
                 const img = getImg(p);
                 const hasD = p.old_price && p.old_price > p.price;
                 const disc = hasD ? Math.round((1 - p.price / p.old_price!) * 100) : 0;
@@ -130,7 +153,9 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                   <div key={p.id} className="pc">
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
                     <div style={{ position: "relative", aspectRatio: "1/1", background: "#fafafa", overflow: "hidden" }}>
-                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi" loading="lazy" onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
+                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi"
+                        loading={idx < 8 ? "eager" : "lazy"}
+                        onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
                       {oos && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
                       {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>{p.stock} left</span>}
                       {!oos && !low && p.stock !== undefined && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>متوفر</span>}
@@ -166,17 +191,30 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                 );
               })}
             </div>
+
+            {/* Load More */}
+            {hasMore && (
+              <div style={{ textAlign: "center", marginTop: 40 }}>
+                <button onClick={loadMore} disabled={loadingMore}
+                  style={{ padding: "14px 48px", borderRadius: 30, border: "2px solid #fda1b7", background: loadingMore ? "#fef4f0" : "#fff", color: "#fda1b7", fontSize: 15, fontWeight: 700, cursor: loadingMore ? "not-allowed" : "pointer", transition: "all 0.2s" }}>
+                  {loadingMore ? "Loading..." : `Load More (${total - products.length} remaining)`}
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
 
       <style jsx global>{`
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-        .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+        @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+        .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
         .pc{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #eee;box-shadow:0 2px 12px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s}
         .pc:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(253,161,183,.15)!important}
         .pc:hover .pi{transform:scale(1.05)}
         .price-block{display:flex;flex-direction:column;gap:2px}
+        .pc-skeleton{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #eee}
+        .sk-img{aspect-ratio:1/1;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:400px 100%;animation:shimmer 1.2s infinite}
+        .sk-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:400px 100%;animation:shimmer 1.2s infinite}
         @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr);gap:10px}}
       `}</style>
     </div>
