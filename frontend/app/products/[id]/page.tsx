@@ -168,6 +168,7 @@ export default function ProductPage() {
               )}
               <img src={getImg(product, activeImg)} alt={product.name_en}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                loading="eager" decoding="async"
                 onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/600x600/fda1b7/fff?text=??"; }} />
             </div>
 

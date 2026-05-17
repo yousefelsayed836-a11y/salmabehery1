@@ -154,11 +154,11 @@ function ShopContent() {
         {loading ? (
           <div className="products-grid">
             {[1,2,3,4,5,6,7,8].map(i => (
-              <div key={i} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 10px rgba(253,161,183,0.1)" }}>
-                <div style={{ height: 200, background: "#fff", animation: "pulse 1.5s infinite" }} />
+              <div key={i} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee" }}>
+                <div style={{ aspectRatio: "1/1", background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "400px 100%", animation: "shimmer 1.2s infinite" }} />
                 <div style={{ padding: 14 }}>
-                  <div style={{ height: 16, background: "#fff", borderRadius: 4, marginBottom: 8, width: "70%", animation: "pulse 1.5s infinite" }} />
-                  <div style={{ height: 14, background: "#fff", borderRadius: 4, width: "40%", animation: "pulse 1.5s infinite" }} />
+                  <div style={{ height: 14, background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "400px 100%", animation: "shimmer 1.2s infinite", borderRadius: 6, marginBottom: 10, width: "75%" }} />
+                  <div style={{ height: 12, background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "400px 100%", animation: "shimmer 1.2s infinite", borderRadius: 6, width: "45%" }} />
                 </div>
               </div>
             ))}
@@ -182,7 +182,8 @@ function ShopContent() {
                   <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", transition: "transform 0.2s, box-shadow 0.2s" }}>
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
                     <div className="product-image-wrapper" style={{ position: "relative", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
-                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "transform 0.3s" }} className="product-image" loading="lazy"
+                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "transform 0.3s" }} className="product-image"
+                        loading="lazy" decoding="async"
                         onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`; }} />
                       {p.water_resistance && <span style={{ position: "absolute", top: 8, right: 8, background: "#3b82f6", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 600 }}>💧</span>}
                       {p.stock !== undefined && p.stock > 0 && (
@@ -271,6 +272,8 @@ function ShopContent() {
       )}
 
       <style jsx global>{`
+        @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.15) !important; }
         .product-card:hover .product-image { transform: scale(1.05); }
