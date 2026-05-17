@@ -9,15 +9,13 @@ export default function FaviconUpdater() {
       .then(r => r.json())
       .then(d => {
         if (!d.value) return;
-        const existing = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-        if (existing) {
-          existing.href = d.value;
-        } else {
-          const link = document.createElement("link");
-          link.rel = "icon";
-          link.href = d.value;
-          document.head.appendChild(link);
-        }
+        // Remove all existing icon links then add fresh one
+        document.querySelectorAll("link[rel~='icon'], link[rel='shortcut icon']").forEach(el => el.remove());
+        const link = document.createElement("link");
+        link.rel = "icon";
+        link.type = d.value.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+        link.href = d.value + "?t=" + Date.now();
+        document.head.appendChild(link);
       })
       .catch(() => {});
   }, []);

@@ -39,12 +39,13 @@ function buildEmailHtml(order, items) {
 
 async function sendOrderEmail(order, items) {
   const key = process.env.RESEND_API_KEY;
-  const adminEmail = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com';
+  const raw = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com';
+  const recipients = raw.split(',').map(e => e.trim()).filter(Boolean);
   if (!key) { console.log('[Email] No RESEND_API_KEY set, skipping email'); return; }
 
   const body = JSON.stringify({
     from: 'Salma Behery Store <onboarding@resend.dev>',
-    to: [adminEmail],
+    to: recipients,
     subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
     html: buildEmailHtml(order, items),
   });
@@ -64,7 +65,7 @@ async function sendOrderEmail(order, items) {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          console.log('[Email] Sent successfully to', adminEmail);
+          console.log('[Email] Sent successfully to', recipients.join(', '));
         } else {
           console.error('[Email] Resend error:', res.statusCode, data);
         }
@@ -215,7 +216,7 @@ router.get('/test-email', async (req, res) => {
   const fakeOrder = { id: 'TEST-001', customer_name: 'Test', customer_phone: '01000000000', shipping_address: 'Test Address', city: 'Cairo', governorate: '', notes: '', shipping_cost: 50, total_amount: 550 };
   try {
     await sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 500 }]);
-    res.json({ ok: true, to: process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com' });
+    res.json({ ok: true, to: process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com', key_set: !!process.env.RESEND_API_KEY });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
