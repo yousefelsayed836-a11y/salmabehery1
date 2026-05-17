@@ -192,6 +192,9 @@ export default function HomePage() {
           .categories-grid-inner { gap: 7px; }
           .cat-title { font-size: 12px !important; }
         }
+        @media (hover: hover) {
+          .sparkle-img:hover { transform: scale(1.05); }
+        }
       `}</style>
 
       {/* ── POPUP ── */}
@@ -440,12 +443,11 @@ export default function HomePage() {
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 3, maxWidth: 680, margin: "0 auto", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(253,161,183,0.15)" }}>
           {["sparkle-1", "sparkle-2", "sparkle-3", "sparkle-4"].map((s, i) => (
-            <div key={s} style={{ overflow: "hidden", aspectRatio: "1/1", background: "#fff" }}>
+            <div key={s} className="sparkle-cell" style={{ overflow: "hidden", aspectRatio: "1/1", background: "#fff" }}>
               <img src={`/images/${s}.jpg`} alt={`Sparkle ${i + 1}`}
                 loading="lazy" decoding="async"
+                className="sparkle-img"
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s ease" }}
-                onMouseEnter={e => (e.target as HTMLImageElement).style.transform = "scale(1.05)"}
-                onMouseLeave={e => (e.target as HTMLImageElement).style.transform = "scale(1)"}
                 onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/340x340/fdf0f3/fda1b7?text=✨`; }} />
             </div>
           ))}
