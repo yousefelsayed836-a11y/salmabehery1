@@ -83,41 +83,41 @@ app.get('/api/images/:id', async (req, res) => {
   }
 });
 
-// ✅ Single image upload — stored in DB, permanent, cached 1 year
+// ✅ imgBB upload helper — free, permanent, no DB usage
+const fetch = require('node-fetch');
+async function uploadToImgBB(buffer) {
+  const key = process.env.IMGBB_API_KEY;
+  if (!key) throw new Error('IMGBB_API_KEY not set');
+  const params = new URLSearchParams();
+  params.set('key', key);
+  params.set('image', buffer.toString('base64'));
+  const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: params });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error?.message || 'imgBB failed');
+  return data.data.display_url;
+}
+
+// ✅ Single image upload → imgBB (free, permanent)
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-    const b64 = req.file.buffer.toString('base64');
-    const result = await db.query(
-      'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
-      [req.file.mimetype, b64]
-    );
-    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
-    res.json({ success: true, url: `${BASE_URL}/api/images/${result.rows[0].id}` });
+    const url = await uploadToImgBB(req.file.buffer);
+    res.json({ success: true, url });
   } catch (e) {
     console.error('Upload error:', e);
-    res.status(500).json({ error: 'Upload failed' });
+    res.status(500).json({ error: 'Upload failed: ' + e.message });
   }
 });
 
-// ✅ Multiple images upload — stored in DB, permanent, cached 1 year
+// ✅ Multiple images upload → imgBB (free, permanent)
 app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
-    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
-    const urls = [];
-    for (const file of req.files) {
-      const b64 = file.buffer.toString('base64');
-      const r = await db.query(
-        'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
-        [file.mimetype, b64]
-      );
-      urls.push(`${BASE_URL}/api/images/${r.rows[0].id}`);
-    }
+    const urls = await Promise.all(req.files.map(f => uploadToImgBB(f.buffer)));
     res.json({ success: true, urls });
   } catch (e) {
     console.error('Multiple upload error:', e);
-    res.status(500).json({ error: 'Upload failed' });
+    res.status(500).json({ error: 'Upload failed: ' + e.message });
   }
 });
 
