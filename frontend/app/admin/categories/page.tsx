@@ -58,16 +58,16 @@ export default function AdminCategories() {
 
   const cancel = () => { setShowForm(false); setEditing(null); setForm(EMPTY); };
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = (file: File) => {
     setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("image", file);
-      const r = await fetch(`${API.replace("/api", "")}/api/upload`, { method: "POST", body: fd });
-      const data = await r.json();
-      if (data.url) setForm(f => ({ ...f, image: data.url }));
-    } catch { flash("Upload failed"); }
-    setUploading(false);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      if (base64) setForm(f => ({ ...f, image: base64 }));
+      setUploading(false);
+    };
+    reader.onerror = () => { flash("Upload failed"); setUploading(false); };
+    reader.readAsDataURL(file);
   };
 
   const save = async () => {

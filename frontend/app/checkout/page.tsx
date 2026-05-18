@@ -364,5 +364,5 @@ export default function CheckoutPage() {
   );
 }
 
-const labelStyle: React.CSSProperties = { display: "block", fontSize: 12, fontWeight: 700, color: "#666", marginBottom: 6 };
-const inputStyle: React.CSSProperties = { width: "100%", padding: "11px 14px", borderRadius: 10, border: "1.5px solid #f0d4dc", fontSize: 14, outline: "none", boxSizing: "border-box", background: "#fff" };
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 13, fontWeight: 700, color: "#666", marginBottom: 6 };
+const inputStyle: React.CSSProperties = { width: "100%", padding: "12px 14px", borderRadius: 10, border: "1.5px solid #f0d4dc", fontSize: 16, outline: "none", boxSizing: "border-box", background: "#fff" };
