@@ -698,6 +698,10 @@ export default function BraceletPage() {
             transform: translateY(-4px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
           }
+          .product-card:hover .product-image {
+            transform: scale(1.05);
+          }
+        }
 
         /* ====== Image ====== */
         .product-image-wrapper {
@@ -719,10 +723,6 @@ export default function BraceletPage() {
           height: 100%;
           object-fit: cover;
           transition: transform 0.3s;
-        }
-          .product-card:hover .product-image {
-            transform: scale(1.05);
-          }
         }
 
         /* ====== Badges ====== */

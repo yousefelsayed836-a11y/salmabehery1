@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Roboto_Condensed } from 'next/font/google';
 import './globals.css';
 import Header from '../components/Header';
@@ -15,6 +15,12 @@ const robotoCondensed = Roboto_Condensed({
   variable: '--font-roboto-condensed',
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   title: 'Salma Behery - Jewelry Store',

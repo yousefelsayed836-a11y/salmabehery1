@@ -422,8 +422,9 @@ export default function HomePage() {
                 style={{ width: "100%", padding: 12, margin: "8px 0", border: "1px solid #ddd", borderRadius: 6, fontFamily: "inherit", fontSize: 14, resize: "vertical", boxSizing: "border-box" }} />
               <div style={{ display: "flex", justifyContent: "center", margin: "14px 0", gap: 6 }}>
                 {[1, 2, 3, 4, 5].map(star => (
-                  <span key={star} onClick={() => setFormRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
-                    style={{ fontSize: 32, color: star <= (hoverRating || formRating) ? "#fda1b7" : "#ccc", cursor: "pointer", transition: "color 0.15s" }}>★</span>
+                  <span key={star} onClick={() => setFormRating(star)}
+                    onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
+                    style={{ fontSize: 32, color: star <= (hoverRating || formRating) ? "#fda1b7" : "#ccc", cursor: "pointer", touchAction: "manipulation" }}>★</span>
                 ))}
               </div>
               <button type="submit" disabled={submitting}
