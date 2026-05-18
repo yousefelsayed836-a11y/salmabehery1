@@ -8,27 +8,9 @@ const fs = require('fs');
 const compression = require('compression');
 const { initSocket } = require('./config/socket');
 const db = require('./database/db');
-const cloudinary = require('cloudinary').v2;
-
 dotenv.config();
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-async function uploadToCloudinary(file) {
-  const b64 = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-  const result = await cloudinary.uploader.upload(b64, {
-    folder: 'salma-products',
-    resource_type: 'auto',
-    transformation: [{ quality: 'auto:good', fetch_format: 'auto' }],
-  });
-  return result.secure_url;
-}
-
-const uploadMemory = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 
@@ -44,7 +26,7 @@ app.use(cors({
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// ✅ Legacy static uploads (backward compat for old URLs)
+// ✅ Static uploads (legacy URLs)
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir, { maxAge: '1y', immutable: true }));
@@ -63,9 +45,9 @@ app.use('/api/cart', require('./routes/cart'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/reviews', require('./routes/reviews'));
 
-// ✅ Bulk upload (CSV — memory only)
+// ✅ Bulk upload CSV
 const bulkUploadRoutes = require('./routes/admin/bulkUpload');
-app.use('/api/admin/products/bulk-upload', uploadMemory.single('csv'), bulkUploadRoutes);
+app.use('/api/admin/products/bulk-upload', upload.single('csv'), bulkUploadRoutes);
 
 // ✅ Settings (favicon, etc.)
 app.use('/api/settings', require('./routes/settings'));
@@ -101,23 +83,37 @@ app.get('/api/images/:id', async (req, res) => {
   }
 });
 
-// ✅ Single image upload → Cloudinary CDN (permanent + fast)
-app.post('/api/upload', uploadMemory.single('image'), async (req, res) => {
+// ✅ Single image upload — stored in DB, permanent, cached 1 year
+app.post('/api/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-    const url = await uploadToCloudinary(req.file);
-    res.json({ success: true, url });
+    const b64 = req.file.buffer.toString('base64');
+    const result = await db.query(
+      'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
+      [req.file.mimetype, b64]
+    );
+    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
+    res.json({ success: true, url: `${BASE_URL}/api/images/${result.rows[0].id}` });
   } catch (e) {
     console.error('Upload error:', e);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
 
-// ✅ Multiple images upload → Cloudinary CDN (permanent + fast)
-app.post('/api/upload/multiple', uploadMemory.array('images', 20), async (req, res) => {
+// ✅ Multiple images upload — stored in DB, permanent, cached 1 year
+app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
-    const urls = await Promise.all(req.files.map(f => uploadToCloudinary(f)));
+    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
+    const urls = [];
+    for (const file of req.files) {
+      const b64 = file.buffer.toString('base64');
+      const r = await db.query(
+        'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
+        [file.mimetype, b64]
+      );
+      urls.push(`${BASE_URL}/api/images/${r.rows[0].id}`);
+    }
     res.json({ success: true, urls });
   } catch (e) {
     console.error('Multiple upload error:', e);
