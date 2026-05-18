@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "../../components/CartContext";
@@ -50,8 +50,20 @@ function ShopContent() {
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
   const PAGE_SIZE = 24;
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { fetchProducts(1, false); }, [searchQuery]);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const obs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        fetchProducts(page + 1, true);
+      }
+    }, { rootMargin: "200px" });
+    obs.observe(sentinelRef.current);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, page]);
 
   const fetchProducts = async (pageNum = 1, append = false) => {
     try {
@@ -228,14 +240,8 @@ function ShopContent() {
                 );
               })}
             </div>
-            {hasMore && (
-              <div style={{ textAlign: "center", marginTop: 40 }}>
-                <button onClick={() => fetchProducts(page + 1, true)} disabled={loadingMore}
-                  style={{ padding: "14px 48px", borderRadius: 30, border: "2px solid #fda1b7", background: "#fff", color: "#fda1b7", fontSize: 15, fontWeight: 700, cursor: loadingMore ? "not-allowed" : "pointer", opacity: loadingMore ? 0.7 : 1 }}>
-                  {loadingMore ? "Loading..." : `Load More (${total - products.length} remaining)`}
-                </button>
-              </div>
-            )}
+            <div ref={sentinelRef} style={{ height: 1 }} />
+            {loadingMore && <div style={{ textAlign: "center", padding: 24, color: "#fda1b7", fontSize: 14, fontWeight: 600 }}>Loading...</div>}
           </>
         )}
       </div>

@@ -219,6 +219,7 @@ export default function ProductsPage() {
       <style jsx global>{`
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        input, select, textarea { font-size: 16px !important; }
         .prod-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
         .prod-table-wrap table { min-width: 700px; }
         @media (max-width: 640px) {

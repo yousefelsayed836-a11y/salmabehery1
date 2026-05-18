@@ -196,6 +196,7 @@ export default function AdminDashboard() {
       <style jsx global>{`
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        input, select, textarea { font-size: 16px !important; }
         @media (max-width: 640px) {
           .admin-wrap { padding: 12px !important; }
           .admin-nav-grid { grid-template-columns: 1fr 1fr !important; }

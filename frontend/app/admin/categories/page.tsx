@@ -108,6 +108,8 @@ export default function AdminCategories() {
   };
 
   return (
+    <>
+    <style jsx global>{`input, select, textarea { font-size: 16px !important; }`}</style>
     <div style={{ minHeight: "100vh", background: "#f5f5f5", padding: 20 }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
@@ -206,5 +208,6 @@ export default function AdminCategories() {
         )}
       </div>
     </div>
+    </>
   );
 }

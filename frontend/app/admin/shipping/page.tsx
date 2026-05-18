@@ -199,7 +199,7 @@ export default function ShippingPage() {
 
   return (
     <>
-      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }`}</style>
+      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; } input, select, textarea { font-size: 16px !important; }`}</style>
 
       <div style={{ minHeight: "100vh", padding: "24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>

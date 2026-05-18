@@ -56,7 +56,17 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
 
   useEffect(() => { fetchProducts(1, false); }, [fetchProducts]);
 
-  const loadMore = () => fetchProducts(page + 1, true);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const obs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        fetchProducts(page + 1, true);
+      }
+    }, { rootMargin: "200px" });
+    obs.observe(sentinelRef.current);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, page, fetchProducts]);
 
   const handleAdd = (product: Product) => {
     if ((product.stock ?? 1) === 0) return;
@@ -192,15 +202,8 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
               })}
             </div>
 
-            {/* Load More */}
-            {hasMore && (
-              <div style={{ textAlign: "center", marginTop: 40 }}>
-                <button onClick={loadMore} disabled={loadingMore}
-                  style={{ padding: "14px 48px", borderRadius: 30, border: "2px solid #fda1b7", background: loadingMore ? "#fef4f0" : "#fff", color: "#fda1b7", fontSize: 15, fontWeight: 700, cursor: loadingMore ? "not-allowed" : "pointer", transition: "all 0.2s" }}>
-                  {loadingMore ? "Loading..." : `Load More (${total - products.length} remaining)`}
-                </button>
-              </div>
-            )}
+            <div ref={sentinelRef} style={{ height: 1 }} />
+            {loadingMore && <div style={{ textAlign: "center", padding: 24, color: "#fda1b7", fontSize: 14, fontWeight: 600 }}>Loading...</div>}
           </>
         )}
       </div>
