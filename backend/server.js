@@ -7,6 +7,7 @@ const multer = require('multer');
 const fs = require('fs');
 const compression = require('compression');
 const { initSocket } = require('./config/socket');
+const db = require('./database/db');
 
 dotenv.config();
 
@@ -21,10 +22,10 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// ✅ Serve uploaded images statically
+// ✅ Serve uploaded images statically (legacy — kept for old URLs)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ✅ Multer - memory storage
@@ -57,58 +58,65 @@ app.use('/api/shipping', require('./routes/shipping'));
 // ✅ One-time CSV import
 app.use('/api/admin/import-products', require('./routes/admin/importProducts'));
 
-// ✅ Single image upload
-app.post('/api/upload', upload.single('image'), (req, res) => {
+// ✅ Ensure uploaded_images table exists
+db.query(`
+  CREATE TABLE IF NOT EXISTS uploaded_images (
+    id BIGSERIAL PRIMARY KEY,
+    mime_type TEXT NOT NULL,
+    data TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`).catch(e => console.error('DB image table init error:', e.message));
+
+// ✅ Serve image from DB
+app.get('/api/images/:id', async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image uploaded' });
-    }
+    const result = await db.query('SELECT mime_type, data FROM uploaded_images WHERE id=$1', [req.params.id]);
+    if (!result.rows.length) return res.status(404).end();
+    const { mime_type, data } = result.rows[0];
+    const buf = Buffer.from(data, 'base64');
+    res.set('Content-Type', mime_type);
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    res.send(buf);
+  } catch (e) {
+    res.status(500).end();
+  }
+});
 
-    const uploadsDir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    const filename = Date.now() + '-' + req.file.originalname.replace(/\s+/g, '-');
-    const filepath = path.join(uploadsDir, filename);
-    fs.writeFileSync(filepath, req.file.buffer);
-
-    const BASE_URL = process.env.BASE_URL || `https://salma-backend-4imp.onrender.com`;
-    res.json({
-      success: true,
-      url: `${BASE_URL}/uploads/${filename}`
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
+// ✅ Single image upload — stored in DB (persistent)
+app.post('/api/upload', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+    const b64 = req.file.buffer.toString('base64');
+    const result = await db.query(
+      'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
+      [req.file.mimetype, b64]
+    );
+    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
+    res.json({ success: true, url: `${BASE_URL}/api/images/${result.rows[0].id}` });
+  } catch (e) {
+    console.error('Upload error:', e);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
 
-// ✅ Multiple images upload
-app.post('/api/upload/multiple', upload.array('images', 10), (req, res) => {
+// ✅ Multiple images upload — stored in DB (persistent)
+app.post('/api/upload/multiple', upload.array('images', 10), async (req, res) => {
   try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: 'No images uploaded' });
-    }
-
-    const uploadsDir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    const BASE_URL = process.env.BASE_URL || `https://salma-backend-4imp.onrender.com`;
+    if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
+    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
     const urls = [];
-
     for (const file of req.files) {
-      const filename = Date.now() + '-' + file.originalname.replace(/\s+/g, '-');
-      const filepath = path.join(uploadsDir, filename);
-      fs.writeFileSync(filepath, file.buffer);
-      urls.push(`${BASE_URL}/uploads/${filename}`);
+      const b64 = file.buffer.toString('base64');
+      const result = await db.query(
+        'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
+        [file.mimetype, b64]
+      );
+      urls.push(`${BASE_URL}/api/images/${result.rows[0].id}`);
     }
-
     res.json({ success: true, urls });
-  } catch (error) {
-    console.error('Multiple upload error:', error);
+  } catch (e) {
+    console.error('Multiple upload error:', e);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
