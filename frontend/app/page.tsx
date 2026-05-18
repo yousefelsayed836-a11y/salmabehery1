@@ -133,11 +133,6 @@ export default function HomePage() {
 
   return (
     <>
-      <Head>
-        <title>Salma Behery — Premium Jewelry Collection</title>
-        <meta name="description" content="Premium Jewelry. Free Shipping above 900 EGP, Cash on Delivery." />
-      </Head>
-
       <style jsx global>{`
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(30px); }
