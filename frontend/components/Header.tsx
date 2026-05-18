@@ -85,7 +85,7 @@ export default function Header() {
   return (
     <>
       {/* Header */}
-      <header style={{
+      <header className="header-root" style={{
         position: isHome ? "fixed" : "sticky",
         top: "40px",
         left: 0,
@@ -134,7 +134,7 @@ export default function Header() {
 
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-            <span style={{
+            <span className="header-logo" style={{
               fontFamily: "var(--font-roboto-condensed), sans-serif",
               fontWeight: 500,
               fontSize: 24,
@@ -282,6 +282,8 @@ export default function Header() {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
+          .header-root { padding: 4px 14px !important; }
+          .header-logo { font-size: 17px !important; letter-spacing: 1.5px !important; }
         }
       `}</style>
     </>

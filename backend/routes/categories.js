@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
+// Ensure image column is TEXT (not VARCHAR) so base64 images fit
+db.query(`ALTER TABLE categories ALTER COLUMN image TYPE TEXT`).catch(() => {});
+
 // GET all (admin=true returns all including inactive)
 router.get('/', async (req, res) => {
   try {

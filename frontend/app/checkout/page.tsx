@@ -9,7 +9,7 @@ interface CartItem {
   size: string;
 }
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
 
 // كل المحافظات والمدن المصرية
 const EGYPT_DATA: Record<string, { nameAr: string; cities: string[] }> = {
@@ -204,8 +204,8 @@ export default function CheckoutPage() {
 
   return (
     <div style={{ background: "#f9f0f3", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "20px 16px 40px" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", margin: "0 0 20px" }}>🛒 Checkout</h1>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 16px 40px" }}>
+        <h1 className="checkout-title" style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", margin: "0 0 20px" }}>🛒 Checkout</h1>
 
         <div className="checkout-grid">
 
@@ -358,6 +358,7 @@ export default function CheckoutPage() {
           .checkout-summary { order: 1; }
           .checkout-form { order: 2; }
           .form-row { grid-template-columns: 1fr; }
+          .checkout-title { font-size: 18px !important; }
         }
       `}</style>
     </div>
