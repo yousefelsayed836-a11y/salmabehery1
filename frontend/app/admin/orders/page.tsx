@@ -30,8 +30,8 @@ interface Order {
   items?: OrderItem[];
 }
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 
 const isArabic = (text: string) => /[؀-ۿ]/.test(text);
 
@@ -106,6 +106,14 @@ export default function OrdersPage() {
   const [selectedForPrint, setSelectedForPrint] = useState<Set<string>>(new Set());
   const [translatedAddresses, setTranslatedAddresses] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    // Disable pinch-zoom on admin orders page (mobile dashboard)
+    const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
+    const original = meta?.getAttribute("content") || "";
+    if (meta) meta.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no");
+    return () => { if (meta && original) meta.setAttribute("content", original); };
+  }, []);
 
   useEffect(() => {
     fetchOrders();
@@ -340,7 +348,10 @@ export default function OrdersPage() {
           .modal-header { padding: 14px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
           .orders-table-wrap { display: none; }
           .orders-mobile-cards { display: flex; flex-direction: column; gap: 12px; }
+          input, select, textarea { font-size: 16px !important; }
+          .orders-mobile-select-bar { display: flex !important; }
         }
+        .orders-mobile-select-bar { display: none; align-items: center; gap: 10px; margin-bottom: 10px; }
         .order-card {
           background: #fff;
           border-radius: 14px;
@@ -525,6 +536,25 @@ export default function OrdersPage() {
               </table>
             </div>
 
+            {/* Mobile select-all bar */}
+            <div className="orders-mobile-select-bar">
+              <input type="checkbox"
+                checked={selectedForPrint.size === filteredOrders.length && filteredOrders.length > 0}
+                onChange={e => {
+                  if (e.target.checked) setSelectedForPrint(new Set(filteredOrders.map(o => o.id)));
+                  else setSelectedForPrint(new Set());
+                }}
+                style={{ width: 18, height: 18, accentColor: "#fda1b7" }} />
+              <span style={{ fontSize: 14, fontWeight: 600, color: "#555" }}>
+                {selectedForPrint.size > 0 ? `${selectedForPrint.size} selected` : "Select all"}
+              </span>
+              {selectedForPrint.size > 0 && (
+                <button onClick={handleBatchPrint} style={{ marginLeft: "auto", padding: "8px 14px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                  🖨️ طباعة {selectedForPrint.size}
+                </button>
+              )}
+            </div>
+
             {/* Mobile card view */}
             <div className="orders-mobile-cards">
               {filteredOrders.map(order => {
@@ -533,7 +563,11 @@ export default function OrdersPage() {
                 return (
                   <div key={order.id} className="order-card">
                     <div className="order-card-row">
-                      <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 16 }}>#{order.id.slice(-6)}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)}
+                          style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#fda1b7" }} />
+                        <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 16 }}>#{order.id.slice(-6)}</span>
+                      </div>
                       <select value={order.status} onChange={e => updateStatus(order.id, e.target.value)}
                         style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #ddd", fontSize: 12, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
                         <option value="pending">Pending</option>
@@ -554,8 +588,8 @@ export default function OrdersPage() {
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
                       <input type="number" value={dep === 0 ? "" : dep}
                         onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
-                        placeholder="مقدم (EGP)"
-                        style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none" }} />
+                        placeholder="مقدم (EGP)" inputMode="numeric"
+                        style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 16, outline: "none" }} />
                     </div>
                     <div className="order-card-actions">
                       <button onClick={() => openOrder(order)} style={{ background: "#1a1a2e", color: "#fff" }}>👁️ View</button>

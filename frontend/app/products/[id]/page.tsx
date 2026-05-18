@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 const API = BACKEND + "/api";
 
 interface Variant {
@@ -87,10 +87,11 @@ export default function ProductPage() {
     const price = selectedVariant?.price_override ?? p.price;
     const size = selectedVariant ? `${selectedVariant.option_name}: ${selectedVariant.option_value}` : (p.size_info || "One Size");
     const cartKey = `${p.id}-${size}`;
+    const maxQty = selectedVariant ? selectedVariant.quantity : (p.stock ?? 99);
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const idx = cart.findIndex((i: any) => i.cartKey === cartKey);
-    if (idx >= 0) cart[idx].qty = Math.min(10, cart[idx].qty + count);
-    else cart.push({ cartKey, product: { id: p.id, name_en: p.name_en, price, image_url: img }, qty: count, size });
+    if (idx >= 0) cart[idx].qty = Math.min(maxQty, cart[idx].qty + count);
+    else cart.push({ cartKey, product: { id: p.id, name_en: p.name_en, price, image_url: img }, qty: Math.min(maxQty, count), size });
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
   };
@@ -264,7 +265,7 @@ export default function ProductPage() {
                 <button onClick={() => setQty(q => Math.max(1, q - 1))}
                   style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 400, color: "#1a1a2e", cursor: "pointer" }}>−</button>
                 <span style={{ width: 44, textAlign: "center", fontWeight: 400, fontSize: 16, color: "#1a1a2e" }}>{qty}</span>
-                <button onClick={() => setQty(q => Math.min(10, q + 1))}
+                <button onClick={() => setQty(q => Math.min(activeStock > 0 ? activeStock : 99, q + 1))}
                   style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 400, color: "#1a1a2e", cursor: "pointer" }}>+</button>
               </div>
               <button onClick={handleAddToCart} disabled={!inStock}
