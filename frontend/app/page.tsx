@@ -143,10 +143,10 @@ export default function HomePage() {
           100% { background-position: 200% center; }
         }
         .cat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .cat-card img { transition: transform 0.45s ease; }
+        .cat-card img { transition: transform 0.45s ease; filter: contrast(1.04) saturate(1.08); }
         @media (hover: hover) {
           .cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(253,161,183,0.25) !important; }
-          .cat-card:hover img { transform: scale(1.07); }
+          .cat-card:hover img { transform: scale(1.07); filter: contrast(1.06) saturate(1.12); }
         }
         .feat-card {
           border-radius: 16px;
@@ -314,7 +314,7 @@ export default function HomePage() {
               display: "flex", flexDirection: "column", overflow: "hidden",
               border: "1px solid #eee",
             }}>
-              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f9f0f3", position: "relative" }}>
+              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#222", position: "relative" }}>
                 <img src={img} alt={cat.name_en}
                   loading="eager" decoding="async" fetchPriority="high"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
