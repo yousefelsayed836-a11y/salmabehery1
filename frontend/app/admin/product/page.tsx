@@ -27,6 +27,7 @@ function getProductImage(p: Product) {
 const emptyForm = {
   name_en: "", name_ar: "", description_en: "", description_ar: "",
   price: "", old_price: "", stock: "", material: "", main_image: "",
+  images: [] as string[],
   category_id: "", category_ids: [] as string[], water_resistance: "", size_info: "", is_active: true,
   variants: [] as Variant[],
 };
@@ -74,13 +75,38 @@ export default function ProductsPage() {
 
   useEffect(() => { fetchProducts(); fetchCategories(); }, [fetchProducts, fetchCategories]);
 
-  const uploadImage = async (file: File, setter: (f: string, v: any) => void) => {
+  const UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com"}/api/upload/multiple`;
+
+  const uploadImagesForAdd = async (files: File[]) => {
     setUploadingImage(true);
     try {
-      const fd = new FormData(); fd.append("image", file);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com"}/api/upload`, { method: "POST", body: fd });
+      const fd = new FormData();
+      files.forEach(f => fd.append("images", f));
+      const res = await fetch(UPLOAD_URL, { method: "POST", body: fd });
       const data = await res.json();
-      if (data.url) setter("main_image", data.url);
+      if (data.urls) {
+        setAddForm(p => {
+          const next = [...(p.images || []), ...data.urls];
+          return { ...p, images: next, main_image: next[0] || "" };
+        });
+      }
+    } catch (e: any) { alert("Upload failed: " + e.message); }
+    finally { setUploadingImage(false); }
+  };
+
+  const uploadImagesForEdit = async (files: File[]) => {
+    setUploadingImage(true);
+    try {
+      const fd = new FormData();
+      files.forEach(f => fd.append("images", f));
+      const res = await fetch(UPLOAD_URL, { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.urls) {
+        setFullEditForm(p => {
+          const next = [...(p.images || []), ...data.urls];
+          return { ...p, images: next, main_image: next[0] || "" };
+        });
+      }
     } catch (e: any) { alert("Upload failed: " + e.message); }
     finally { setUploadingImage(false); }
   };
@@ -101,7 +127,8 @@ export default function ProductsPage() {
           description_en: addForm.description_en || undefined, description_ar: addForm.description_ar || undefined,
           price: Number(addForm.price), old_price: addForm.old_price ? Number(addForm.old_price) : undefined,
           stock: Number(addForm.stock) || 0, material: addForm.material || undefined,
-          main_image: addForm.main_image || undefined, images: addForm.main_image ? [addForm.main_image] : [],
+          main_image: addForm.images?.[0] || addForm.main_image || undefined,
+          images: addForm.images?.length > 0 ? addForm.images : (addForm.main_image ? [addForm.main_image] : []),
           category_id: addForm.category_ids[0] || addForm.category_id || undefined,
           category_ids: addForm.category_ids.length > 0 ? addForm.category_ids : undefined,
           water_resistance: addForm.water_resistance || undefined,
@@ -133,7 +160,8 @@ export default function ProductsPage() {
           description_en: fullEditForm.description_en || undefined, description_ar: fullEditForm.description_ar || undefined,
           price: Number(fullEditForm.price), old_price: fullEditForm.old_price ? Number(fullEditForm.old_price) : null,
           stock: Number(fullEditForm.stock) || 0, material: fullEditForm.material || undefined,
-          main_image: fullEditForm.main_image || undefined, images: fullEditForm.main_image ? [fullEditForm.main_image] : undefined,
+          main_image: fullEditForm.images?.[0] || fullEditForm.main_image || undefined,
+          images: fullEditForm.images?.length > 0 ? fullEditForm.images : (fullEditForm.main_image ? [fullEditForm.main_image] : undefined),
           category_id: fullEditForm.category_ids[0] || fullEditForm.category_id || undefined,
           category_ids: fullEditForm.category_ids.length > 0 ? fullEditForm.category_ids : undefined,
           water_resistance: fullEditForm.water_resistance || undefined,
@@ -198,6 +226,7 @@ export default function ProductsPage() {
       price: String(p.price || 0), old_price: p.old_price ? String(p.old_price) : "",
       stock: String(p.stock || 0), material: p.material || "",
       main_image: p.main_image || p.image_url || "",
+      images: p.images?.length ? p.images : (p.main_image || p.image_url) ? [p.main_image || p.image_url || ""] : [],
       category_id: p.category_id || "",
       category_ids: existingCatIds,
       water_resistance: p.water_resistance || "", size_info: p.size_info || "",
@@ -362,7 +391,7 @@ export default function ProductsPage() {
               <button onClick={() => setShowAddModal(false)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "#fff", fontSize: 18, cursor: "pointer" }}>✕</button>
             </div>
             {addError && <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 10, padding: 12, marginBottom: 20, color: "#ef4444", fontWeight: 600 }}>⚠️ {addError}</div>}
-            <ProductFormFields form={addForm} onChange={handleAddChange} formId="add" categories={categories} uploadingImage={uploadingImage} onUploadImage={f => uploadImage(f, handleAddChange)} />
+            <ProductFormFields form={addForm} onChange={handleAddChange} formId="add" categories={categories} uploadingImage={uploadingImage} onUploadImages={uploadImagesForAdd} />
             <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "flex-end" }}>
               <button onClick={() => setShowAddModal(false)} style={{ padding: "12px 24px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", color: "#666", cursor: "pointer" }}>Cancel</button>
               <button onClick={saveAddProduct} disabled={addSaving} style={{ padding: "12px 32px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#22c55e,#16a34a)", color: "#fff", fontWeight: 700, cursor: addSaving ? "not-allowed" : "pointer", opacity: addSaving ? 0.7 : 1 }}>
@@ -382,7 +411,7 @@ export default function ProductsPage() {
               <button onClick={() => setFullEditProduct(null)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "#fff", fontSize: 18, cursor: "pointer" }}>✕</button>
             </div>
             {fullEditError && <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 10, padding: 12, marginBottom: 20, color: "#ef4444", fontWeight: 600 }}>⚠️ {fullEditError}</div>}
-            <ProductFormFields form={fullEditForm} onChange={handleFullEditChange} formId="edit" categories={categories} uploadingImage={uploadingImage} onUploadImage={f => uploadImage(f, handleFullEditChange)} />
+            <ProductFormFields form={fullEditForm} onChange={handleFullEditChange} formId="edit" categories={categories} uploadingImage={uploadingImage} onUploadImages={uploadImagesForEdit} />
             <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "flex-end" }}>
               <button onClick={() => setFullEditProduct(null)} style={{ padding: "12px 24px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", color: "#666", cursor: "pointer" }}>Cancel</button>
               <button onClick={saveFullEdit} disabled={fullEditSaving} style={{ padding: "12px 32px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: fullEditSaving ? "not-allowed" : "pointer", opacity: fullEditSaving ? 0.7 : 1 }}>

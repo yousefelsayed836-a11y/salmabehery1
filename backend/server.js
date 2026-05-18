@@ -8,8 +8,25 @@ const fs = require('fs');
 const compression = require('compression');
 const { initSocket } = require('./config/socket');
 const db = require('./database/db');
+const cloudinary = require('cloudinary').v2;
 
 dotenv.config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+async function uploadToCloudinary(file) {
+  const b64 = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+  const result = await cloudinary.uploader.upload(b64, {
+    folder: 'salma-products',
+    resource_type: 'auto',
+    transformation: [{ quality: 'auto:good', fetch_format: 'auto' }],
+  });
+  return result.secure_url;
+}
 
 const app = express();
 
@@ -83,37 +100,23 @@ app.get('/api/images/:id', async (req, res) => {
   }
 });
 
-// ✅ Single image upload — stored in DB (persistent)
+// ✅ Single image upload — Cloudinary CDN
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-    const b64 = req.file.buffer.toString('base64');
-    const result = await db.query(
-      'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
-      [req.file.mimetype, b64]
-    );
-    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
-    res.json({ success: true, url: `${BASE_URL}/api/images/${result.rows[0].id}` });
+    const url = await uploadToCloudinary(req.file);
+    res.json({ success: true, url });
   } catch (e) {
     console.error('Upload error:', e);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
 
-// ✅ Multiple images upload — stored in DB (persistent)
-app.post('/api/upload/multiple', upload.array('images', 10), async (req, res) => {
+// ✅ Multiple images upload — Cloudinary CDN
+app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
-    const BASE_URL = process.env.BASE_URL || 'https://api.salmabehery.com';
-    const urls = [];
-    for (const file of req.files) {
-      const b64 = file.buffer.toString('base64');
-      const result = await db.query(
-        'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
-        [file.mimetype, b64]
-      );
-      urls.push(`${BASE_URL}/api/images/${result.rows[0].id}`);
-    }
+    const urls = await Promise.all(req.files.map(f => uploadToCloudinary(f)));
     res.json({ success: true, urls });
   } catch (e) {
     console.error('Multiple upload error:', e);

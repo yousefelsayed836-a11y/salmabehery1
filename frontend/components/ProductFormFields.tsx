@@ -18,7 +18,7 @@ interface ProductFormFieldsProps {
   formId: string;
   categories: Category[];
   uploadingImage: boolean;
-  onUploadImage: (file: File) => void;
+  onUploadImages: (files: File[]) => void;
 }
 
 const labelStyle: React.CSSProperties = {
@@ -31,7 +31,9 @@ const inputStyle: React.CSSProperties = {
 
 const emptyVariant = (): Variant => ({ option_name: "Size", option_value: "", quantity: 0, price_override: null });
 
-export default function ProductFormFields({ form, onChange, formId, categories, uploadingImage, onUploadImage }: ProductFormFieldsProps) {
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
+
+export default function ProductFormFields({ form, onChange, formId, categories, uploadingImage, onUploadImages }: ProductFormFieldsProps) {
   const selectedIds: string[] = Array.isArray(form.category_ids) ? form.category_ids : form.category_id ? [form.category_id] : [];
   const variants: Variant[] = Array.isArray(form.variants) ? form.variants : [];
 
@@ -121,21 +123,56 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
         )}
       </div>
 
-      {/* Product Image */}
+      {/* Product Images — multi-upload */}
       <div style={{ gridColumn: "1 / -1" }}>
-        <label style={labelStyle}>Product Image</label>
-        <input type="text" value={form.main_image} onChange={e => onChange("main_image", e.target.value)} placeholder="https://... or upload below" style={{ ...inputStyle, marginBottom: 8 }} />
-        <label style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 8, border: "2px dashed #fda1b7", cursor: uploadingImage ? "not-allowed" : "pointer", color: "#fda1b7", fontWeight: 600, fontSize: 13, opacity: uploadingImage ? 0.6 : 1 }}>
-          {uploadingImage ? "⏳ Uploading..." : "📤 Upload Image"}
-          <input type="file" accept="image/*" style={{ display: "none" }} disabled={uploadingImage} onChange={e => { const f = e.target.files?.[0]; if (f) onUploadImage(f); }} />
-        </label>
-        {form.main_image && (
-          <div style={{ marginTop: 10 }}>
-            <img src={form.main_image.startsWith("http") ? form.main_image : `${process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com"}${form.main_image}`}
-              alt="Preview" style={{ width: 100, height: 100, borderRadius: 10, objectFit: "cover", border: "2px solid #fda1b7" }}
-              onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+        <label style={labelStyle}>Product Images</label>
+
+        {/* Thumbnails grid */}
+        {(form.images as string[] || []).length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+            {(form.images as string[]).map((img: string, i: number) => {
+              const src = img.startsWith("http") ? img : `${BACKEND_URL}${img}`;
+              return (
+                <div key={i} style={{ position: "relative", width: 88, height: 88, flexShrink: 0 }}>
+                  <img src={src} alt=""
+                    style={{ width: 88, height: 88, objectFit: "cover", borderRadius: 10,
+                      border: `2px solid ${i === 0 ? "#fda1b7" : "#ddd"}` }}
+                    onError={e => { (e.target as HTMLImageElement).style.opacity = "0.3"; }} />
+                  {i === 0 && (
+                    <span style={{ position: "absolute", bottom: 4, left: 4, background: "#fda1b7",
+                      color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 5px", borderRadius: 4,
+                      letterSpacing: 0.5 }}>MAIN</span>
+                  )}
+                  <button type="button" onClick={() => {
+                    const next = (form.images as string[]).filter((_: string, idx: number) => idx !== i);
+                    onChange("images", next);
+                    onChange("main_image", next[0] || "");
+                  }} style={{ position: "absolute", top: 3, right: 3, width: 20, height: 20,
+                    borderRadius: "50%", border: "none", background: "#ef4444", color: "#fff",
+                    fontSize: 11, cursor: "pointer", display: "flex", alignItems: "center",
+                    justifyContent: "center", padding: 0, lineHeight: 1 }}>✕</button>
+                </div>
+              );
+            })}
           </div>
         )}
+
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px",
+          borderRadius: 8, border: "2px dashed #fda1b7",
+          cursor: uploadingImage ? "not-allowed" : "pointer",
+          color: "#fda1b7", fontWeight: 600, fontSize: 13, opacity: uploadingImage ? 0.6 : 1 }}>
+          {uploadingImage ? "⏳ Uploading..." : "📤 Add Images"}
+          <input type="file" accept="image/*" multiple style={{ display: "none" }}
+            disabled={uploadingImage}
+            onChange={e => {
+              const files = Array.from(e.target.files || []);
+              if (files.length) onUploadImages(files);
+              e.currentTarget.value = "";
+            }} />
+        </label>
+        <p style={{ margin: "5px 0 0", fontSize: 11, color: "#aaa" }}>
+          First image = main. Click ✕ to remove. Multiple files allowed.
+        </p>
       </div>
 
       {/* ── VARIANTS ── */}
