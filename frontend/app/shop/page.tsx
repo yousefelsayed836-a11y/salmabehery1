@@ -22,6 +22,7 @@ interface Product {
   handle?: string;
   stock?: number;
   is_active: boolean;
+  variants?: any[];
 }
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
@@ -85,9 +86,13 @@ function ShopContent() {
   };
 
   const addToCart = (product: Product) => {
+    if (product.variants && product.variants.length > 0) {
+      window.location.href = `/products/${product.id}`;
+      return;
+    }
     ctxAddToCart(
       { id: product.id, name_en: product.name_en, price: product.price, image_url: getProductImage(product) },
-      1, product.size_info || "One Size", product.stock
+      1, product.size_info || "", product.stock
     );
     setToast(`✓ ${product.name_en.slice(0, 20)} added`);
     setTimeout(() => setToast(""), 2000);
@@ -219,7 +224,7 @@ function ShopContent() {
                       {(() => {
                         const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
                         const oos = p.stock === 0;
-                        const size = p.size_info || "One Size";
+                        const size = p.size_info || "";
                         return oos ? (
                           <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Out of Stock</span>
                         ) : cartQty > 0 ? (

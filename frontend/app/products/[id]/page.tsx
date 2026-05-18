@@ -85,7 +85,7 @@ export default function ProductPage() {
   const addToCart = (p: Product, count = 1) => {
     const img = getImg(p);
     const price = selectedVariant?.price_override ?? p.price;
-    const size = selectedVariant ? `${selectedVariant.option_name}: ${selectedVariant.option_value}` : (p.size_info || "One Size");
+    const size = selectedVariant ? `${selectedVariant.option_name}: ${selectedVariant.option_value}` : (p.size_info || "");
     const cartKey = `${p.id}-${size}`;
     const maxQty = selectedVariant ? selectedVariant.quantity : (p.stock ?? 99);
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");

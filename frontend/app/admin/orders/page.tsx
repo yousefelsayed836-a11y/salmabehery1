@@ -81,7 +81,7 @@ function generateWaybillHtml(order: Order, deposit: number, productImages: Recor
           ${(order.items || []).map(item => `
             <div class="wb-item">
               <span class="wb-item-name">${item.product_name || "منتج"}</span>
-              ${item.size ? `<span class="wb-item-size">مقاس: ${item.size}</span>` : ""}
+              ${item.size && item.size !== "One Size" ? `<span class="wb-item-size">مقاس: ${item.size}</span>` : ""}
               <span class="wb-item-qty">x${item.quantity}</span>
             </div>`).join("")}
           <div class="wb-totals">
@@ -722,7 +722,7 @@ export default function OrdersPage() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e" }}>{item.product_name || "Product"}</div>
-                        {item.size && <div style={{ fontSize: 13, color: "#888", marginTop: 3 }}>Size: {item.size}</div>}
+                        {item.size && item.size !== "One Size" && <div style={{ fontSize: 13, color: "#888", marginTop: 3 }}>Size: {item.size}</div>}
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
                         <div style={{ fontSize: 13, color: "#888" }}>x{item.quantity}</div>

@@ -56,7 +56,8 @@ export default function HomePage() {
   const [hoverRating, setHoverRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [apiCategories, setApiCategories] = useState<any[]>(STATIC_CATEGORIES);
+  const [apiCategories, setApiCategories] = useState<any[]>([]);
+  const [catsLoading, setCatsLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const [featuredSection, setFeaturedSection] = useState<{ title: string; enabled: boolean; products: any[] } | null>(null);
 
@@ -77,6 +78,7 @@ export default function HomePage() {
       fetch(`${API}/settings/featured_section`).then(r => r.json()).catch(() => null),
     ]).then(async ([cats, featuredRaw]) => {
       if (Array.isArray(cats) && cats.length > 0) setApiCategories(cats);
+      setCatsLoading(false);
 
       if (featuredRaw?.value) {
         try {
@@ -143,10 +145,10 @@ export default function HomePage() {
           100% { background-position: 200% center; }
         }
         .cat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .cat-card img { transition: transform 0.45s ease; filter: contrast(1.12) saturate(1.35) brightness(1.04); }
+        .cat-card img { transition: transform 0.45s ease; }
         @media (hover: hover) {
           .cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(253,161,183,0.25) !important; }
-          .cat-card:hover img { transform: scale(1.07); filter: contrast(1.15) saturate(1.45) brightness(1.06); }
+          .cat-card:hover img { transform: scale(1.07); }
         }
         .feat-card {
           border-radius: 16px;
@@ -305,7 +307,14 @@ export default function HomePage() {
         </div>
 
         <div className="categories-grid-inner">
-          {apiCategories.map((cat) => {
+          {catsLoading ? Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} style={{ borderRadius: 20, overflow: "hidden", border: "1px solid #eee", boxShadow: "0 6px 20px rgba(0,0,0,0.08)" }}>
+              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", background: "linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)", backgroundSize: "200% center", animation: "shimmer 1.2s infinite" }} />
+              <div className="cat-text" style={{ padding: "10px 12px 12px", textAlign: "center" }}>
+                <div style={{ height: 14, borderRadius: 7, background: "#f0f0f0", margin: "0 auto", width: "60%" }} />
+              </div>
+            </div>
+          )) : apiCategories.map((cat) => {
             const img = cat.image || FALLBACK_IMAGES[cat.slug] || `https://placehold.co/400x500/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`;
             return (
             <Link key={cat.id} href={`/shop/${cat.slug}`} className="cat-card" style={{

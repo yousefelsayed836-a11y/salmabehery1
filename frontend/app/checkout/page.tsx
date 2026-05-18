@@ -231,7 +231,7 @@ export default function CheckoutPage() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 12, fontWeight: 600, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.product.name_en}</div>
-                          <div style={{ fontSize: 11, color: "#aaa" }}>x{item.qty}{item.size ? ` · ${item.size}` : ""}</div>
+                          <div style={{ fontSize: 11, color: "#aaa" }}>x{item.qty}{item.size && item.size !== "One Size" ? ` · ${item.size}` : ""}</div>
                         </div>
                         <div style={{ fontWeight: 700, color: "#fda1b7", fontSize: 13 }}>{item.product.price * item.qty} EGP</div>
                         <button onClick={() => removeItem(i)} style={{ background: "none", border: "none", color: "#bbb", fontSize: 18, cursor: "pointer", padding: "0 2px", lineHeight: 1, flexShrink: 0 }} title="Remove">×</button>

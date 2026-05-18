@@ -8,7 +8,7 @@ interface Product {
   id: string; name_en: string; name_ar?: string; description_en?: string;
   price: number; old_price?: number; material?: string; water_resistance?: string;
   size_info?: string; images?: string[]; main_image?: string; stock?: number;
-  category_name?: string; is_active: boolean;
+  category_name?: string; is_active: boolean; variants?: any[];
 }
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
@@ -70,9 +70,13 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
 
   const handleAdd = (product: Product) => {
     if ((product.stock ?? 1) === 0) return;
+    if (product.variants && product.variants.length > 0) {
+      router.push(`/products/${product.id}`);
+      return;
+    }
     addToCart(
       { id: product.id, name_en: product.name_en, price: product.price, image_url: getImg(product) },
-      1, product.size_info || "One Size", product.stock
+      1, product.size_info || "", product.stock
     );
   };
 
@@ -186,7 +190,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                           </button>
                         ) : cartQty > 0 ? (
                           <div style={{ display: "flex", alignItems: "center", border: "1.5px solid #fda1b7", borderRadius: 20, overflow: "hidden" }}>
-                            <button onClick={e => { e.preventDefault(); updateQty(p.id, p.size_info || "One Size", -1); }} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>−</button>
+                            <button onClick={e => { e.preventDefault(); updateQty(p.id, p.size_info || "", -1); }} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>−</button>
                             <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", minWidth: 16, textAlign: "center" }}>{cartQty}</span>
                             <button onClick={e => { e.preventDefault(); handleAdd(p); }} style={{ width: 28, height: 28, border: "none", background: "transparent", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fda1b7" }}>+</button>
                           </div>
