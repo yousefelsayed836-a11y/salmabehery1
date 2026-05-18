@@ -277,11 +277,10 @@ export default function ProductPage() {
             </div>
 
             {/* Buy Now */}
-            <Link href="/checkout"
+            <Link href="/checkout" className="buy-now-btn"
               style={{ display: "block", textAlign: "center", padding: "14px", borderRadius: 12,
                 border: "2px solid #fda1b7", color: "#fda1b7", fontSize: 15, fontWeight: 400,
-                textDecoration: "none", transition: "all 0.2s" }}
->
+                textDecoration: "none", transition: "all 0.2s" }}>
               Buy Now
             </Link>
 
@@ -377,6 +376,7 @@ export default function ProductPage() {
         @media (hover: hover) {
           .sim-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(253,161,183,0.18) !important; }
           .sim-card:hover .sim-img { transform: scale(1.06); }
+          .buy-now-btn:hover { background: #fda1b7 !important; color: #fff !important; }
         }
 
         @media (max-width: 768px) {

@@ -126,9 +126,9 @@ function SearchResults() {
             const discount = hasDiscount ? Math.round((1 - p.price / p.old_price!) * 100) : 0;
             return (
               <Link key={p.id} href={`/products/${p.handle || p.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", cursor: "pointer" }}>
+                <div className="search-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", transition: "transform 0.2s, box-shadow 0.2s", cursor: "pointer" }}>
                   <div style={{ position: "relative", height: 240, background: "#fff", overflow: "hidden" }}>
-                    <img src={getImg(p)} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    <img src={getImg(p)} alt={p.name_en} className="search-img" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }}
                       onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/300x300/fda1b7/fff?text=??`; }} />
                     {hasDiscount && (
                       <span style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>-{discount}%</span>
@@ -154,6 +154,10 @@ function SearchResults() {
       <style jsx global>{`
         @media (max-width: 480px) {
           div[style*="repeat(auto-fill"] { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+        }
+        @media (hover: hover) {
+          .search-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; }
+          .search-card:hover .search-img { transform: scale(1.05); }
         }
       `}</style>
     </div>
