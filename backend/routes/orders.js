@@ -39,7 +39,7 @@ function buildEmailHtml(order, items) {
 
 async function sendOrderEmail(order, items) {
   const key = process.env.RESEND_API_KEY;
-  const raw = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com';
+  const raw = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com,yousefelsayed836@gmail.com';
   const recipients = raw.split(',').map(e => e.trim()).filter(Boolean);
   if (!key) { console.log('[Email] No RESEND_API_KEY set, skipping email'); return; }
 
