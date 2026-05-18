@@ -94,7 +94,7 @@ export default function AdminDashboard() {
       });
       if (!r.ok) throw new Error(`Server error ${r.status}`);
       setFaviconUrl(dataUrl);
-      setFaviconMsg("✅ تم تحديث الـ Favicon!");
+      setFaviconMsg("✅ Favicon updated!");
       const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
       if (link) link.href = dataUrl;
     } catch (e: any) { setFaviconMsg("❌ " + e.message); }
@@ -114,10 +114,10 @@ export default function AdminDashboard() {
           fetchData();
           // Browser notification
           if (Notification.permission === "granted") {
-            new Notification("🛍️ أوردر جديد!", { body: `${data.order.customer_name} — ${data.order.total_amount} EGP`, icon: "/favicon.png" });
+            new Notification("🛍️ New Order!", { body: `${data.order.customer_name} — ${data.order.total_amount} EGP`, icon: "/favicon.png" });
           } else if (Notification.permission !== "denied") {
             Notification.requestPermission().then(p => {
-              if (p === "granted") new Notification("🛍️ أوردر جديد!", { body: `${data.order.customer_name} — ${data.order.total_amount} EGP` });
+              if (p === "granted") new Notification("🛍️ New Order!", { body: `${data.order.customer_name} — ${data.order.total_amount} EGP` });
             });
           }
           setTimeout(() => setNewOrderToast(null), 6000);
@@ -306,7 +306,7 @@ export default function AdminDashboard() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e", marginBottom: 2 }}>Favicon (Tab Icon)</div>
-                <div style={{ fontSize: 12, color: "#aaa" }}>الصورة الصغيرة اللي بتظهر في تاب المتصفح</div>
+                <div style={{ fontSize: 12, color: "#aaa" }}>The small icon that appears in the browser tab</div>
               </div>
               <label style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", whiteSpace: "nowrap" }}>
                 {faviconUploading ? "Uploading..." : "Upload New"}
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                 <code style={{ fontSize: 12, background: "#e2e8f0", padding: "2px 6px", borderRadius: 4 }}>
                   {typeof window !== "undefined" ? window.location.origin : "https://yoursite.com"}/api/fb-feed
                 </code>
-                <span style={{ marginLeft: 8, color: "#888" }}>— ارفعه في Commerce Manager</span>
+                <span style={{ marginLeft: 8, color: "#888" }}>— Upload in Commerce Manager</span>
               </div>
             </div>
           </div>

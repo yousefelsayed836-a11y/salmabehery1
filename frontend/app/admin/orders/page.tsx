@@ -395,7 +395,7 @@ export default function OrdersPage() {
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {selectedForPrint.size > 0 && (
                 <button onClick={handleBatchPrint} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1a1a2e,#333)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
-                  🖨️ طباعة {selectedForPrint.size} بوليصة
+                  🖨️ Print {selectedForPrint.size} Waybill{selectedForPrint.size > 1 ? "s" : ""}
                 </button>
               )}
               <button onClick={fetchOrders} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>🔄 Refresh</button>
@@ -408,7 +408,7 @@ export default function OrdersPage() {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="🔍 ابحث برقم الأوردر، الاسم، التليفون، أو العنوان..."
+              placeholder="🔍 Search by order #, name, phone, or address..."
               style={{
                 width: "100%",
                 padding: "12px 16px",
@@ -426,7 +426,7 @@ export default function OrdersPage() {
             />
             {searchQuery && (
               <div style={{ marginTop: 6, fontSize: 12, color: "#888", textAlign: "right" }}>
-                {filteredOrders.length} نتيجة من {orders.length}
+                {filteredOrders.length} results of {orders.length}
               </div>
             )}
           </div>
@@ -437,7 +437,7 @@ export default function OrdersPage() {
             <div style={{ textAlign: "center", padding: 60, color: "#888" }}>Loading orders...</div>
           ) : filteredOrders.length === 0 ? (
             <div style={{ textAlign: "center", padding: 60, background: "#fff", borderRadius: 16, color: "#888" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div><p>{searchQuery ? "لا توجد نتائج" : "No orders found"}</p>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div><p>{searchQuery ? "No results found" : "No orders found"}</p>
             </div>
           ) : (
             <>
@@ -492,7 +492,7 @@ export default function OrdersPage() {
                         </td>
                         <td style={{ padding: 14, fontSize: 14, fontWeight: 700 }} onClick={() => openOrder(order)}>
                           <div>{fmt(order.total_amount)} EGP</div>
-                          {dep > 0 && <div style={{ fontSize: 11, color: "#22c55e", marginTop: 2 }}>متبقي: {fmt(remaining)}</div>}
+                          {dep > 0 && <div style={{ fontSize: 11, color: "#22c55e", marginTop: 2 }}>Remaining: {fmt(remaining)}</div>}
                         </td>
                         <td style={{ padding: 8 }} onClick={e => e.stopPropagation()}>
                           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -503,7 +503,7 @@ export default function OrdersPage() {
                               placeholder="0"
                               style={{ width: 72, padding: "5px 8px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 12, outline: "none" }}
                             />
-                            <span style={{ fontSize: 11, color: "#888" }}>ج.م</span>
+                            <span style={{ fontSize: 11, color: "#888" }}>EGP</span>
                           </div>
                         </td>
                         <td style={{ padding: 14 }}>
@@ -550,7 +550,7 @@ export default function OrdersPage() {
               </span>
               {selectedForPrint.size > 0 && (
                 <button onClick={handleBatchPrint} style={{ marginLeft: "auto", padding: "8px 14px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                  🖨️ طباعة {selectedForPrint.size}
+                  🖨️ Print {selectedForPrint.size}
                 </button>
               )}
             </div>
@@ -583,12 +583,12 @@ export default function OrdersPage() {
                     <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>{order.city || ""}{order.governorate ? ` · ${order.governorate}` : ""}</div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                       <span style={{ fontWeight: 800, fontSize: 15, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</span>
-                      {dep > 0 && <span style={{ fontSize: 12, color: "#22c55e" }}>متبقي: {fmt(remaining)}</span>}
+                      {dep > 0 && <span style={{ fontSize: 12, color: "#22c55e" }}>Remaining: {fmt(remaining)}</span>}
                     </div>
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
                       <input type="number" value={dep === 0 ? "" : dep}
                         onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
-                        placeholder="مقدم (EGP)" inputMode="numeric"
+                        placeholder="Deposit (EGP)" inputMode="numeric"
                         style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 16, outline: "none" }} />
                     </div>
                     <div className="order-card-actions">
@@ -620,7 +620,7 @@ export default function OrdersPage() {
                 </span>
                 <button onClick={() => handlePrint(selectedOrder)}
                   style={{ padding: "8px 18px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
-                  🖨️ طباعة بوليصة
+                  🖨️ Print Waybill
                 </button>
                 <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", color: "#fff", fontSize: 28, cursor: "pointer", lineHeight: 1 }}>×</button>
               </div>
@@ -667,7 +667,7 @@ export default function OrdersPage() {
 
                 {/* Deposit */}
                 <div style={{ marginTop: 14, padding: 14, background: "#fff", borderRadius: 10, border: "1.5px solid #fda1b7" }}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", display: "block", marginBottom: 8 }}>💵 مدفوع مقدم (Deposit)</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", display: "block", marginBottom: 8 }}>💵 Deposit (Paid in advance)</label>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <input
                       type="number"
@@ -679,12 +679,12 @@ export default function OrdersPage() {
                     <span style={{ fontWeight: 600, color: "#888" }}>EGP</span>
                     <button onClick={() => { const amt = parseFloat(depositInput) || 0; saveDeposit(selectedOrder.id, amt); }}
                       style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
-                      حفظ
+                      Save
                     </button>
                   </div>
                   {(deposits[selectedOrder.id] || 0) > 0 && (
                     <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                      <span style={{ color: "#888" }}>المتبقي للتحصيل</span>
+                      <span style={{ color: "#888" }}>Remaining to collect</span>
                       <span style={{ fontWeight: 800, fontSize: 18, color: "#22c55e" }}>
                         {fmt(Math.max(0, (selectedOrder.total_amount || 0) - (deposits[selectedOrder.id] || 0)))} EGP
                       </span>
