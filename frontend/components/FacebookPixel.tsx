@@ -21,8 +21,9 @@ export default function FacebookPixel() {
           return;
         }
 
-        // Inject pixel script
+        // Inject pixel script — append to body to avoid conflicting with React's head management
         const script = document.createElement("script");
+        script.id = "fb-pixel-script";
         script.innerHTML = `
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -35,11 +36,7 @@ export default function FacebookPixel() {
           fbq('init', '${pixelId}');
           fbq('track', 'PageView');
         `;
-        document.head.appendChild(script);
-
-        const noscript = document.createElement("noscript");
-        noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1"/>`;
-        document.head.appendChild(noscript);
+        document.body.appendChild(script);
       })
       .catch(() => {});
   }, []);
