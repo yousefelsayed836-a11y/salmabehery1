@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
@@ -237,9 +238,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Preload hero image for fastest first paint */}
-      <link rel="preload" as="image" href="/images/hero-bg.jpg" />
-
       {/* ── HERO ── */}
       <section
         className="hero-section"
@@ -248,33 +246,34 @@ export default function HomePage() {
           height: "85vh",
           minHeight: "550px",
           maxHeight: "800px",
-          backgroundImage: 'url("/images/hero-bg.jpg")',
-          backgroundSize: "cover", 
-          backgroundPosition: "center", 
-          backgroundRepeat: "no-repeat",
-          display: "flex", 
-          alignItems: "flex-end", 
+          display: "flex",
+          alignItems: "flex-end",
           justifyContent: "center",
-          textAlign: "center", 
-          position: "relative", 
+          textAlign: "center",
+          position: "relative",
           paddingBottom: "60px",
+          overflow: "hidden",
         }}
       >
-
-        <div style={{
-          position: "relative",
-          padding: "0 20px",
-        }}>
+        <Image
+          src="/images/hero-bg.jpg"
+          alt="Salma Behery hero"
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover", objectPosition: "center" }}
+        />
+        <div style={{ position: "relative", zIndex: 1, padding: "0 20px" }}>
           <Link href="/shop" style={{
-            display: "inline-block", 
-            background: "rgba(255,255,255,0.2)", 
+            display: "inline-block",
+            background: "rgba(255,255,255,0.2)",
             backdropFilter: "blur(10px)",
-            color: "#fff", 
-            padding: "16px 48px", 
-            borderRadius: 50, 
+            color: "#fff",
+            padding: "16px 48px",
+            borderRadius: 50,
             textDecoration: "none",
-            fontWeight: 500, 
-            fontSize: 15, 
+            fontWeight: 500,
+            fontSize: 15,
             border: "1px solid rgba(255,255,255,0.4)",
             letterSpacing: 2,
             textTransform: "uppercase",
@@ -434,12 +433,15 @@ export default function HomePage() {
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 3, maxWidth: 680, margin: "0 auto", borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(253,161,183,0.15)" }}>
           {["sparkle-1", "sparkle-2", "sparkle-3", "sparkle-4"].map((s, i) => (
-            <div key={s} className="sparkle-cell" style={{ overflow: "hidden", aspectRatio: "1/1", background: "#fff" }}>
-              <img src={`/images/${s}.jpg`} alt={`Sparkle ${i + 1}`}
-                loading="lazy" decoding="async"
+            <div key={s} className="sparkle-cell" style={{ overflow: "hidden", aspectRatio: "1/1", background: "#fff", position: "relative" }}>
+              <Image
+                src={`/images/${s}.jpg`}
+                alt={`Sparkle ${i + 1}`}
+                fill
+                sizes="(max-width: 680px) 50vw, 340px"
+                style={{ objectFit: "cover", transition: "transform 0.4s ease" }}
                 className="sparkle-img"
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s ease" }}
-                onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/340x340/fdf0f3/fda1b7?text=✨`; }} />
+              />
             </div>
           ))}
         </div>
