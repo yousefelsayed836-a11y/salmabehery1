@@ -129,6 +129,8 @@ export default function ProductPage() {
   const activePrice = selectedVariant?.price_override ?? product.price;
   const activeStock = selectedVariant ? selectedVariant.quantity : (product.stock ?? 1);
   const inStock = activeStock > 0;
+  const hasVariants = (product.variants || []).length > 0;
+  const needsVariant = hasVariants && !selectedVariant;
 
   // Group variants by option_name
   const variantGroups: Record<string, Variant[]> = {};
@@ -268,12 +270,13 @@ export default function ProductPage() {
                 <button onClick={() => setQty(q => Math.min(activeStock > 0 ? activeStock : 99, q + 1))}
                   style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 400, color: "#1a1a2e", cursor: "pointer" }}>+</button>
               </div>
-              <button onClick={handleAddToCart} disabled={!inStock}
+              <button onClick={handleAddToCart} disabled={!inStock || needsVariant}
                 style={{ flex: 1, height: 48, borderRadius: 12, border: "none",
-                  background: !inStock ? "#e5e7eb" : added ? "#22c55e" : "linear-gradient(135deg,#fda1b7,#f78fa3)",
-                  color: !inStock ? "#9ca3af" : "#fff", fontSize: 15, fontWeight: 400,
-                  cursor: !inStock ? "not-allowed" : "pointer", transition: "all 0.3s" }}>
-                {!inStock ? "Out of Stock" : added ? "Added to Cart" : "Add to Cart"}
+                  background: !inStock ? "#e5e7eb" : needsVariant ? "#fff0f5" : added ? "#22c55e" : "linear-gradient(135deg,#fda1b7,#f78fa3)",
+                  color: !inStock ? "#9ca3af" : needsVariant ? "#fda1b7" : "#fff", fontSize: 15, fontWeight: 400,
+                  cursor: !inStock || needsVariant ? "not-allowed" : "pointer", transition: "all 0.3s",
+                  border: needsVariant ? "1.5px solid #fda1b7" : "none" }}>
+                {!inStock ? "Out of Stock" : needsVariant ? "Select a variant first" : added ? "Added to Cart" : "Add to Cart"}
               </button>
             </div>
 

@@ -4,19 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
-
-// Fallback images by slug if DB has none
-const FALLBACK_IMAGES: Record<string, string> = {
-  "rings": "/images/rings.jpg",
-  "hand-chains": "/images/hand-chains.jpg",
-  "bracelet": "/images/bracelets.jpg",
-  "bracelets": "/images/bracelets.jpg",
-  "necklace": "/images/necklaces.jpg",
-  "necklaces": "/images/necklaces.jpg",
-  "earrings": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=500&fit=crop",
-  "sets-and-offers": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
-  "extra-things": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&h=500&fit=crop",
-};
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 
 // Static categories shown instantly before API responds
 const STATIC_CATEGORIES = [
@@ -315,7 +303,7 @@ export default function HomePage() {
               </div>
             </div>
           )) : apiCategories.map((cat) => {
-            const img = cat.image || FALLBACK_IMAGES[cat.slug] || `https://placehold.co/400x500/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`;
+            const imgUrl = cat.has_image ? `${BACKEND}/api/categories/image/${cat.id}` : null;
             return (
             <Link key={cat.id} href={`/shop/${cat.slug}`} className="cat-card" style={{
               textDecoration: "none", color: "#222", borderRadius: 20,
@@ -323,11 +311,10 @@ export default function HomePage() {
               display: "flex", flexDirection: "column", overflow: "hidden",
               border: "1px solid #eee",
             }}>
-              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#222", position: "relative" }}>
-                <img src={img} alt={cat.name_en}
-                  loading="eager" decoding="async" fetchPriority="high"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
-                  onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/200x260/fdf0f3/fda1b7?text=${encodeURIComponent(cat.name_en?.[0] || "?")}`; }} />
+              <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f5e8ed", position: "relative" }}>
+                {imgUrl && <img src={imgUrl} alt={cat.name_en}
+                  loading="eager" decoding="async"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} />}
               </div>
               <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>
                 <div className="cat-title" style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4, letterSpacing: 0.5 }}>{cat.name_en}</div>

@@ -5,17 +5,47 @@ const db = require('../database/db');
 // Ensure image column is TEXT (not VARCHAR) so base64 images fit
 db.query(`ALTER TABLE categories ALTER COLUMN image TYPE TEXT`).catch(() => {});
 
-// GET all (admin=true returns all including inactive)
+// GET all (admin=true returns all including inactive + image data)
 router.get('/', async (req, res) => {
   try {
     const admin = req.query.admin === 'true';
     const where = admin ? '' : 'WHERE is_active = true';
-    const result = await db.query(`SELECT * FROM categories ${where} ORDER BY sort_order ASC NULLS LAST, name_en ASC`);
-    if (!admin) res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60');
-    res.json(result.rows);
+    if (admin) {
+      const result = await db.query(`SELECT * FROM categories ${where} ORDER BY sort_order ASC NULLS LAST, name_en ASC`);
+      return res.json(result.rows);
+    }
+    // Public: omit heavy base64 image, return lightweight metadata + image_url reference
+    const result = await db.query(
+      `SELECT id, name_en, name_ar, slug, sort_order, is_active,
+              (image IS NOT NULL AND image != '') AS has_image
+       FROM categories ${where} ORDER BY sort_order ASC NULLS LAST, name_en ASC`
+    );
+    const rows = result.rows.map(r => ({
+      ...r,
+      image_url: r.has_image ? `/api/categories/image/${r.id}` : null,
+    }));
+    res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60');
+    res.json(rows);
   } catch (error) {
     console.error('Get categories error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// GET category image — served as binary with caching (must be before /:slug)
+router.get('/image/:id', async (req, res) => {
+  try {
+    const result = await db.query('SELECT image FROM categories WHERE id=$1', [req.params.id]);
+    if (!result.rows.length || !result.rows[0].image) return res.status(404).end();
+    const img = result.rows[0].image;
+    const m = img.match(/^data:([^;]+);base64,(.+)$/s);
+    if (!m) return res.status(400).end();
+    const buf = Buffer.from(m[2], 'base64');
+    res.set('Content-Type', m[1]);
+    res.set('Cache-Control', 'public, max-age=86400, immutable');
+    res.send(buf);
+  } catch (e) {
+    res.status(500).end();
   }
 });
 
