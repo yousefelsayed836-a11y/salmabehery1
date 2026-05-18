@@ -83,25 +83,44 @@ app.get('/api/images/:id', async (req, res) => {
   }
 });
 
-// ✅ imgBB upload helper — free, permanent, no DB usage
+// ✅ Upload image to GitHub repo — free, permanent, survives redeploys
 const fetch = require('node-fetch');
-async function uploadToImgBB(buffer) {
-  const key = process.env.IMGBB_API_KEY;
-  if (!key) throw new Error('IMGBB_API_KEY not set');
-  const params = new URLSearchParams();
-  params.set('key', key);
-  params.set('image', buffer.toString('base64'));
-  const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: params });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error?.message || 'imgBB failed');
-  return data.data.display_url;
+const GITHUB_REPO = 'yousefelsayed836-a11y/salmabehery1';
+
+async function uploadToGitHub(buffer, mimetype) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error('GITHUB_TOKEN not set on server');
+  const ext = mimetype.includes('png') ? 'png' : mimetype.includes('webp') ? 'webp' : 'jpg';
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filePath = `images/${filename}`;
+  const apiRes = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/contents/${filePath}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      body: JSON.stringify({
+        message: `img: ${filename}`,
+        content: buffer.toString('base64'),
+        branch: 'main',
+      }),
+    }
+  );
+  if (!apiRes.ok) {
+    const e = await apiRes.json().catch(() => ({}));
+    throw new Error(e.message || `GitHub API ${apiRes.status}`);
+  }
+  return `https://raw.githubusercontent.com/${GITHUB_REPO}/main/${filePath}`;
 }
 
-// ✅ Single image upload → imgBB (free, permanent)
+// ✅ Single image upload → GitHub repo
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-    const url = await uploadToImgBB(req.file.buffer);
+    const url = await uploadToGitHub(req.file.buffer, req.file.mimetype);
     res.json({ success: true, url });
   } catch (e) {
     console.error('Upload error:', e);
@@ -109,11 +128,11 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-// ✅ Multiple images upload → imgBB (free, permanent)
+// ✅ Multiple images upload → GitHub repo
 app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
-    const urls = await Promise.all(req.files.map(f => uploadToImgBB(f.buffer)));
+    const urls = await Promise.all(req.files.map(f => uploadToGitHub(f.buffer, f.mimetype)));
     res.json({ success: true, urls });
   } catch (e) {
     console.error('Multiple upload error:', e);
