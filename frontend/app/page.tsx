@@ -143,10 +143,10 @@ export default function HomePage() {
           100% { background-position: 200% center; }
         }
         .cat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .cat-card img { transition: transform 0.45s ease; filter: contrast(1.04) saturate(1.08); }
+        .cat-card img { transition: transform 0.45s ease; filter: contrast(1.12) saturate(1.35) brightness(1.04); }
         @media (hover: hover) {
           .cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(253,161,183,0.25) !important; }
-          .cat-card:hover img { transform: scale(1.07); filter: contrast(1.06) saturate(1.12); }
+          .cat-card:hover img { transform: scale(1.07); filter: contrast(1.15) saturate(1.45) brightness(1.06); }
         }
         .feat-card {
           border-radius: 16px;
