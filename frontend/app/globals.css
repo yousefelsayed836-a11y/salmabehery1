@@ -44,8 +44,15 @@ main {
 
 html { scroll-behavior: smooth; }
 
-/* Single-tap navigation on all touch devices */
-a, button { touch-action: manipulation; }
+/* Single-tap on all touch devices — covers links, buttons, and card wrappers */
+a, button,
+.pc, .cat-card, .feat-card, .sim-card,
+.product-card, .search-card, .order-card {
+  touch-action: manipulation;
+}
+
+/* Remove tap highlight flash on iOS */
+* { -webkit-tap-highlight-color: transparent; }
 .font-arabic { font-family: 'Cairo', 'Tahoma', sans-serif; }
 
 ::-webkit-scrollbar { width: 6px; }
