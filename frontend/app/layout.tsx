@@ -7,6 +7,7 @@ import { CartProvider } from '../components/CartContext';
 import FaviconUpdater from '../components/FaviconUpdater';
 import FacebookPixel from '../components/FacebookPixel';
 import KeepAlive from '../components/KeepAlive';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 const robotoCondensed = Roboto_Condensed({
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );
