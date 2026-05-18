@@ -271,11 +271,11 @@ export default function ProductPage() {
                   style={{ width: 42, height: 48, border: "none", background: "#fff", fontSize: 20, fontWeight: 400, color: "#1a1a2e", cursor: "pointer" }}>+</button>
               </div>
               <button onClick={handleAddToCart} disabled={!inStock || needsVariant}
-                style={{ flex: 1, height: 48, borderRadius: 12, border: "none",
+                style={{ flex: 1, height: 48, borderRadius: 12,
+                  border: needsVariant ? "1.5px solid #fda1b7" : "none",
                   background: !inStock ? "#e5e7eb" : needsVariant ? "#fff0f5" : added ? "#22c55e" : "linear-gradient(135deg,#fda1b7,#f78fa3)",
                   color: !inStock ? "#9ca3af" : needsVariant ? "#fda1b7" : "#fff", fontSize: 15, fontWeight: 400,
-                  cursor: !inStock || needsVariant ? "not-allowed" : "pointer", transition: "all 0.3s",
-                  border: needsVariant ? "1.5px solid #fda1b7" : "none" }}>
+                  cursor: !inStock || needsVariant ? "not-allowed" : "pointer", transition: "all 0.3s" }}>
                 {!inStock ? "Out of Stock" : needsVariant ? "Select a variant first" : added ? "Added to Cart" : "Add to Cart"}
               </button>
             </div>
