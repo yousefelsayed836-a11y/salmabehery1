@@ -10,8 +10,8 @@ interface Product {
   size_info?: string; images?: string[]; main_image?: string; stock?: number;
   category_name?: string; is_active: boolean;
 }
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 const PAGE_SIZE = 24;
 
 function getImg(p: Product) {

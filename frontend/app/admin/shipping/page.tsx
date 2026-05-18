@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
-const API = (process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com") + "/api";
+const API = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
 
 interface Rate {
   id: number;

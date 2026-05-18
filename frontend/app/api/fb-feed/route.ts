@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://salmabehery.com";
 
 export async function GET() {

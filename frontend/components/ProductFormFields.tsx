@@ -131,7 +131,7 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
         </label>
         {form.main_image && (
           <div style={{ marginTop: 10 }}>
-            <img src={form.main_image.startsWith("http") ? form.main_image : `${process.env.NEXT_PUBLIC_API_URL || "https://salma-backend-4imp.onrender.com"}${form.main_image}`}
+            <img src={form.main_image.startsWith("http") ? form.main_image : `${process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com"}${form.main_image}`}
               alt="Preview" style={{ width: 100, height: 100, borderRadius: 10, objectFit: "cover", border: "2px solid #fda1b7" }}
               onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
           </div>
