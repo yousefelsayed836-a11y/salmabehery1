@@ -28,6 +28,8 @@ async function uploadToCloudinary(file) {
   return result.secure_url;
 }
 
+const uploadMemory = multer({ storage: multer.memoryStorage() });
+
 const app = express();
 
 app.use(compression());
@@ -42,11 +44,10 @@ app.use(cors({
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// ✅ Serve uploaded images statically (legacy — kept for old URLs)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// ✅ Multer - memory storage
-const upload = multer({ storage: multer.memoryStorage() });
+// ✅ Legacy static uploads (backward compat for old URLs)
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir, { maxAge: '1y', immutable: true }));
 
 // ✅ Socket.IO
 const server = http.createServer(app);
@@ -62,9 +63,9 @@ app.use('/api/cart', require('./routes/cart'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/reviews', require('./routes/reviews'));
 
-// ✅ Bulk upload
+// ✅ Bulk upload (CSV — memory only)
 const bulkUploadRoutes = require('./routes/admin/bulkUpload');
-app.use('/api/admin/products/bulk-upload', upload.single('csv'), bulkUploadRoutes);
+app.use('/api/admin/products/bulk-upload', uploadMemory.single('csv'), bulkUploadRoutes);
 
 // ✅ Settings (favicon, etc.)
 app.use('/api/settings', require('./routes/settings'));
@@ -100,8 +101,8 @@ app.get('/api/images/:id', async (req, res) => {
   }
 });
 
-// ✅ Single image upload — Cloudinary CDN
-app.post('/api/upload', upload.single('image'), async (req, res) => {
+// ✅ Single image upload → Cloudinary CDN (permanent + fast)
+app.post('/api/upload', uploadMemory.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
     const url = await uploadToCloudinary(req.file);
@@ -112,8 +113,8 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-// ✅ Multiple images upload — Cloudinary CDN
-app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) => {
+// ✅ Multiple images upload → Cloudinary CDN (permanent + fast)
+app.post('/api/upload/multiple', uploadMemory.array('images', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
     const urls = await Promise.all(req.files.map(f => uploadToCloudinary(f)));
