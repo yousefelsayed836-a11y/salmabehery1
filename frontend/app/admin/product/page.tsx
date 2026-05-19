@@ -230,7 +230,7 @@ export default function ProductsPage() {
       category_id: p.category_id || "",
       category_ids: existingCatIds,
       water_resistance: p.water_resistance || "", size_info: p.size_info || "",
-      is_active: p.is_active ?? true,
+      is_active: p.is_active !== false,
       variants: Array.isArray(p.variants) ? p.variants : [],
     });
     setFullEditError("");
@@ -270,6 +270,16 @@ export default function ProductsPage() {
               <button onClick={() => { setAddForm({ ...emptyForm }); setAddError(""); setShowAddModal(true); }}
                 style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#22c55e,#16a34a)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
                 ➕ Add Product
+              </button>
+              <button onClick={async () => {
+                if (!confirm("Activate ALL draft products?")) return;
+                await Promise.all(products.filter(p => !p.is_active).map(p =>
+                  fetch(`${API_BASE}/products/${p.id}/toggle`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ is_active: true }) })
+                ));
+                fetchProducts();
+              }}
+                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#f59e0b,#d97706)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
+                ⚡ Activate All
               </button>
               <button onClick={fetchProducts}
                 style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
