@@ -85,13 +85,21 @@ app.get('/api/images/:id', async (req, res) => {
 
 // ✅ Upload image to GitHub repo — free, permanent, survives redeploys
 const fetch = require('node-fetch');
+const sharp = require('sharp');
 const GITHUB_REPO = 'yousefelsayed836-a11y/salmabehery1';
+
+async function compressImage(buffer) {
+  return sharp(buffer)
+    .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: 82, effort: 4 })
+    .toBuffer();
+}
 
 async function uploadToGitHub(buffer, mimetype) {
   const token = process.env.GITHUB_TOKEN;
   if (!token) throw new Error('GITHUB_TOKEN not set on server');
-  const ext = mimetype.includes('png') ? 'png' : mimetype.includes('webp') ? 'webp' : 'jpg';
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const compressed = await compressImage(buffer);
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
   const filePath = `images/${filename}`;
   const apiRes = await fetch(
     `https://api.github.com/repos/${GITHUB_REPO}/contents/${filePath}`,
@@ -104,7 +112,7 @@ async function uploadToGitHub(buffer, mimetype) {
       },
       body: JSON.stringify({
         message: `img: ${filename}`,
-        content: buffer.toString('base64'),
+        content: compressed.toString('base64'),
         branch: 'main',
       }),
     }
