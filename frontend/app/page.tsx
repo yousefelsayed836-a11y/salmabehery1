@@ -261,7 +261,7 @@ export default function HomePage() {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: "cover", objectPosition: "center" }}
+          style={{ objectFit: "cover", objectPosition: "center", filter: "saturate(1.12) contrast(1.04)" }}
         />
         <div style={{ position: "relative", zIndex: 1, padding: "0 20px" }}>
           <Link href="/shop" style={{
@@ -439,7 +439,7 @@ export default function HomePage() {
                 alt={`Sparkle ${i + 1}`}
                 fill
                 sizes="(max-width: 680px) 50vw, 340px"
-                style={{ objectFit: "cover", transition: "transform 0.4s ease" }}
+                style={{ objectFit: "cover", transition: "transform 0.4s ease", filter: "saturate(1.12) contrast(1.04)" }}
                 className="sparkle-img"
               />
             </div>

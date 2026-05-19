@@ -56,13 +56,17 @@ router.get('/', async (req, res) => {
     let paramIndex = 1;
 
     if (collection) {
-      // Filter by collection using both category_id and product_categories junction
       query += `
-        AND (c.slug = $${paramIndex} OR p.id IN (
-          SELECT pc.product_id FROM product_categories pc
-          JOIN categories cj ON cj.id = pc.category_id
-          WHERE cj.slug = $${paramIndex}
-        ))
+        AND (
+          LOWER(c.slug) = LOWER($${paramIndex})
+          OR LOWER(c.name_en) ILIKE LOWER(REPLACE($${paramIndex}, '-', ' '))
+          OR p.id IN (
+            SELECT pc.product_id FROM product_categories pc
+            JOIN categories cj ON cj.id = pc.category_id
+            WHERE LOWER(cj.slug) = LOWER($${paramIndex})
+              OR LOWER(cj.name_en) ILIKE LOWER(REPLACE($${paramIndex}, '-', ' '))
+          )
+        )
       `;
       params.push(collection);
       paramIndex++;
@@ -102,11 +106,16 @@ router.get('/', async (req, res) => {
 
     if (collection) {
       countQuery += `
-        AND (c.slug = $${countIndex} OR p.id IN (
-          SELECT pc.product_id FROM product_categories pc
-          JOIN categories cj ON cj.id = pc.category_id
-          WHERE cj.slug = $${countIndex}
-        ))
+        AND (
+          LOWER(c.slug) = LOWER($${countIndex})
+          OR LOWER(c.name_en) ILIKE LOWER(REPLACE($${countIndex}, '-', ' '))
+          OR p.id IN (
+            SELECT pc.product_id FROM product_categories pc
+            JOIN categories cj ON cj.id = pc.category_id
+            WHERE LOWER(cj.slug) = LOWER($${countIndex})
+              OR LOWER(cj.name_en) ILIKE LOWER(REPLACE($${countIndex}, '-', ' '))
+          )
+        )
       `;
       countParams.push(collection);
       countIndex++;

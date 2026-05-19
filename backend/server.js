@@ -113,7 +113,7 @@ async function uploadToGitHub(buffer, mimetype) {
     const e = await apiRes.json().catch(() => ({}));
     throw new Error(e.message || `GitHub API ${apiRes.status}`);
   }
-  return `https://raw.githubusercontent.com/${GITHUB_REPO}/main/${filePath}`;
+  return `https://cdn.jsdelivr.net/gh/${GITHUB_REPO}@main/${filePath}`;
 }
 
 // ✅ Single image upload → GitHub repo

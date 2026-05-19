@@ -336,7 +336,7 @@ export default function OrdersPage() {
     <>
       <style jsx global>{`
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; overflow-x: hidden; }
         .orders-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
         .orders-table-wrap table { min-width: 900px; }
         .orders-mobile-cards { display: none; }
@@ -607,7 +607,7 @@ export default function OrdersPage() {
       {/* Order Detail Modal */}
       {selectedOrder && (
         <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
-          <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
             <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
               <div>
@@ -626,7 +626,7 @@ export default function OrdersPage() {
               </div>
             </div>
 
-            <div className="modal-inner modal-grid" style={{ padding: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div className="modal-inner modal-grid" style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
 
               {/* Customer Info */}
               <div style={{ background: "#fafafa", borderRadius: 14, padding: 20 }}>
