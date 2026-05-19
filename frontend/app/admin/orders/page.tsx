@@ -336,16 +336,23 @@ export default function OrdersPage() {
     <>
       <style jsx global>{`
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; overflow-x: hidden; }
+        html, body { margin: 0; overflow-x: hidden; max-width: 100%; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        .orders-outer { width: 100%; max-width: 100%; overflow-x: hidden; }
         .orders-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
         .orders-table-wrap table { min-width: 900px; }
         .orders-mobile-cards { display: none; }
         @media (max-width: 700px) {
           .orders-outer { padding: 10px !important; }
           .orders-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+          .orders-header > div:last-child { width: 100%; }
+          .orders-header > div:last-child button { width: 100%; }
+          .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+          .modal-box { border-radius: 20px 20px 0 0 !important; max-height: 92vh !important; width: 100% !important; max-width: 100% !important; }
           .modal-grid { grid-template-columns: 1fr !important; }
           .modal-inner { padding: 14px !important; }
           .modal-header { padding: 14px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
+          .modal-header > div:last-child { flex-wrap: wrap; gap: 6px; width: 100%; }
           .orders-table-wrap { display: none; }
           .orders-mobile-cards { display: flex; flex-direction: column; gap: 12px; }
           input, select, textarea { font-size: 16px !important; }
@@ -358,12 +365,17 @@ export default function OrdersPage() {
           padding: 14px;
           box-shadow: 0 2px 10px rgba(0,0,0,0.06);
           border: 1px solid #f0d4dc;
+          width: 100%;
+          max-width: 100%;
+          overflow: hidden;
         }
         .order-card-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 8px;
+          flex-wrap: wrap;
+          gap: 6px;
         }
         .order-card-actions {
           display: flex;
@@ -606,8 +618,8 @@ export default function OrdersPage() {
 
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
-          <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
+          <div className="modal-box" style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
             <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
               <div>
