@@ -48,8 +48,10 @@ export default function ShippingPage() {
       setLoading(true);
       const res = await fetch(`${API}/shipping?admin=true`);
       const data = await res.json();
-      setRates(data.rates || []);
-      setFreeThreshold(data.free_threshold || 900);
+      if (Array.isArray(data.rates)) {
+        setRates(data.rates);
+        setFreeThreshold(data.free_threshold || 900);
+      }
     } catch {}
     finally { setLoading(false); }
   }, []);

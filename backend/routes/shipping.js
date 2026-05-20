@@ -22,6 +22,9 @@ async function ensureTable() {
       is_active BOOLEAN NOT NULL DEFAULT true
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)
+  `);
 
   // Seed defaults if table is empty
   const { rows } = await pool.query('SELECT COUNT(*) FROM shipping_rates');
