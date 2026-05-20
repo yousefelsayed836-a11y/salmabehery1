@@ -22,7 +22,7 @@ const EGYPT_DATA: Record<string, { nameAr: string; cities: string[] }> = {
   "Fayoum": { nameAr: "الفيوم", cities: ["Fayoum City", "Ibsheway", "Sinnuris", "Tamiya", "Yusuf El Seddiq"] },
   "Gharbia": { nameAr: "الغربية", cities: ["Tanta", "El Mahalla El Kubra", "Kafr El Zayat", "Zefta", "El Sadat City"] },
   "Ismailia": { nameAr: "الإسماعيلية", cities: ["Ismailia City", "Fayed", "Qantara", "El Tal El Kabir"] },
-  "Menofia": { nameAr: "المنوفية", cities: ["Shebin El Kom", "Menouf", "Ashmoun", "Quesna", "Sadat City", "Birket El Sab"] },
+  "Menofia": { nameAr: "المنوفية", cities: ["Shebin El Kom", "Menouf", "Ashmoun", "Quesna", "Sadat City", "Birket El Sab", "Tala", "El Bagor", "El Shohadaa", "Sers El Lian"] },
   "Minya": { nameAr: "المنيا", cities: ["Minya City", "Abu Qurqas", "Mallawi", "Maghagha", "Beni Mazar", "Matay"] },
   "Qalyubia": { nameAr: "القليوبية", cities: ["Banha", "Shubra El Kheima", "Qalyub", "Khanka", "Tukh", "Qaha"] },
   "New Valley": { nameAr: "الوادي الجديد", cities: ["Kharga", "Dakhla", "Farafra", "Baris"] },
