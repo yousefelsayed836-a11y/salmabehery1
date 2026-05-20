@@ -20,7 +20,8 @@ const initPromise = (async () => {
       name TEXT NOT NULL,
       name_ar TEXT NOT NULL DEFAULT '',
       cost INT,
-      is_active BOOLEAN NOT NULL DEFAULT true
+      is_active BOOLEAN NOT NULL DEFAULT true,
+      UNIQUE(governorate_id, name)
     )
   `);
   await pool.query(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)`);
@@ -58,52 +59,54 @@ const initPromise = (async () => {
     ON CONFLICT (name) DO NOTHING
   `);
 
-  // Seed cities only if table is empty (preserves any admin edits)
-  const { rows: cc } = await pool.query('SELECT COUNT(*) FROM shipping_cities');
-  if (parseInt(cc[0].count) === 0) {
-    const { rows: govs } = await pool.query('SELECT id, name FROM shipping_rates');
-    const govMap = {};
-    govs.forEach(g => { govMap[g.name] = g.id; });
+  // Add unique constraint to existing table if missing (safe to run every start)
+  await pool.query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'shipping_cities_governorate_id_name_key'
+      ) THEN
+        ALTER TABLE shipping_cities ADD CONSTRAINT shipping_cities_governorate_id_name_key
+          UNIQUE (governorate_id, name);
+      END IF;
+    END $$
+  `);
 
-    const citySeeds = [
-      ['Cairo', 'Cairo City','مدينة القاهرة'], ['Cairo','Nasr City','مدينة نصر'], ['Cairo','Heliopolis','مصر الجديدة'], ['Cairo','Maadi','المعادي'], ['Cairo','Zamalek','الزمالك'], ['Cairo','New Cairo','القاهرة الجديدة'], ['Cairo','6th of October City','مدينة 6 أكتوبر'], ['Cairo','Shorouk','الشروق'], ['Cairo','Badr City','مدينة بدر'], ['Cairo','Obour','العبور'],
-      ['Giza','Giza City','مدينة الجيزة'], ['Giza','Dokki','الدقي'], ['Giza','Mohandessin','المهندسين'], ['Giza','Haram','الهرم'], ['Giza','Imbaba','إمبابة'], ['Giza','6th of October','6 أكتوبر'], ['Giza','Sheikh Zayed','الشيخ زايد'], ['Giza','Faysal','فيصل'],
-      ['Alexandria','Alexandria City','مدينة الإسكندرية'], ['Alexandria','Sidi Gaber','سيدي جابر'], ['Alexandria','Smouha','سموحة'], ['Alexandria','Miami','ميامي'], ['Alexandria','Montaza','المنتزه'], ['Alexandria','Borg El Arab','برج العرب'], ['Alexandria','Abu Qir','أبو قير'],
-      ['Dakahlia','Mansoura','المنصورة'], ['Dakahlia','Talkha','طلخا'], ['Dakahlia','Mit Ghamr','ميت غمر'], ['Dakahlia','Belqas','بلقاس'], ['Dakahlia','Aga','أجا'], ['Dakahlia','Sherbin','شربين'], ['Dakahlia','Dekernes','دكرنس'],
-      ['Red Sea','Hurghada','الغردقة'], ['Red Sea','Safaga','سفاجا'], ['Red Sea','El Quseir','القصير'], ['Red Sea','Marsa Alam','مرسى علم'], ['Red Sea','Ras Gharib','رأس غارب'],
-      ['Beheira','Damanhur','دمنهور'], ['Beheira','Kafr El Dawwar','كفر الدوار'], ['Beheira','Rashid','رشيد'], ['Beheira','Edku','إدكو'], ['Beheira','Abu Hummus','أبو حمص'],
-      ['Fayoum','Fayoum City','مدينة الفيوم'], ['Fayoum','Ibsheway','إبشواي'], ['Fayoum','Sinnuris','سنورس'], ['Fayoum','Tamiya','طامية'], ['Fayoum','Yusuf El Seddiq','يوسف الصديق'],
-      ['Gharbia','Tanta','طنطا'], ['Gharbia','El Mahalla El Kubra','المحلة الكبرى'], ['Gharbia','Kafr El Zayat','كفر الزيات'], ['Gharbia','Zefta','زفتى'], ['Gharbia','El Sadat City','مدينة السادات'],
-      ['Ismailia','Ismailia City','مدينة الإسماعيلية'], ['Ismailia','Fayed','فايد'], ['Ismailia','Qantara','القنطرة'], ['Ismailia','El Tal El Kabir','التل الكبير'],
-      ['Menofia','Shebin El Kom','شبين الكوم'], ['Menofia','Menouf','منوف'], ['Menofia','Ashmoun','أشمون'], ['Menofia','Quesna','قويسنا'], ['Menofia','Sadat City','مدينة السادات'], ['Menofia','Birket El Sab','بركة السبع'], ['Menofia','Tala','تلا'], ['Menofia','El Bagor','الباجور'], ['Menofia','El Shohadaa','الشهداء'], ['Menofia','Sers El Lian','سرس الليان'],
-      ['Minya','Minya City','مدينة المنيا'], ['Minya','Abu Qurqas','أبو قرقاص'], ['Minya','Mallawi','ملوي'], ['Minya','Maghagha','مغاغة'], ['Minya','Beni Mazar','بني مزار'], ['Minya','Matay','مطاي'],
-      ['Qalyubia','Banha','بنها'], ['Qalyubia','Shubra El Kheima','شبرا الخيمة'], ['Qalyubia','Qalyub','قليوب'], ['Qalyubia','Khanka','الخانكة'], ['Qalyubia','Tukh','طوخ'], ['Qalyubia','Qaha','قها'],
-      ['New Valley','Kharga','الخارجة'], ['New Valley','Dakhla','الداخلة'], ['New Valley','Farafra','الفرافرة'], ['New Valley','Baris','باريس'],
-      ['Suez','Suez City','مدينة السويس'], ['Suez','Ain Sokhna','العين السخنة'], ['Suez','Ataqah','عتاقة'],
-      ['Aswan','Aswan City','مدينة أسوان'], ['Aswan','Edfu','إدفو'], ['Aswan','Kom Ombo','كوم أمبو'], ['Aswan','Abu Simbel','أبو سمبل'], ['Aswan','Daraw','دراو'],
-      ['Assiut','Assiut City','مدينة أسيوط'], ['Assiut','Abnub','أبنوب'], ['Assiut','Manfalut','منفلوط'], ['Assiut','Dairut','ديروط'], ['Assiut','El Qusiya','القوصية'], ['Assiut','Sahel Selim','ساحل سليم'],
-      ['Beni Suef','Beni Suef City','مدينة بني سويف'], ['Beni Suef','El Fashn','الفشن'], ['Beni Suef','Beba','ببا'], ['Beni Suef','Nasser','ناصر'], ['Beni Suef','Somsta','سمسطا'],
-      ['Port Said','Port Said City','مدينة بورسعيد'], ['Port Said','Port Fouad','بورفؤاد'],
-      ['Damietta','Damietta City','مدينة دمياط'], ['Damietta','Faraskur','فارسكور'], ['Damietta','Kafr Saad','كفر سعد'], ['Damietta','New Damietta','دمياط الجديدة'], ['Damietta','Ras El Bar','رأس البر'],
-      ['Sharqia','Zagazig','الزقازيق'], ['Sharqia','10th of Ramadan','العاشر من رمضان'], ['Sharqia','Belbeis','بلبيس'], ['Sharqia','Abu Hammad','أبو حماد'], ['Sharqia','Minya El Qamh','منيا القمح'], ['Sharqia','El Husseiniya','الحسينية'],
-      ['South Sinai','Sharm El Sheikh','شرم الشيخ'], ['South Sinai','Dahab','دهب'], ['South Sinai','Nuweiba','نويبع'], ['South Sinai','Taba','طابا'], ['South Sinai','Saint Catherine','سانت كاترين'], ['South Sinai','El Tor','الطور'],
-      ['Kafr El Sheikh','Kafr El Sheikh City','مدينة كفر الشيخ'], ['Kafr El Sheikh','Desouq','دسوق'], ['Kafr El Sheikh','Baltim','بلطيم'], ['Kafr El Sheikh','Fouh','فوه'], ['Kafr El Sheikh','Biala','بيلا'], ['Kafr El Sheikh','Sidi Salem','سيدي سالم'],
-      ['Matrouh','Marsa Matrouh','مرسى مطروح'], ['Matrouh','Siwa','سيوة'], ['Matrouh','El Alamein','العلمين'], ['Matrouh','El Dabaa','الضبعة'],
-      ['Luxor','Luxor City','مدينة الأقصر'], ['Luxor','Esna','إسنا'], ['Luxor','El Qarna','القرنة'], ['Luxor','Armant','أرمنت'],
-      ['Qena','Qena City','مدينة قنا'], ['Qena','Nag Hammadi','نجع حمادي'], ['Qena','Dishna','دشنا'], ['Qena','Farshut','فرشوط'],
-      ['North Sinai','Arish','العريش'], ['North Sinai','Rafah','رفح'], ['North Sinai','Sheikh Zuweid','الشيخ زويد'], ['North Sinai','Bir El Abd','بئر العبد'],
-      ['Sohag','Sohag City','مدينة سوهاج'], ['Sohag','Akhmim','أخميم'], ['Sohag','Tahta','طهطا'], ['Sohag','El Maragha','المراغة'], ['Sohag','Girga','جرجا'], ['Sohag','Juhayna','جهينة'],
-    ];
-
-    for (const [govName, cityName, cityNameAr] of citySeeds) {
-      const govId = govMap[govName];
-      if (!govId) continue;
-      await pool.query(
-        'INSERT INTO shipping_cities (governorate_id, name, name_ar) VALUES ($1,$2,$3)',
-        [govId, cityName, cityNameAr]
-      );
-    }
-  }
+  // Seed all cities in one query — joins by gov name, skips duplicates
+  await pool.query(`
+    INSERT INTO shipping_cities (governorate_id, name, name_ar)
+    SELECT r.id, c.city, c.city_ar
+    FROM shipping_rates r
+    JOIN (VALUES
+      ('Cairo','Cairo City','مدينة القاهرة'),('Cairo','Nasr City','مدينة نصر'),('Cairo','Heliopolis','مصر الجديدة'),('Cairo','Maadi','المعادي'),('Cairo','Zamalek','الزمالك'),('Cairo','New Cairo','القاهرة الجديدة'),('Cairo','6th of October City','مدينة 6 أكتوبر'),('Cairo','Shorouk','الشروق'),('Cairo','Badr City','مدينة بدر'),('Cairo','Obour','العبور'),
+      ('Giza','Giza City','مدينة الجيزة'),('Giza','Dokki','الدقي'),('Giza','Mohandessin','المهندسين'),('Giza','Haram','الهرم'),('Giza','Imbaba','إمبابة'),('Giza','6th of October','6 أكتوبر'),('Giza','Sheikh Zayed','الشيخ زايد'),('Giza','Faysal','فيصل'),
+      ('Alexandria','Alexandria City','مدينة الإسكندرية'),('Alexandria','Sidi Gaber','سيدي جابر'),('Alexandria','Smouha','سموحة'),('Alexandria','Miami','ميامي'),('Alexandria','Montaza','المنتزه'),('Alexandria','Borg El Arab','برج العرب'),('Alexandria','Abu Qir','أبو قير'),
+      ('Dakahlia','Mansoura','المنصورة'),('Dakahlia','Talkha','طلخا'),('Dakahlia','Mit Ghamr','ميت غمر'),('Dakahlia','Belqas','بلقاس'),('Dakahlia','Aga','أجا'),('Dakahlia','Sherbin','شربين'),('Dakahlia','Dekernes','دكرنس'),
+      ('Red Sea','Hurghada','الغردقة'),('Red Sea','Safaga','سفاجا'),('Red Sea','El Quseir','القصير'),('Red Sea','Marsa Alam','مرسى علم'),('Red Sea','Ras Gharib','رأس غارب'),
+      ('Beheira','Damanhur','دمنهور'),('Beheira','Kafr El Dawwar','كفر الدوار'),('Beheira','Rashid','رشيد'),('Beheira','Edku','إدكو'),('Beheira','Abu Hummus','أبو حمص'),
+      ('Fayoum','Fayoum City','مدينة الفيوم'),('Fayoum','Ibsheway','إبشواي'),('Fayoum','Sinnuris','سنورس'),('Fayoum','Tamiya','طامية'),('Fayoum','Yusuf El Seddiq','يوسف الصديق'),
+      ('Gharbia','Tanta','طنطا'),('Gharbia','El Mahalla El Kubra','المحلة الكبرى'),('Gharbia','Kafr El Zayat','كفر الزيات'),('Gharbia','Zefta','زفتى'),('Gharbia','El Sadat City','مدينة السادات'),
+      ('Ismailia','Ismailia City','مدينة الإسماعيلية'),('Ismailia','Fayed','فايد'),('Ismailia','Qantara','القنطرة'),('Ismailia','El Tal El Kabir','التل الكبير'),
+      ('Menofia','Shebin El Kom','شبين الكوم'),('Menofia','Menouf','منوف'),('Menofia','Ashmoun','أشمون'),('Menofia','Quesna','قويسنا'),('Menofia','Sadat City','مدينة السادات'),('Menofia','Birket El Sab','بركة السبع'),('Menofia','Tala','تلا'),('Menofia','El Bagor','الباجور'),('Menofia','El Shohadaa','الشهداء'),('Menofia','Sers El Lian','سرس الليان'),
+      ('Minya','Minya City','مدينة المنيا'),('Minya','Abu Qurqas','أبو قرقاص'),('Minya','Mallawi','ملوي'),('Minya','Maghagha','مغاغة'),('Minya','Beni Mazar','بني مزار'),('Minya','Matay','مطاي'),
+      ('Qalyubia','Banha','بنها'),('Qalyubia','Shubra El Kheima','شبرا الخيمة'),('Qalyubia','Qalyub','قليوب'),('Qalyubia','Khanka','الخانكة'),('Qalyubia','Tukh','طوخ'),('Qalyubia','Qaha','قها'),
+      ('New Valley','Kharga','الخارجة'),('New Valley','Dakhla','الداخلة'),('New Valley','Farafra','الفرافرة'),('New Valley','Baris','باريس'),
+      ('Suez','Suez City','مدينة السويس'),('Suez','Ain Sokhna','العين السخنة'),('Suez','Ataqah','عتاقة'),
+      ('Aswan','Aswan City','مدينة أسوان'),('Aswan','Edfu','إدفو'),('Aswan','Kom Ombo','كوم أمبو'),('Aswan','Abu Simbel','أبو سمبل'),('Aswan','Daraw','دراو'),
+      ('Assiut','Assiut City','مدينة أسيوط'),('Assiut','Abnub','أبنوب'),('Assiut','Manfalut','منفلوط'),('Assiut','Dairut','ديروط'),('Assiut','El Qusiya','القوصية'),('Assiut','Sahel Selim','ساحل سليم'),
+      ('Beni Suef','Beni Suef City','مدينة بني سويف'),('Beni Suef','El Fashn','الفشن'),('Beni Suef','Beba','ببا'),('Beni Suef','Nasser','ناصر'),('Beni Suef','Somsta','سمسطا'),
+      ('Port Said','Port Said City','مدينة بورسعيد'),('Port Said','Port Fouad','بورفؤاد'),
+      ('Damietta','Damietta City','مدينة دمياط'),('Damietta','Faraskur','فارسكور'),('Damietta','Kafr Saad','كفر سعد'),('Damietta','New Damietta','دمياط الجديدة'),('Damietta','Ras El Bar','رأس البر'),
+      ('Sharqia','Zagazig','الزقازيق'),('Sharqia','10th of Ramadan','العاشر من رمضان'),('Sharqia','Belbeis','بلبيس'),('Sharqia','Abu Hammad','أبو حماد'),('Sharqia','Minya El Qamh','منيا القمح'),('Sharqia','El Husseiniya','الحسينية'),
+      ('South Sinai','Sharm El Sheikh','شرم الشيخ'),('South Sinai','Dahab','دهب'),('South Sinai','Nuweiba','نويبع'),('South Sinai','Taba','طابا'),('South Sinai','Saint Catherine','سانت كاترين'),('South Sinai','El Tor','الطور'),
+      ('Kafr El Sheikh','Kafr El Sheikh City','مدينة كفر الشيخ'),('Kafr El Sheikh','Desouq','دسوق'),('Kafr El Sheikh','Baltim','بلطيم'),('Kafr El Sheikh','Fouh','فوه'),('Kafr El Sheikh','Biala','بيلا'),('Kafr El Sheikh','Sidi Salem','سيدي سالم'),
+      ('Matrouh','Marsa Matrouh','مرسى مطروح'),('Matrouh','Siwa','سيوة'),('Matrouh','El Alamein','العلمين'),('Matrouh','El Dabaa','الضبعة'),
+      ('Luxor','Luxor City','مدينة الأقصر'),('Luxor','Esna','إسنا'),('Luxor','El Qarna','القرنة'),('Luxor','Armant','أرمنت'),
+      ('Qena','Qena City','مدينة قنا'),('Qena','Nag Hammadi','نجع حمادي'),('Qena','Dishna','دشنا'),('Qena','Farshut','فرشوط'),
+      ('North Sinai','Arish','العريش'),('North Sinai','Rafah','رفح'),('North Sinai','Sheikh Zuweid','الشيخ زويد'),('North Sinai','Bir El Abd','بئر العبد'),
+      ('Sohag','Sohag City','مدينة سوهاج'),('Sohag','Akhmim','أخميم'),('Sohag','Tahta','طهطا'),('Sohag','El Maragha','المراغة'),('Sohag','Girga','جرجا'),('Sohag','Juhayna','جهينة')
+    ) AS c(gov, city, city_ar) ON r.name = c.gov
+    ON CONFLICT (governorate_id, name) DO NOTHING
+  `);
 })();
 
 // GET /api/shipping
