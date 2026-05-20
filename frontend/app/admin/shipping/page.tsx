@@ -43,9 +43,9 @@ export default function ShippingPage() {
   const [pendingCityCosts, setPendingCityCosts] = useState<Record<number, string>>({});
   const [editingCity, setEditingCity] = useState<number | null>(null);
 
-  const fetchRates = useCallback(async () => {
+  const fetchRates = useCallback(async (showLoader = false) => {
     try {
-      setLoading(true);
+      if (showLoader) setLoading(true);
       const res = await fetch(`${API}/shipping?admin=true`);
       const data = await res.json();
       if (Array.isArray(data.rates)) {
@@ -53,10 +53,10 @@ export default function ShippingPage() {
         setFreeThreshold(data.free_threshold || 900);
       }
     } catch {}
-    finally { setLoading(false); }
+    finally { if (showLoader) setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchRates(); }, [fetchRates]);
+  useEffect(() => { fetchRates(true); }, [fetchRates]);
 
   const fetchCities = async (govId: number) => {
     setLoadingCities(true);

@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../database/db');
 
+let initialized = false;
+
 async function ensureTable() {
+  if (initialized) return;
+  initialized = true;
   await pool.query(`
     CREATE TABLE IF NOT EXISTS shipping_rates (
       id SERIAL PRIMARY KEY,

@@ -7,6 +7,9 @@ import { useParams } from "next/navigation";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 const API = BACKEND + "/api";
 
+// Module-level cache persists across client-side navigations for the session
+const productCache = new Map<string, { product: any; similar: any[] }>();
+
 interface Variant {
   id?: number;
   option_name: string;
@@ -57,8 +60,18 @@ export default function ProductPage() {
 
   useEffect(() => {
     if (!productId) return;
+
+    // Serve from cache immediately (no loading flash on back-navigation)
+    const cached = productCache.get(productId);
+    if (cached) {
+      setProduct(cached.product);
+      setSimilar(cached.similar);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    fetch(`${API}/products/${productId}`, { cache: "no-store" })
+    fetch(`${API}/products/${productId}`)
       .then(r => r.json())
       .then(d => {
         const p = d.product || d;
@@ -69,13 +82,17 @@ export default function ProductPage() {
             .then(r => r.json())
             .then(data => {
               const all: Product[] = data.products || data.data || [];
-              setSimilar(all.filter((x: Product) =>
+              const sim = all.filter((x: Product) =>
                 x.id !== productId &&
                 x.is_active !== false &&
                 (x.stock === undefined || x.stock === null || x.stock > 0)
-              ).slice(0, 4));
+              ).slice(0, 4);
+              setSimilar(sim);
+              productCache.set(productId, { product: p, similar: sim });
             })
-            .catch(() => {});
+            .catch(() => { productCache.set(productId, { product: p, similar: [] }); });
+        } else {
+          productCache.set(productId, { product: p, similar: [] });
         }
       })
       .catch(() => setLoading(false));
