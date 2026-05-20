@@ -26,26 +26,23 @@ async function ensureTable() {
     CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)
   `);
 
-  // Seed defaults if table is empty
-  const { rows } = await pool.query('SELECT COUNT(*) FROM shipping_rates');
-  if (parseInt(rows[0].count) === 0) {
-    const defaults = [
-      ['Cairo','القاهرة',60],['Giza','الجيزة',60],['Alexandria','الإسكندرية',70],
-      ['Dakahlia','الدقهلية',80],['Red Sea','البحر الأحمر',100],['Beheira','البحيرة',80],
-      ['Fayoum','الفيوم',80],['Gharbia','الغربية',80],['Ismailia','الإسماعيلية',80],
-      ['Menofia','المنوفية',80],['Minya','المنيا',85],['Qalyubia','القليوبية',65],
-      ['New Valley','الوادي الجديد',120],['Suez','السويس',80],['Aswan','أسوان',100],
-      ['Assiut','أسيوط',90],['Beni Suef','بني سويف',80],['Port Said','بورسعيد',80],
-      ['Damietta','دمياط',80],['Sharqia','الشرقية',80],['South Sinai','جنوب سيناء',110],
-      ['Kafr El Sheikh','كفر الشيخ',80],['Matrouh','مطروح',110],['Luxor','الأقصر',100],
-      ['Qena','قنا',95],['North Sinai','شمال سيناء',100],['Sohag','سوهاج',90],
-    ];
-    for (const [name, name_ar, cost] of defaults) {
-      await pool.query(
-        'INSERT INTO shipping_rates (name, name_ar, cost) VALUES ($1,$2,$3) ON CONFLICT (name) DO NOTHING',
-        [name, name_ar, cost]
-      );
-    }
+  // Always restore any missing default governorates (ON CONFLICT DO NOTHING preserves user edits)
+  const defaults = [
+    ['Cairo','القاهرة',60],['Giza','الجيزة',60],['Alexandria','الإسكندرية',70],
+    ['Dakahlia','الدقهلية',80],['Red Sea','البحر الأحمر',100],['Beheira','البحيرة',80],
+    ['Fayoum','الفيوم',80],['Gharbia','الغربية',80],['Ismailia','الإسماعيلية',80],
+    ['Menofia','المنوفية',80],['Minya','المنيا',85],['Qalyubia','القليوبية',65],
+    ['New Valley','الوادي الجديد',120],['Suez','السويس',80],['Aswan','أسوان',100],
+    ['Assiut','أسيوط',90],['Beni Suef','بني سويف',80],['Port Said','بورسعيد',80],
+    ['Damietta','دمياط',80],['Sharqia','الشرقية',80],['South Sinai','جنوب سيناء',110],
+    ['Kafr El Sheikh','كفر الشيخ',80],['Matrouh','مطروح',110],['Luxor','الأقصر',100],
+    ['Qena','قنا',95],['North Sinai','شمال سيناء',100],['Sohag','سوهاج',90],
+  ];
+  for (const [name, name_ar, cost] of defaults) {
+    await pool.query(
+      'INSERT INTO shipping_rates (name, name_ar, cost) VALUES ($1,$2,$3) ON CONFLICT (name) DO NOTHING',
+      [name, name_ar, cost]
+    );
   }
 }
 
