@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
@@ -25,7 +25,7 @@ interface City {
 export default function ShippingPage() {
   const [rates, setRates] = useState<Rate[]>([]);
   const [freeThreshold, setFreeThreshold] = useState(900);
-  const [loading, setLoading] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [search, setSearch] = useState("");
@@ -33,8 +33,6 @@ export default function ShippingPage() {
   const [addForm, setAddForm] = useState({ name: "", name_ar: "", cost: 80 });
   const [addMsg, setAddMsg] = useState("");
   const [pendingCosts, setPendingCosts] = useState<Record<number, number>>({});
-
-  // Cities state
   const [expandedGov, setExpandedGov] = useState<number | null>(null);
   const [cities, setCities] = useState<Record<number, City[]>>({});
   const [loadingCities, setLoadingCities] = useState(false);
@@ -43,20 +41,19 @@ export default function ShippingPage() {
   const [pendingCityCosts, setPendingCityCosts] = useState<Record<number, string>>({});
   const [editingCity, setEditingCity] = useState<number | null>(null);
 
-  const fetchRates = useCallback(async (showLoader = false) => {
+  async function loadRates() {
     try {
-      if (showLoader) setLoading(true);
       const res = await fetch(`${API}/shipping?admin=true`);
       const data = await res.json();
-      if (Array.isArray(data.rates)) {
+      if (Array.isArray(data.rates) && data.rates.length > 0) {
         setRates(data.rates);
         setFreeThreshold(data.free_threshold || 900);
       }
     } catch {}
-    finally { if (showLoader) setLoading(false); }
-  }, []);
+    setFirstLoad(false);
+  }
 
-  useEffect(() => { fetchRates(true); }, [fetchRates]);
+  useEffect(() => { loadRates(); }, []);
 
   const fetchCities = async (govId: number) => {
     setLoadingCities(true);
@@ -65,7 +62,7 @@ export default function ShippingPage() {
       const data = await res.json();
       setCities(prev => ({ ...prev, [govId]: data.cities || [] }));
     } catch {}
-    finally { setLoadingCities(false); }
+    setLoadingCities(false);
   };
 
   const toggleExpand = async (govId: number) => {
@@ -100,40 +97,44 @@ export default function ShippingPage() {
       );
       setPendingCosts({});
       setSaveMsg("✅ Saved!");
-      fetchRates();
+      loadRates();
     } catch { setSaveMsg("❌ Failed"); }
-    finally {
-      setSaving(false);
-      setTimeout(() => setSaveMsg(""), 3000);
-    }
+    setSaving(false);
+    setTimeout(() => setSaveMsg(""), 3000);
   };
 
   const toggleActive = async (r: Rate) => {
+    // Optimistic update
+    setRates(prev => prev.map(x => x.id === r.id ? { ...x, is_active: !x.is_active } : x));
     await fetch(`${API}/shipping/${r.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_active: !r.is_active }),
     });
-    fetchRates();
   };
 
   const deleteRate = async (r: Rate) => {
-    await fetch(`${API}/shipping/${r.id}`, { method: "DELETE" });
+    // Optimistic update
+    setRates(prev => prev.filter(x => x.id !== r.id));
     if (expandedGov === r.id) setExpandedGov(null);
-    fetchRates();
+    await fetch(`${API}/shipping/${r.id}`, { method: "DELETE" });
   };
 
   const addGovernorate = async () => {
     if (!addForm.name.trim()) { setAddMsg("اكتب الاسم"); return; }
     try {
-      await fetch(`${API}/shipping`, {
+      const res = await fetch(`${API}/shipping`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(addForm),
       });
+      const data = await res.json();
+      if (data.rate) {
+        // Optimistic: add to list immediately
+        setRates(prev => [...prev, data.rate].sort((a, b) => a.name.localeCompare(b.name)));
+      }
       setAddMsg("✅ تمت الإضافة!");
       setAddForm({ name: "", name_ar: "", cost: 80 });
-      fetchRates();
       setTimeout(() => { setAddMsg(""); setShowAdd(false); }, 1500);
     } catch { setAddMsg("❌ فشل"); }
   };
@@ -176,17 +177,21 @@ export default function ShippingPage() {
   };
 
   const toggleCityActive = async (city: City, govId: number) => {
+    // Optimistic
+    setCities(prev => ({
+      ...prev,
+      [govId]: (prev[govId] || []).map(c => c.id === city.id ? { ...c, is_active: !c.is_active } : c),
+    }));
     await fetch(`${API}/shipping/city/${city.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_active: !city.is_active }),
     });
-    await fetchCities(govId);
   };
 
   const deleteCity = async (cityId: number, govId: number) => {
+    setCities(prev => ({ ...prev, [govId]: (prev[govId] || []).filter(c => c.id !== cityId) }));
     await fetch(`${API}/shipping/city/${cityId}`, { method: "DELETE" });
-    await fetchCities(govId);
   };
 
   const filtered = rates.filter(r =>
@@ -201,7 +206,7 @@ export default function ShippingPage() {
 
   return (
     <>
-      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; } input, select, textarea { font-size: 16px !important; }`}</style>
+      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; } input, select { font-size: 16px !important; }`}</style>
 
       <div style={{ minHeight: "100vh", padding: "24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -280,7 +285,7 @@ export default function ShippingPage() {
             {[
               { label: "المحافظات", value: rates.length },
               { label: "الفعّالة", value: activeRates.length },
-              { label: "متوسط الشحن", value: `${avg} EGP` },
+              { label: "متوسط الشحن", value: avg ? `${avg} EGP` : "—" },
             ].map(s => (
               <div key={s.label} style={{ background: "#fff", borderRadius: 12, padding: "14px 16px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", textAlign: "center" }}>
                 <p style={{ margin: 0, fontSize: 12, color: "#888" }}>{s.label}</p>
@@ -293,21 +298,19 @@ export default function ShippingPage() {
           <input type="text" placeholder="ابحث عن محافظة..." value={search} onChange={e => setSearch(e.target.value)}
             style={{ width: "100%", padding: "12px 16px", borderRadius: 10, border: "1px solid #ddd", fontSize: 14, marginBottom: 12, outline: "none" }} />
 
-          {/* Governorates List */}
-          {loading ? (
-            <div style={{ textAlign: "center", padding: 40, color: "#888" }}>جاري التحميل...</div>
+          {/* List */}
+          {firstLoad ? (
+            <div style={{ textAlign: "center", padding: 60, color: "#bbb", fontSize: 14 }}>جاري التحميل...</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ textAlign: "center", padding: 60, color: "#bbb", fontSize: 14 }}>لا توجد محافظات</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {filtered.map((r, i) => (
                 <div key={r.id} style={{ background: "#fff", borderRadius: 14, boxShadow: "0 2px 10px rgba(0,0,0,0.05)", overflow: "hidden", opacity: r.is_active ? 1 : 0.6 }}>
 
-                  {/* Governorate Row */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: i % 2 === 0 ? "#fff" : "#fffcfd" }}>
-                    {/* Expand button */}
-                    <button
-                      onClick={() => toggleExpand(r.id)}
-                      style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: expandedGov === r.id ? "#fda1b7" : "#f5f5f5", color: expandedGov === r.id ? "#fff" : "#555", cursor: "pointer", fontSize: 14, fontWeight: 700, flexShrink: 0 }}
-                    >
+                    <button onClick={() => toggleExpand(r.id)}
+                      style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: expandedGov === r.id ? "#fda1b7" : "#f5f5f5", color: expandedGov === r.id ? "#fff" : "#555", cursor: "pointer", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
                       {expandedGov === r.id ? "▲" : "▼"}
                     </button>
 
@@ -317,13 +320,10 @@ export default function ShippingPage() {
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                      <input
-                        type="number"
-                        value={r.cost}
+                      <input type="number" value={r.cost}
                         onChange={e => setCost(r.id, Number(e.target.value))}
                         disabled={!r.is_active}
-                        style={{ width: 85, padding: "6px 10px", borderRadius: 8, border: "1.5px solid #f0d4dc", fontSize: 14, fontWeight: 700, textAlign: "center", outline: "none", color: "#fda1b7", background: r.is_active ? "#fff" : "#f5f5f5" }}
-                      />
+                        style={{ width: 85, padding: "6px 10px", borderRadius: 8, border: "1.5px solid #f0d4dc", fontSize: 14, fontWeight: 700, textAlign: "center", outline: "none", color: "#fda1b7", background: r.is_active ? "#fff" : "#f5f5f5" }} />
                       <span style={{ fontSize: 12, color: "#aaa" }}>EGP</span>
 
                       <button onClick={() => toggleActive(r)}
@@ -346,12 +346,11 @@ export default function ShippingPage() {
                       <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#fda1b7" }}>🏙️ مدن {r.name_ar || r.name}</p>
 
                       {loadingCities && !cities[r.id] ? (
-                        <div style={{ color: "#aaa", fontSize: 13 }}>جاري التحميل...</div>
+                        <div style={{ color: "#aaa", fontSize: 13, marginBottom: 12 }}>جاري التحميل...</div>
                       ) : (
                         <>
-                          {/* Cities Table */}
                           {(cities[r.id] || []).length === 0 ? (
-                            <p style={{ fontSize: 13, color: "#bbb", margin: "0 0 12px" }}>لا توجد مدن مضافة — أسعار الشحن تستخدم سعر المحافظة</p>
+                            <p style={{ fontSize: 13, color: "#bbb", margin: "0 0 12px" }}>لا توجد مدن مضافة — سعر الشحن يستخدم سعر المحافظة</p>
                           ) : (
                             <div style={{ marginBottom: 14, display: "flex", flexDirection: "column", gap: 6 }}>
                               {(cities[r.id] || []).map(city => (
@@ -363,14 +362,11 @@ export default function ShippingPage() {
 
                                   {editingCity === city.id ? (
                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                      <input
-                                        type="number"
-                                        placeholder={`افتراضي: ${r.cost}`}
+                                      <input type="number" placeholder={`افتراضي: ${r.cost}`}
                                         value={pendingCityCosts[city.id] ?? (city.cost !== null ? String(city.cost) : "")}
                                         onChange={e => setPendingCityCosts(p => ({ ...p, [city.id]: e.target.value }))}
                                         style={{ width: 100, padding: "5px 8px", borderRadius: 8, border: "1.5px solid #fda1b7", fontSize: 13, outline: "none", textAlign: "center" }}
-                                        autoFocus
-                                      />
+                                        autoFocus />
                                       <span style={{ fontSize: 11, color: "#aaa" }}>EGP</span>
                                       <button onClick={() => saveCityCost(city, r.id)}
                                         style={{ padding: "5px 12px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
@@ -383,10 +379,8 @@ export default function ShippingPage() {
                                     </div>
                                   ) : (
                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                      <span
-                                        onClick={() => setEditingCity(city.id)}
-                                        style={{ padding: "4px 12px", borderRadius: 8, background: city.cost !== null ? "#fdf0f3" : "#f5f5f5", color: city.cost !== null ? "#fda1b7" : "#aaa", fontSize: 13, fontWeight: 700, cursor: "pointer", border: "1px dashed #fda1b766" }}
-                                      >
+                                      <span onClick={() => setEditingCity(city.id)}
+                                        style={{ padding: "4px 12px", borderRadius: 8, background: city.cost !== null ? "#fdf0f3" : "#f5f5f5", color: city.cost !== null ? "#fda1b7" : "#aaa", fontSize: 13, fontWeight: 700, cursor: "pointer", border: "1px dashed #fda1b766" }}>
                                         {city.cost !== null ? `${city.cost} EGP` : `${r.cost} EGP ↑`}
                                       </span>
                                       <button onClick={() => toggleCityActive(city, r.id)}
@@ -406,27 +400,16 @@ export default function ShippingPage() {
                             </div>
                           )}
 
-                          {/* Add City Form */}
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
-                            <input
-                              placeholder="اسم المدينة (EN)"
-                              value={addCityForm.name}
+                            <input placeholder="اسم المدينة (EN)" value={addCityForm.name}
                               onChange={e => setAddCityForm(p => ({ ...p, name: e.target.value }))}
-                              style={{ flex: 2, minWidth: 120, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none" }}
-                            />
-                            <input
-                              placeholder="اسم المدينة (AR)"
-                              value={addCityForm.name_ar}
+                              style={{ flex: 2, minWidth: 120, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none" }} />
+                            <input placeholder="اسم المدينة (AR)" value={addCityForm.name_ar}
                               onChange={e => setAddCityForm(p => ({ ...p, name_ar: e.target.value }))}
-                              style={{ flex: 2, minWidth: 120, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none", direction: "rtl" }}
-                            />
-                            <input
-                              type="number"
-                              placeholder={`سعر خاص (اختياري)`}
-                              value={addCityForm.cost}
+                              style={{ flex: 2, minWidth: 120, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none", direction: "rtl" }} />
+                            <input type="number" placeholder="سعر خاص (اختياري)" value={addCityForm.cost}
                               onChange={e => setAddCityForm(p => ({ ...p, cost: e.target.value }))}
-                              style={{ width: 130, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none" }}
-                            />
+                              style={{ width: 130, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none" }} />
                             <button onClick={() => addCity(r.id)}
                               style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
                               + إضافة مدينة
