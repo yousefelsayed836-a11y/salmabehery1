@@ -487,20 +487,10 @@ export default function OrdersPage() {
                         </td>
                         <td style={{ padding: 14, fontSize: 13, maxWidth: 160 }} onClick={() => openOrder(order)}>{order.shipping_address || order.address || "-"}</td>
                         <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>{order.city || "-"}</td>
-                        <td style={{ padding: 8 }} onClick={() => openOrder(order)}>
-                          <div style={{ display: "flex", gap: 3, flexWrap: "wrap", maxWidth: 120 }}>
-                            {order.items?.slice(0, 4).map((item, i) => (
-                              <div key={i} style={{ position: "relative" }}>
-                                <div style={{ width: 36, height: 36, borderRadius: 8, overflow: "hidden", background: "#fdf0f3", border: "1px solid #eee" }}>
-                                  <img src={productImages[item.product_id] || `https://placehold.co/36x36/fdf0f3/fda1b7?text=💍`}
-                                    alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                    onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/36x36/fdf0f3/fda1b7?text=💍`; }} />
-                                </div>
-                                {item.quantity > 1 && <span style={{ position: "absolute", top: -4, right: -4, background: "#1a1a2e", color: "#fff", borderRadius: "50%", width: 14, height: 14, fontSize: 8, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.quantity}</span>}
-                              </div>
-                            ))}
-                            {(order.items?.length || 0) > 4 && <div style={{ width: 36, height: 36, borderRadius: 8, background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#888", fontWeight: 700 }}>+{(order.items?.length || 0) - 4}</div>}
-                          </div>
+                        <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>
+                          <span style={{ background: "#fdf0f3", color: "#fda1b7", borderRadius: 8, padding: "3px 10px", fontWeight: 700, fontSize: 13 }}>
+                            {order.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 0} قطعة
+                          </span>
                         </td>
                         <td style={{ padding: 14, fontSize: 14, fontWeight: 700 }} onClick={() => openOrder(order)}>
                           <div>{fmt(order.total_amount)} EGP</div>
