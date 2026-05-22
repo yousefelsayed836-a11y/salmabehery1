@@ -144,7 +144,7 @@ export default function Header() {
               transition: "color 0.3s ease",
               display: "block",
             }}>
-              Salma Be<span style={{ letterSpacing: 4 }}>h</span>ery
+              Salma Be<span style={{ letterSpacing: 2.5 }}>h</span>ery
             </span>
           </Link>
 
