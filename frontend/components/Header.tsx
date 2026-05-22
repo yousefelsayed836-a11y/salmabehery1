@@ -144,7 +144,7 @@ export default function Header() {
               transition: "color 0.3s ease",
               display: "block",
             }}>
-              Salma Behery
+              Salma Be<span style={{ letterSpacing: 2 }}>h</span>ery
             </span>
           </Link>
 
