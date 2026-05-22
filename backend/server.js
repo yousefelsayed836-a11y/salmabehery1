@@ -90,6 +90,7 @@ const GITHUB_REPO = 'yousefelsayed836-a11y/salmabehery1';
 
 async function compressImage(buffer) {
   return sharp(buffer)
+    .rotate()
     .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
     .webp({ quality: 82, effort: 4 })
     .toBuffer();
