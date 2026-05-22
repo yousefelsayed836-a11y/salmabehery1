@@ -138,13 +138,13 @@ export default function Header() {
               fontFamily: "'CinzelDecorative', serif",
               fontWeight: 400,
               fontSize: 22,
-              letterSpacing: 3,
+              letterSpacing: 1,
               whiteSpace: "nowrap",
               color: isTransparent ? "#fff" : "#1a1a2e",
               transition: "color 0.3s ease",
               display: "block",
             }}>
-              Salma Behery
+              Salma Be<span style={{ letterSpacing: 5 }}>h</span>ery
             </span>
           </Link>
 
@@ -290,7 +290,7 @@ export default function Header() {
           .header-root { padding: 4px 14px !important; }
           .header-logo {
             font-size: 15px !important;
-            letter-spacing: 2.5px !important;
+            letter-spacing: 0.5px !important;
             -webkit-text-stroke: 0.4px currentColor;
           }
         }
