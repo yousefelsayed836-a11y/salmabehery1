@@ -135,12 +135,11 @@ export default function Header() {
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <span className="header-logo" style={{
-              fontFamily: "var(--font-roboto-condensed), sans-serif",
-              fontWeight: 500,
-              fontSize: 24,
-              letterSpacing: 2,
+              fontFamily: "'CinzelDecorative', serif",
+              fontWeight: 400,
+              fontSize: 22,
+              letterSpacing: 1,
               whiteSpace: "nowrap",
-              textTransform: "uppercase" as const,
               color: isTransparent ? "#fff" : "#1a1a2e",
               transition: "color 0.3s ease",
               display: "block",
@@ -278,12 +277,18 @@ export default function Header() {
       </header>
 
       <style jsx global>{`
+        @font-face {
+          font-family: 'CinzelDecorative';
+          src: url('/fonts/CinzelDecorative.ttf') format('truetype');
+          font-weight: 400;
+          font-display: swap;
+        }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .desktop-icon { display: none !important; }
           .mobile-nav  { display: flex !important; }
           .header-root { padding: 4px 14px !important; }
-          .header-logo { font-size: 17px !important; letter-spacing: 1.5px !important; }
+          .header-logo { font-size: 15px !important; letter-spacing: 0.5px !important; }
         }
       `}</style>
     </>
