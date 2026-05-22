@@ -49,6 +49,7 @@ export default function HomePage() {
   const [catsLoading, setCatsLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const [featuredSection, setFeaturedSection] = useState<{ title: string; enabled: boolean; products: any[] } | null>(null);
+  const [heroUrl, setHeroUrl] = useState("/images/hero-bg.jpg");
 
   useEffect(() => {
     if (typeof window !== "undefined" && !sessionStorage.getItem("popup_shown")) {
@@ -62,6 +63,8 @@ export default function HomePage() {
 
   useEffect(() => {
     // Fetch categories + featured in parallel — critical path (updates static fallback)
+    fetch(`${API}/settings/hero_image`).then(r => r.json()).then(d => { if (d.value) setHeroUrl(d.value); }).catch(() => {});
+
     Promise.all([
       fetch(`${API}/categories`).then(r => r.json()).catch(() => null),
       fetch(`${API}/settings/featured_section`).then(r => r.json()).catch(() => null),
@@ -256,7 +259,7 @@ export default function HomePage() {
         }}
       >
         <Image
-          src="/images/hero-bg.jpg"
+          src={heroUrl}
           alt="Salma Behery hero"
           fill
           priority

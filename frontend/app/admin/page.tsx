@@ -42,6 +42,9 @@ export default function AdminDashboard() {
   const [faviconUrl, setFaviconUrl] = useState("");
   const [faviconUploading, setFaviconUploading] = useState(false);
   const [faviconMsg, setFaviconMsg] = useState("");
+  const [heroUrl, setHeroUrl] = useState("");
+  const [heroUploading, setHeroUploading] = useState(false);
+  const [heroMsg, setHeroMsg] = useState("");
   const [fbPixelId, setFbPixelId] = useState("");
   const [fbPixelMsg, setFbPixelMsg] = useState("");
   const [featuredTitle, setFeaturedTitle] = useState("Featured Products");
@@ -56,6 +59,10 @@ export default function AdminDashboard() {
     fetch(`${API_BASE}/settings/favicon`)
       .then(r => r.json())
       .then(d => { if (d.value) setFaviconUrl(d.value); })
+      .catch(() => {});
+    fetch(`${API_BASE}/settings/hero_image`)
+      .then(r => r.json())
+      .then(d => { if (d.value) setHeroUrl(d.value); })
       .catch(() => {});
     fetch(`${API_BASE}/settings/fb_pixel_id`)
       .then(r => r.json())
@@ -80,26 +87,45 @@ export default function AdminDashboard() {
     setFaviconUploading(true);
     setFaviconMsg("");
     try {
-      // Convert to base64 and save directly in DB — no server file upload needed
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const r = await fetch(`${API_BASE}/settings/favicon`, {
+      const form = new FormData();
+      form.append("image", file);
+      const up = await fetch(`${API_BASE}/upload`, { method: "POST", body: form });
+      if (!up.ok) throw new Error(`Upload error ${up.status}`);
+      const { url } = await up.json();
+      await fetch(`${API_BASE}/settings/favicon`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: dataUrl }),
+        body: JSON.stringify({ value: url }),
       });
-      if (!r.ok) throw new Error(`Server error ${r.status}`);
-      setFaviconUrl(dataUrl);
+      setFaviconUrl(url);
       setFaviconMsg("✅ Favicon updated!");
-      const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-      if (link) link.href = dataUrl;
+      let link = document.getElementById("dynamic-favicon") as HTMLLinkElement | null;
+      if (!link) { link = document.createElement("link"); link.id = "dynamic-favicon"; link.rel = "icon"; document.head.appendChild(link); }
+      link.href = url + "?t=" + Date.now();
     } catch (e: any) { setFaviconMsg("❌ " + e.message); }
     setFaviconUploading(false);
     setTimeout(() => setFaviconMsg(""), 4000);
+  };
+
+  const uploadHero = async (file: File) => {
+    setHeroUploading(true);
+    setHeroMsg("");
+    try {
+      const form = new FormData();
+      form.append("image", file);
+      const up = await fetch(`${API_BASE}/upload`, { method: "POST", body: form });
+      if (!up.ok) throw new Error(`Upload error ${up.status}`);
+      const { url } = await up.json();
+      await fetch(`${API_BASE}/settings/hero_image`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: url }),
+      });
+      setHeroUrl(url);
+      setHeroMsg("✅ Hero image updated!");
+    } catch (e: any) { setHeroMsg("❌ " + e.message); }
+    setHeroUploading(false);
+    setTimeout(() => setHeroMsg(""), 4000);
   };
 
   // SSE: listen for new orders
@@ -314,6 +340,26 @@ export default function AdminDashboard() {
               </label>
             </div>
             {faviconMsg && <div style={{ marginTop: 10, fontSize: 13, color: faviconMsg.includes("✅") ? "#166534" : "#991b1b", fontWeight: 600 }}>{faviconMsg}</div>}
+          </div>
+
+          {/* Hero Image Upload */}
+          <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+              <div style={{ width: 80, height: 48, borderRadius: 10, border: "1.5px solid #eee", overflow: "hidden", background: "#f5f5f5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {heroUrl
+                  ? <img src={heroUrl} alt="hero" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <div style={{ fontSize: 20 }}>🖼️</div>}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e", marginBottom: 2 }}>Hero Image</div>
+                <div style={{ fontSize: 12, color: "#aaa" }}>الصورة الرئيسية في أعلى الصفحة الأولى</div>
+              </div>
+              <label style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", whiteSpace: "nowrap" }}>
+                {heroUploading ? "Uploading..." : "Upload New"}
+                <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => e.target.files?.[0] && uploadHero(e.target.files[0])} disabled={heroUploading} />
+              </label>
+            </div>
+            {heroMsg && <div style={{ marginTop: 10, fontSize: 13, color: heroMsg.includes("✅") ? "#166534" : "#991b1b", fontWeight: 600 }}>{heroMsg}</div>}
           </div>
 
           {/* Facebook Settings */}
