@@ -463,7 +463,7 @@ export default function OrdersPage() {
                         else setSelectedForPrint(new Set());
                       }} checked={selectedForPrint.size === filteredOrders.length && filteredOrders.length > 0} />
                     </th>
-                    {["ORDER", "CUSTOMER", "PHONE", "ADDRESS", "CITY", "ITEMS", "TOTAL", "DEPOSIT", "STATUS", "ACTIONS"].map(h => (
+                    {["ORDER", "CUSTOMER", "PHONE", "ADDRESS", "CITY", "TOTAL", "DEPOSIT", "STATUS", "ACTIONS"].map(h => (
                       <th key={h} style={{ padding: 14, textAlign: "left", fontSize: 12, fontWeight: 600 }}>{h}</th>
                     ))}
                   </tr>
@@ -487,11 +487,6 @@ export default function OrdersPage() {
                         </td>
                         <td style={{ padding: 14, fontSize: 13, maxWidth: 160 }} onClick={() => openOrder(order)}>{order.shipping_address || order.address || "-"}</td>
                         <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>{order.city || "-"}</td>
-                        <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>
-                          <span style={{ background: "#fdf0f3", color: "#fda1b7", borderRadius: 8, padding: "3px 10px", fontWeight: 700, fontSize: 13 }}>
-                            {order.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 0} قطعة
-                          </span>
-                        </td>
                         <td style={{ padding: 14, fontSize: 14, fontWeight: 700 }} onClick={() => openOrder(order)}>
                           <div>{fmt(order.total_amount)} EGP</div>
                           {dep > 0 && <div style={{ fontSize: 11, color: "#22c55e", marginTop: 2 }}>Remaining: {fmt(remaining)}</div>}
