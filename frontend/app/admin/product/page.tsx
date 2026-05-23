@@ -249,13 +249,14 @@ export default function ProductsPage() {
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f3ff; }
         input, select, textarea { font-size: 16px !important; }
-        .prod-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
-        .prod-table-wrap table { min-width: 700px; }
+        .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
         @media (max-width: 640px) {
           .prod-outer { padding: 10px !important; }
           .prod-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
           .prod-header-btns { width: 100% !important; }
           .prod-header-btns button { flex: 1 !important; }
+          .prod-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
           .prod-modal-pad { padding: 10px !important; }
         }
       `}</style>
@@ -306,88 +307,106 @@ export default function ProductsPage() {
           )}
 
           {loading ? (
-            <div style={{ textAlign: "center", padding: 60, color: "#888" }}>Loading products...</div>
+            <div className="prod-grid">
+              {[1,2,3,4,5,6,7,8].map(i => (
+                <div key={i} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee" }}>
+                  <div style={{ aspectRatio: "3/4", background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "400px 100%", animation: "shimmer 1.2s infinite" }} />
+                  <div style={{ padding: 12 }}>
+                    <div style={{ height: 13, background: "#f5f5f5", borderRadius: 6, marginBottom: 8, width: "75%" }} />
+                    <div style={{ height: 12, background: "#f5f5f5", borderRadius: 6, width: "45%" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
-            <div className="prod-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "#7c3aed", color: "#fff" }}>
-                    {["IMAGE", "PRODUCT", "CATEGORY", "PRICE", "STOCK", "STATUS", "ACTIONS"].map(h => (
-                      <th key={h} style={{ padding: 16, textAlign: "left", fontSize: 13 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(p => {
-                    const isEditing = editingId === p.id;
-                    return (
-                      <tr key={p.id} style={{ borderBottom: "1px solid #f5f5f5", opacity: p.is_active ? 1 : 0.6, background: p.is_active ? "#fff" : "#fafafa" }}>
-                        <td style={{ padding: 12 }}>
-                          <img src={getProductImage(p)} alt={p.name_en} style={{ width: 50, height: 50, borderRadius: 8, objectFit: "cover" }}
-                            onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/50x50/fda1b7/fff?text=?"; }} />
-                        </td>
-                        <td style={{ padding: 12 }}>
-                          <div style={{ fontWeight: 600, fontSize: 14 }}>{p.name_en}</div>
-                          {p.name_ar && <div style={{ fontSize: 12, color: "#888" }}>{p.name_ar}</div>}
-                          {p.material && <div style={{ fontSize: 11, color: "#aaa" }}>{p.material}</div>}
-                        </td>
-                        <td style={{ padding: 12 }}>
-                          {p.categories && p.categories.length > 0
-                            ? <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                                {p.categories.map(c => (
-                                  <span key={c.id} style={{ fontSize: 11, color: "#fff", background: "#fda1b7", padding: "2px 8px", borderRadius: 20, fontWeight: 600 }}>{c.name_en}</span>
-                                ))}
-                              </div>
-                            : <span style={{ fontSize: 12, color: "#aaa" }}>—</span>
-                          }
-                        </td>
-                        <td style={{ padding: 12 }}>
-                          {isEditing
-                            ? <input type="number" value={editPrice} onChange={e => setEditPrice(e.target.value)} style={{ width: 100, padding: "6px 10px", borderRadius: 6, border: "1px solid #fda1b7", fontSize: 14 }} autoFocus />
-                            : <div>
-                              <span style={{ fontWeight: 700, color: "#1a1a2e", fontSize: 16 }}>{p.price} EGP</span>
-                              {p.old_price && p.old_price > 0 && <div style={{ fontSize: 11, color: "#999", textDecoration: "line-through" }}>{p.old_price} EGP</div>}
-                            </div>
-                          }
-                        </td>
-                        <td style={{ padding: 12 }}>
-                          {isEditing
-                            ? <input type="number" value={editStock} onChange={e => setEditStock(e.target.value)} style={{ width: 80, padding: "6px 10px", borderRadius: 6, border: "1px solid #fda1b7", fontSize: 14 }} />
-                            : <span style={{ padding: "4px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: (p.stock || 0) > 10 ? "#eef0f5" : (p.stock || 0) > 0 ? "#fdf0f3" : "#fee2e2", color: (p.stock || 0) > 10 ? "#1a1a2e" : (p.stock || 0) > 0 ? "#fda1b7" : "#ef4444" }}>
-                              {p.stock || 0}
-                            </span>
-                          }
-                        </td>
-                        <td style={{ padding: 12 }}>
-                          <button onClick={() => toggleActive(p.id, p.is_active)}
-                            style={{ padding: "6px 14px", borderRadius: 20, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: p.is_active ? "#1a1a2e" : "#aaa", color: "#fff" }}>
-                            {p.is_active ? "● ACTIVE" : "○ DRAFT"}
-                          </button>
-                        </td>
-                        <td style={{ padding: 12, textAlign: "center" }}>
-                          {isEditing
-                            ? <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                              <button onClick={() => saveQuickEdit(p.id)} disabled={saving} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#22c55e", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>{saving ? "..." : "✓ Save"}</button>
-                              <button onClick={() => setEditingId(null)} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", fontSize: 12, cursor: "pointer" }}>✕</button>
-                            </div>
-                            : <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                              <button onClick={() => { setEditingId(p.id); setEditPrice(String(p.price)); setEditStock(String(p.stock)); }} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#8b5cf6", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Quick</button>
-                              <button onClick={() => openFullEdit(p)} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#7c3aed", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Edit</button>
-                              <button onClick={() => deleteProduct(p.id)} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", fontSize: 12, cursor: "pointer" }}>🗑️</button>
-                            </div>
-                          }
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {filtered.length === 0 && !loading && (
-                <div style={{ textAlign: "center", padding: 40, color: "#888" }}>
-                  {search ? "No results found" : "No products"}
+            <>
+              <div className="prod-grid">
+                {filtered.map(p => {
+                  const isEditing = editingId === p.id;
+                  const stockGood = (p.stock || 0) > 10;
+                  const stockLow = (p.stock || 0) > 0 && (p.stock || 0) <= 10;
+                  return (
+                    <div key={p.id} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", opacity: p.is_active ? 1 : 0.6, display: "flex", flexDirection: "column" }}>
+                      {/* Image */}
+                      <div style={{ position: "relative", background: "#fdf0f3", aspectRatio: "3/4", overflow: "hidden" }}>
+                        <img src={getProductImage(p)} alt={p.name_en}
+                          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                          onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/300x400/fda1b7/fff?text=?"; }} />
+                        <span style={{ position: "absolute", top: 7, left: 7, padding: "3px 8px", borderRadius: 20, fontSize: 9, fontWeight: 700, background: p.is_active ? "#1a1a2e" : "#888", color: "#fff" }}>
+                          {p.is_active ? "ACTIVE" : "DRAFT"}
+                        </span>
+                        <span style={{ position: "absolute", bottom: 7, left: 7, padding: "3px 8px", borderRadius: 20, fontSize: 9, fontWeight: 700, background: stockGood ? "#1a1a2e" : stockLow ? "#fda1b7" : "#ef4444", color: "#fff" }}>
+                          {p.stock || 0} pcs
+                        </span>
+                        {p.categories && p.categories.length > 0 && (
+                          <div style={{ position: "absolute", top: 7, right: 7, display: "flex", gap: 3, flexDirection: "column", alignItems: "flex-end" }}>
+                            {p.categories.slice(0,2).map(c => (
+                              <span key={c.id} style={{ fontSize: 8, color: "#fff", background: "#fda1b7", padding: "2px 6px", borderRadius: 20, fontWeight: 700 }}>{c.name_en}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {/* Info */}
+                      <div style={{ padding: "10px 10px 10px", flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                        <div style={{ fontWeight: 700, fontSize: 12, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</div>
+                        {isEditing ? (
+                          <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+                            <input type="number" value={editPrice} onChange={e => setEditPrice(e.target.value)} placeholder="Price" autoFocus
+                              style={{ flex: 1, padding: "5px 6px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 11, outline: "none" }} />
+                            <input type="number" value={editStock} onChange={e => setEditStock(e.target.value)} placeholder="Stock"
+                              style={{ width: 52, padding: "5px 6px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 11, outline: "none" }} />
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
+                            {p.old_price && p.old_price > 0 && <span style={{ fontSize: 10, color: "#bbb", textDecoration: "line-through" }}>{p.old_price}</span>}
+                          </div>
+                        )}
+                        {/* Actions */}
+                        <div style={{ display: "flex", gap: 4, marginTop: "auto", paddingTop: 6 }}>
+                          {isEditing ? (
+                            <>
+                              <button onClick={() => saveQuickEdit(p.id)} disabled={saving}
+                                style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer" }}>
+                                {saving ? "..." : "Save"}
+                              </button>
+                              <button onClick={() => setEditingId(null)}
+                                style={{ padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", background: "#fff", color: "#888", fontSize: 10, cursor: "pointer" }}>
+                                ✕
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => toggleActive(p.id, p.is_active)}
+                                style={{ padding: "6px 6px", borderRadius: 7, border: "1.5px solid #eee", background: "#fff", color: "#555", fontSize: 9, fontWeight: 600, cursor: "pointer" }}>
+                                {p.is_active ? "Hide" : "Show"}
+                              </button>
+                              <button onClick={() => { setEditingId(p.id); setEditPrice(String(p.price)); setEditStock(String(p.stock)); }}
+                                style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: "#fda1b7", color: "#fff", fontSize: 9, fontWeight: 700, cursor: "pointer" }}>
+                                Quick
+                              </button>
+                              <button onClick={() => openFullEdit(p)}
+                                style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 9, fontWeight: 700, cursor: "pointer" }}>
+                                Edit
+                              </button>
+                              <button onClick={() => deleteProduct(p.id)}
+                                style={{ padding: "6px 8px", borderRadius: 7, border: "none", background: "#fee2e2", color: "#ef4444", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>
+                                ×
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {filtered.length === 0 && (
+                <div style={{ textAlign: "center", padding: 60, color: "#888" }}>
+                  {search ? "No results found" : "No products yet"}
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
