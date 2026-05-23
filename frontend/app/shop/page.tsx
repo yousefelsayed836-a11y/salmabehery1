@@ -27,6 +27,19 @@ interface Product {
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
 
+// Module-level cache: persists across route changes, prevents re-fetching
+const _preloaded = new Set<string>();
+function preloadImages(urls: string[]) {
+  if (typeof window === "undefined") return;
+  urls.forEach(url => {
+    if (url && !_preloaded.has(url)) {
+      _preloaded.add(url);
+      const img = new window.Image();
+      img.src = url;
+    }
+  });
+}
+
 function getProductImage(p: Product): string {
   const img = p.main_image || (p.images && p.images.find(i => i?.startsWith("http")));
   if (!img) return `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`;
@@ -81,6 +94,7 @@ function ShopContent() {
       setTotal(tot);
       setProducts(prev => append ? [...prev, ...fetched] : fetched);
       setHasMore((pageNum * PAGE_SIZE) < tot);
+      preloadImages(fetched.map((p: Product) => getProductImage(p)));
       setPage(pageNum);
     } catch (err: any) { setError(err?.message || "Failed to load products"); }
     finally { setLoading(false); setLoadingMore(false); }
@@ -201,7 +215,7 @@ function ShopContent() {
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
                     <div className="product-image-wrapper" style={{ position: "relative", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "transform 0.3s" }} className="product-image"
-                        loading="lazy" decoding="async"
+                        loading="eager" decoding="async"
                         onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`; }} />
                       {p.water_resistance && <span style={{ position: "absolute", top: 8, right: 8, background: "#3b82f6", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 600 }}>💧</span>}
                       {p.stock !== undefined && p.stock > 0 && (
