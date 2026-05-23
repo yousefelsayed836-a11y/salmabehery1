@@ -401,8 +401,8 @@ export default function OrdersPage() {
           {/* Header */}
           <div className="orders-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
             <div>
-              <Link href="/admin" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
-              <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1e1b4b" }}>Orders</h1>
+              <Link href="/admin" style={{ color: "#1a1a2e", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
+              <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#111" }}>Orders</h1>
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {selectedForPrint.size > 0 && (
@@ -453,120 +453,39 @@ export default function OrdersPage() {
             </div>
           ) : (
             <>
-            <div className="orders-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "#7c3aed", color: "#fff" }}>
-                    <th style={{ padding: 14, width: 40 }}>
-                      <input type="checkbox" onChange={e => {
-                        if (e.target.checked) setSelectedForPrint(new Set(filteredOrders.map(o => o.id)));
-                        else setSelectedForPrint(new Set());
-                      }} checked={selectedForPrint.size === filteredOrders.length && filteredOrders.length > 0} />
-                    </th>
-                    {["ORDER", "CUSTOMER", "PHONE", "ADDRESS", "CITY", "TOTAL", "DEPOSIT", "STATUS", "ACTIONS"].map(h => (
-                      <th key={h} style={{ padding: 14, textAlign: "left", fontSize: 12, fontWeight: 600 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.map(order => {
-                    const dep = deposits[order.id] || 0;
-                    const remaining = Math.max(0, (order.total_amount || 0) - dep);
-                    return (
-                      <tr key={order.id} style={{ borderBottom: "1px solid #f5f5f5", cursor: "pointer" }}>
-                        <td style={{ padding: "0 14px" }} onClick={e => e.stopPropagation()}>
-                          <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)} />
-                        </td>
-                        <td style={{ padding: 14, fontSize: 14, fontWeight: 700, color: "#7c3aed" }} onClick={() => openOrder(order)}>
-                          #{order.id.slice(-6)}
-                        </td>
-                        <td style={{ padding: 14, fontSize: 14 }} onClick={() => openOrder(order)}>{order.customer_name}</td>
-                        <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>
-                          <div>📞 {order.customer_phone}</div>
-                          {order.phone2 && <div style={{ color: "#1a1a2e", fontSize: 12, marginTop: 2 }}>💬 {order.phone2}</div>}
-                        </td>
-                        <td style={{ padding: 14, fontSize: 13, maxWidth: 160 }} onClick={() => openOrder(order)}>{order.shipping_address || order.address || "-"}</td>
-                        <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>{order.city || "-"}</td>
-                        <td style={{ padding: 14, fontSize: 14, fontWeight: 700 }} onClick={() => openOrder(order)}>
-                          <div>{fmt(order.total_amount)} EGP</div>
-                          {dep > 0 && <div style={{ fontSize: 11, color: "#1a1a2e", marginTop: 2 }}>Remaining: {fmt(remaining)}</div>}
-                        </td>
-                        <td style={{ padding: 8 }} onClick={e => e.stopPropagation()}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                            <input
-                              type="number"
-                              value={dep === 0 ? "" : dep}
-                              onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
-                              placeholder="0"
-                              style={{ width: 72, padding: "5px 8px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 12, outline: "none" }}
-                            />
-                            <span style={{ fontSize: 11, color: "#888" }}>EGP</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: 14 }}>
-                          <select value={order.status} onChange={e => { e.stopPropagation(); updateStatus(order.id, e.target.value); }}
-                            onClick={e => e.stopPropagation()}
-                            style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 12, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="partially_shipped">Partially Shipped</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                        </td>
-                        <td style={{ padding: 14, textAlign: "center" }}>
-                          <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                            <button onClick={e => { e.stopPropagation(); openOrder(order); }}
-                              style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-                              View
-                            </button>
-                            <button onClick={e => { e.stopPropagation(); openOrder(order).then(() => handlePrint(order)); }}
-                              style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-                              🖨️ Print
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile select-all bar */}
-            <div className="orders-mobile-select-bar">
+            {/* Select-all bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "10px 14px", background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
               <input type="checkbox"
                 checked={selectedForPrint.size === filteredOrders.length && filteredOrders.length > 0}
                 onChange={e => {
                   if (e.target.checked) setSelectedForPrint(new Set(filteredOrders.map(o => o.id)));
                   else setSelectedForPrint(new Set());
                 }}
-                style={{ width: 18, height: 18, accentColor: "#fda1b7" }} />
+                style={{ width: 18, height: 18, accentColor: "#fda1b7", cursor: "pointer" }} />
               <span style={{ fontSize: 14, fontWeight: 600, color: "#555" }}>
                 {selectedForPrint.size > 0 ? `${selectedForPrint.size} selected` : "Select all"}
               </span>
               {selectedForPrint.size > 0 && (
-                <button onClick={handleBatchPrint} style={{ marginLeft: "auto", padding: "8px 14px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                <button onClick={handleBatchPrint} style={{ marginLeft: "auto", padding: "8px 16px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                   🖨️ Print {selectedForPrint.size}
                 </button>
               )}
             </div>
 
-            {/* Mobile card view */}
-            <div className="orders-mobile-cards">
+            {/* Unified card grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
               {filteredOrders.map(order => {
                 const dep = deposits[order.id] || 0;
                 const remaining = Math.max(0, (order.total_amount || 0) - dep);
                 return (
-                  <div key={order.id} className="order-card">
-                    <div className="order-card-row">
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)}
-                          style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#fda1b7" }} />
-                        <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 16 }}>#{order.id.slice(-6)}</span>
-                      </div>
+                  <div key={order.id} style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", border: "1px solid #f0f0f0", display: "flex", flexDirection: "column", gap: 10 }}>
+                    {/* Top row: checkbox + order # + status */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)}
+                        style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#fda1b7", flexShrink: 0 }} />
+                      <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 15, flex: 1 }}>#{order.id.slice(-6)}</span>
                       <select value={order.status} onChange={e => updateStatus(order.id, e.target.value)}
-                        style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #ddd", fontSize: 12, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
+                        style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #eee", fontSize: 11, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer", maxWidth: 130 }}>
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
                         <option value="partially_shipped">Part. Shipped</option>
@@ -574,23 +493,40 @@ export default function OrdersPage() {
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e", marginBottom: 2 }}>{order.customer_name}</div>
-                    <div style={{ fontSize: 13, color: "#555", marginBottom: 2 }}>📞 {order.customer_phone}</div>
-                    {order.phone2 && <div style={{ fontSize: 12, color: "#1a1a2e", marginBottom: 2 }}>💬 {order.phone2}</div>}
-                    <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>{order.city || ""}{order.governorate ? ` · ${order.governorate}` : ""}</div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                      <span style={{ fontWeight: 800, fontSize: 15, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</span>
-                      {dep > 0 && <span style={{ fontSize: 12, color: "#1a1a2e" }}>Remaining: {fmt(remaining)}</span>}
+
+                    {/* Customer info */}
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>{order.customer_name}</div>
+                      <div style={{ fontSize: 13, color: "#555", marginTop: 2 }}>📞 {order.customer_phone}</div>
+                      {order.phone2 && <div style={{ fontSize: 12, color: "#888", marginTop: 1 }}>💬 {order.phone2}</div>}
+                      <div style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>{order.city || ""}{order.governorate ? ` · ${order.governorate}` : ""}</div>
                     </div>
-                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
-                      <input type="number" value={dep === 0 ? "" : dep}
-                        onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
-                        placeholder="Deposit (EGP)" inputMode="numeric"
-                        style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 16, outline: "none" }} />
+
+                    {/* Total + deposit */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 16, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</div>
+                        {dep > 0 && <div style={{ fontSize: 11, color: "#888", marginTop: 1 }}>Remaining: {fmt(remaining)} EGP</div>}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <input type="number" value={dep === 0 ? "" : dep}
+                          onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
+                          placeholder="Deposit" inputMode="numeric"
+                          style={{ width: 80, padding: "6px 8px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 12, outline: "none" }} />
+                        <span style={{ fontSize: 11, color: "#aaa" }}>EGP</span>
+                      </div>
                     </div>
-                    <div className="order-card-actions">
-                      <button onClick={() => openOrder(order)} style={{ background: "#7c3aed", color: "#fff" }}>View</button>
-                      <button onClick={() => openOrder(order).then(() => handlePrint(order))} style={{ background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff" }}>🖨️ Print</button>
+
+                    {/* Actions */}
+                    <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                      <button onClick={() => openOrder(order)}
+                        style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                        View
+                      </button>
+                      <button onClick={() => openOrder(order).then(() => handlePrint(order))}
+                        style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                        🖨️ Print
+                      </button>
                     </div>
                   </div>
                 );
@@ -606,7 +542,7 @@ export default function OrdersPage() {
         <div className="modal-overlay" style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
           <div className="modal-box" style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 600, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
-            <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#7c3aed", borderRadius: "20px 20px 0 0" }}>
+            <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
               <div>
                 <h2 style={{ margin: 0, color: "#fff", fontSize: 20, fontWeight: 800 }}>Order #{selectedOrder.id.slice(-6)}</h2>
                 <p style={{ margin: "4px 0 0", color: "#fda1b7", fontSize: 13 }}>{new Date(selectedOrder.created_at).toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
@@ -659,7 +595,7 @@ export default function OrdersPage() {
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
                   <span style={{ fontWeight: 800, fontSize: 15 }}>Total</span>
-                  <span style={{ fontWeight: 800, fontSize: 18, color: "#7c3aed" }}>{fmt(selectedOrder.total_amount)} EGP</span>
+                  <span style={{ fontWeight: 800, fontSize: 18, color: "#1a1a2e" }}>{fmt(selectedOrder.total_amount)} EGP</span>
                 </div>
 
                 {/* Deposit */}
@@ -675,7 +611,7 @@ export default function OrdersPage() {
                     />
                     <span style={{ fontWeight: 600, color: "#888" }}>EGP</span>
                     <button onClick={() => { const amt = parseFloat(depositInput) || 0; saveDeposit(selectedOrder.id, amt); }}
-                      style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
+                      style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
                       Save
                     </button>
                   </div>
@@ -723,7 +659,7 @@ export default function OrdersPage() {
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
                         <div style={{ fontSize: 13, color: "#888" }}>x{item.quantity}</div>
-                        <div style={{ fontWeight: 700, color: "#7c3aed", fontSize: 15 }}>{item.price} EGP</div>
+                        <div style={{ fontWeight: 700, color: "#1a1a2e", fontSize: 15 }}>{item.price} EGP</div>
                         <div style={{ fontSize: 12, color: "#aaa" }}>{item.total || item.price * item.quantity} EGP total</div>
                       </div>
                     </div>
