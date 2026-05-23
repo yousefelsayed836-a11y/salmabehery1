@@ -604,7 +604,7 @@ export default function OrdersPage() {
       {/* Order Detail Modal */}
       {selectedOrder && (
         <div className="modal-overlay" style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
-          <div className="modal-box" style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+          <div className="modal-box" style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 600, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
             <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#7c3aed", borderRadius: "20px 20px 0 0" }}>
               <div>
@@ -627,7 +627,7 @@ export default function OrdersPage() {
 
               {/* Customer Info */}
               <div style={{ background: "#fafafa", borderRadius: 14, padding: 20 }}>
-                <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 1 }}>📦 Customer</h3>
+                <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>📦 Customer</h3>
                 {[
                   ["Name", selectedOrder.customer_name],
                   ["Phone", `📞 ${selectedOrder.customer_phone}`],
@@ -646,7 +646,7 @@ export default function OrdersPage() {
 
               {/* Summary + Deposit */}
               <div style={{ background: "#fafafa", borderRadius: 14, padding: 20 }}>
-                <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 1 }}>💰 Summary</h3>
+                <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>💰 Summary</h3>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
                   <span style={{ color: "#888", fontSize: 13 }}>Subtotal</span>
                   <span style={{ fontWeight: 600 }}>{fmt((selectedOrder.total_amount || 0) - (selectedOrder.shipping_cost || 0))} EGP</span>
@@ -706,7 +706,7 @@ export default function OrdersPage() {
 
             {/* Items */}
             <div className="modal-inner" style={{ padding: "0 20px 20px" }}>
-              <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#fda1b7", textTransform: "uppercase", letterSpacing: 1 }}>🛍️ Items ({selectedOrder.items?.length || 0})</h3>
+              <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>🛍️ Items ({selectedOrder.items?.length || 0})</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {selectedOrder.items?.map((item, i) => {
                   const img = productImages[item.product_id];

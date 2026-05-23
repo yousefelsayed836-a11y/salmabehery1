@@ -246,7 +246,7 @@ export default function AdminDashboard() {
   // Status breakdown
   const statusMap: Record<string, number> = {};
   orders.forEach(o => { const s = o.status || "pending"; statusMap[s] = (statusMap[s] || 0) + 1; });
-  const statusColors: Record<string, string> = { pending: "#f59e0b", confirmed: "#7c3aed", completed: "#10b981", delivered: "#10b981", cancelled: "#ef4444", shipped: "#3b82f6" };
+  const statusColors: Record<string, string> = { pending: "#f59e0b", confirmed: "#1a1a2e", completed: "#10b981", delivered: "#10b981", cancelled: "#ef4444", shipped: "#3b82f6" };
 
   return (
     <>
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f3ff; }
         input, select, textarea { font-size: 16px !important; }
-        .dash-card { background: #fff; border-radius: 20px; box-shadow: 0 2px 16px rgba(124,58,237,0.07); }
+        .dash-card { background: #fff; border-radius: 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); }
         @media (max-width: 640px) {
           .dash-wrap { padding: 14px !important; }
           .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
@@ -270,10 +270,10 @@ export default function AdminDashboard() {
           {/* ── Top bar ── */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1e1b4b", letterSpacing: -0.3 }}>Dashboard</h1>
+              <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#111", letterSpacing: -0.3 }}>Dashboard</h1>
               <p style={{ margin: "3px 0 0", fontSize: 13, color: "#9ca3af" }}>{new Date().toLocaleDateString("en", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
             </div>
-            <Link href="/admin/orders" style={{ padding: "10px 18px", borderRadius: 12, background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
+            <Link href="/admin/orders" style={{ padding: "10px 18px", borderRadius: 12, background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               View Orders
             </Link>
           </div>
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
           {/* ── Stats ── */}
           <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 20 }}>
             {[
-              { label: "Total Revenue", value: `${fmt(totalRevenue)} EGP`, sub: "confirmed orders", color: "#7c3aed", bg: "#f0eeff" },
+              { label: "Total Revenue", value: `${fmt(totalRevenue)} EGP`, sub: "confirmed orders", color: "#1a1a2e", bg: "#f0eeff" },
               { label: "Total Orders",  value: totalOrders,                sub: `${pendingOrders} pending`,   color: "#f59e0b", bg: "#fffbeb" },
               { label: "Products",      value: totalProducts,              sub: `${activeProducts} active`,   color: "#10b981", bg: "#ecfdf5" },
               { label: "Low Stock",     value: lowStock,                   sub: `${outOfStock} out of stock`, color: "#ef4444", bg: "#fef2f2" },
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
                   <div style={{ width: 12, height: 12, borderRadius: 3, background: s.color }} />
                 </div>
                 <p style={{ margin: "0 0 4px", fontSize: 12, color: "#9ca3af", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.label}</p>
-                <p style={{ margin: "0 0 6px", fontSize: 22, fontWeight: 800, color: "#1e1b4b" }}>{s.value}</p>
+                <p style={{ margin: "0 0 6px", fontSize: 22, fontWeight: 800, color: "#111" }}>{s.value}</p>
                 <p style={{ margin: 0, fontSize: 11, color: s.color, fontWeight: 600 }}>{s.sub}</p>
               </div>
             ))}
@@ -304,28 +304,28 @@ export default function AdminDashboard() {
             <div className="dash-card" style={{ flex: 2, padding: 22 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1e1b4b" }}>Orders — Last 7 Days</p>
+                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111" }}>Orders — Last 7 Days</p>
                   <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9ca3af" }}>{orders.length} total orders</p>
                 </div>
                 <div style={{ display: "flex", gap: 14, fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 24, height: 2, background: "#7c3aed", display: "inline-block", borderRadius: 2 }} />Orders</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 24, height: 2, background: "#1a1a2e", display: "inline-block", borderRadius: 2 }} />Orders</span>
                   <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 24, height: 2, background: "#10b981", display: "inline-block", borderRadius: 2 }} />Revenue</span>
                 </div>
               </div>
               <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 90 }}>
                 <polyline points={revPts}   fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <polyline points={countPts} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <polyline points={countPts} fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 {last7.map((d, i) => {
                   const x = pad + (i / (last7.length - 1)) * (W - pad * 2);
                   const y = H - pad - (d.count / maxCount) * (H - pad * 2);
-                  return <circle key={i} cx={x} cy={y} r="3" fill="#7c3aed" />;
+                  return <circle key={i} cx={x} cy={y} r="3" fill="#1a1a2e" />;
                 })}
               </svg>
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
                 {last7.map((d, i) => (
                   <div key={i} style={{ textAlign: "center" }}>
                     <p style={{ margin: 0, fontSize: 10, color: "#9ca3af" }}>{d.label}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 11, fontWeight: 700, color: "#1e1b4b" }}>{d.count}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 11, fontWeight: 700, color: "#111" }}>{d.count}</p>
                   </div>
                 ))}
               </div>
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
 
             {/* Order status breakdown */}
             <div className="dash-card" style={{ flex: 1, padding: 22 }}>
-              <p style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#1e1b4b" }}>Order Status</p>
+              <p style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#111" }}>Order Status</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {Object.entries(statusMap).sort((a,b) => b[1]-a[1]).map(([status, count]) => {
                   const pct = Math.round((count / totalOrders) * 100);
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
                   return (
                     <div key={status}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: "#1e1b4b", textTransform: "capitalize" }}>{status}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "#111", textTransform: "capitalize" }}>{status}</span>
                         <span style={{ fontSize: 12, fontWeight: 700, color }}>{count} <span style={{ color: "#9ca3af", fontWeight: 400 }}>({pct}%)</span></span>
                       </div>
                       <div style={{ height: 6, borderRadius: 3, background: "#f3f4f6" }}>
@@ -358,7 +358,7 @@ export default function AdminDashboard() {
           {/* ── Nav Cards ── */}
           <div className="nav-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
             {[
-              { href: "/admin/orders",     label: "Orders",     sub: `${totalOrders} orders`,     bg: "linear-gradient(135deg,#7c3aed,#a855f7)" },
+              { href: "/admin/orders",     label: "Orders",     sub: `${totalOrders} orders`,     bg: "linear-gradient(135deg,#1a1a2e,#2d2d4e)" },
               { href: "/admin/product",    label: "Products",   sub: `${totalProducts} products`,  bg: "linear-gradient(135deg,#1e1b4b,#3730a3)" },
               { href: "/admin/shipping",   label: "Shipping",   sub: "Manage rates",               bg: "linear-gradient(135deg,#0ea5e9,#0284c7)" },
               { href: "/admin/categories", label: "Categories", sub: "Manage",                     bg: "linear-gradient(135deg,#f59e0b,#d97706)" },
@@ -374,8 +374,8 @@ export default function AdminDashboard() {
           {/* ── Recent Orders ── */}
           <div className="dash-card" style={{ padding: 22, marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1e1b4b" }}>Recent Orders</p>
-              <Link href="/admin/orders" style={{ fontSize: 13, color: "#7c3aed", fontWeight: 600, textDecoration: "none" }}>View all →</Link>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111" }}>Recent Orders</p>
+              <Link href="/admin/orders" style={{ fontSize: 13, color: "#1a1a2e", fontWeight: 600, textDecoration: "none" }}>View all →</Link>
             </div>
             {recentOrders.length === 0 ? (
               <p style={{ textAlign: "center", color: "#9ca3af", padding: 20, fontSize: 13 }}>No orders yet</p>
@@ -388,12 +388,12 @@ export default function AdminDashboard() {
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                         <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
                         <div>
-                          <span style={{ fontWeight: 700, fontSize: 13, color: "#1e1b4b" }}>#{order.id.slice(-6)}</span>
+                          <span style={{ fontWeight: 700, fontSize: 13, color: "#111" }}>#{order.id.slice(-6)}</span>
                           {order.customer_name && <span style={{ marginLeft: 8, fontSize: 13, color: "#6b7280" }}>{order.customer_name}</span>}
                         </div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: "#1e1b4b" }}>{fmt(parseFloat(String(order.total_amount)) || 0)} EGP</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#111" }}>{fmt(parseFloat(String(order.total_amount)) || 0)} EGP</span>
                         <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: color + "22", color }}>{order.status}</span>
                       </div>
                     </div>
@@ -408,12 +408,12 @@ export default function AdminDashboard() {
 
             {/* Favicon */}
             <div className="dash-card" style={{ padding: 20 }}>
-              <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#1e1b4b" }}>Favicon</p>
+              <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#111" }}>Favicon</p>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, border: "1.5px solid #e5e7eb", overflow: "hidden", background: "#f9f9f9", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {faviconUrl ? <img src={faviconUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div style={{ width: 20, height: 20, borderRadius: 4, background: "#e5e7eb" }} />}
                 </div>
-                <label style={{ flex: 1, padding: "10px 16px", borderRadius: 10, background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
+                <label style={{ flex: 1, padding: "10px 16px", borderRadius: 10, background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
                   {faviconUploading ? "..." : "Upload"}
                   <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => e.target.files?.[0] && uploadFavicon(e.target.files[0])} disabled={faviconUploading} />
                 </label>
@@ -423,12 +423,12 @@ export default function AdminDashboard() {
 
             {/* Hero Image */}
             <div className="dash-card" style={{ padding: 20 }}>
-              <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#1e1b4b" }}>Hero Image</p>
+              <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#111" }}>Hero Image</p>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <div style={{ width: 72, height: 48, borderRadius: 12, border: "1.5px solid #e5e7eb", overflow: "hidden", background: "#f9f9f9", flexShrink: 0 }}>
                   {heroUrl ? <img src={heroUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", background: "#e5e7eb" }} />}
                 </div>
-                <label style={{ flex: 1, padding: "10px 16px", borderRadius: 10, background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
+                <label style={{ flex: 1, padding: "10px 16px", borderRadius: 10, background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", textAlign: "center" }}>
                   {heroUploading ? "..." : "Upload"}
                   <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => e.target.files?.[0] && uploadHero(e.target.files[0])} disabled={heroUploading} />
                 </label>
@@ -439,7 +439,7 @@ export default function AdminDashboard() {
 
           {/* Facebook */}
           <div className="dash-card" style={{ padding: 20, marginBottom: 20 }}>
-            <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#1e1b4b" }}>Facebook Integration</p>
+            <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#111" }}>Facebook Integration</p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <input value={fbPixelId} onChange={e => setFbPixelId(e.target.value)} placeholder="Pixel ID" style={{ flex: 1, minWidth: 180, padding: "10px 14px", borderRadius: 10, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none" }} />
               <button onClick={async () => { try { await fetch(`${API_BASE}/settings/fb_pixel_id`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ value: fbPixelId }) }); setFbPixelMsg("Saved!"); } catch { setFbPixelMsg("Failed"); } setTimeout(() => setFbPixelMsg(""), 3000); }} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#1877f2", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
@@ -451,10 +451,10 @@ export default function AdminDashboard() {
           {/* Featured Products */}
           <div className="dash-card" style={{ padding: 20, marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1e1b4b" }}>Featured Products</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#111" }}>Featured Products</p>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 12, color: featuredEnabled ? "#10b981" : "#9ca3af", fontWeight: 600 }}>{featuredEnabled ? "ON" : "OFF"}</span>
-                <div onClick={() => setFeaturedEnabled(v => !v)} style={{ width: 44, height: 24, borderRadius: 12, background: featuredEnabled ? "#7c3aed" : "#e5e7eb", position: "relative", cursor: "pointer", transition: "background 0.2s" }}>
+                <div onClick={() => setFeaturedEnabled(v => !v)} style={{ width: 44, height: 24, borderRadius: 12, background: featuredEnabled ? "#1a1a2e" : "#e5e7eb", position: "relative", cursor: "pointer", transition: "background 0.2s" }}>
                   <div style={{ position: "absolute", top: 2, left: featuredEnabled ? 22 : 2, width: 20, height: 20, borderRadius: "50%", background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s" }} />
                 </div>
               </div>
@@ -468,14 +468,14 @@ export default function AdminDashboard() {
                   const sel = featuredIds.includes(p.id);
                   return (
                     <div key={p.id} onClick={() => setFeaturedIds(ids => ids.includes(p.id) ? ids.filter(id => id !== p.id) : [...ids, p.id])}
-                      style={{ cursor: "pointer", borderRadius: 10, border: `2px solid ${sel ? "#7c3aed" : "#e5e7eb"}`, overflow: "hidden", position: "relative", transition: "border-color 0.15s" }}>
+                      style={{ cursor: "pointer", borderRadius: 10, border: `2px solid ${sel ? "#1a1a2e" : "#e5e7eb"}`, overflow: "hidden", position: "relative", transition: "border-color 0.15s" }}>
                       <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "#f3f4f6" }}>
                         <img src={img || "https://placehold.co/90x120/f3f4f6/9ca3af?text=?"} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/90x120/f3f4f6/9ca3af?text=?"; }} />
                       </div>
-                      {sel && <div style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#fff", fontWeight: 700 }}>✓</div>}
+                      {sel && <div style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#fff", fontWeight: 700 }}>✓</div>}
                       <div style={{ padding: "5px 6px", background: "#fff" }}>
                         <div style={{ fontSize: 9, color: "#374151", fontWeight: 600, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{p.name_en}</div>
-                        <div style={{ fontSize: 9, color: "#7c3aed", fontWeight: 700, marginTop: 2 }}>{p.price} EGP</div>
+                        <div style={{ fontSize: 9, color: "#1a1a2e", fontWeight: 700, marginTop: 2 }}>{p.price} EGP</div>
                       </div>
                     </div>
                   );
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 12, alignItems: "center" }}>
-              <button onClick={async () => { try { await fetch(`${API_BASE}/settings/featured_section`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ value: JSON.stringify({ title: featuredTitle, enabled: featuredEnabled, product_ids: featuredIds }) }) }); setFeaturedMsg("Saved!"); } catch { setFeaturedMsg("Failed"); } setTimeout(() => setFeaturedMsg(""), 3000); }} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
+              <button onClick={async () => { try { await fetch(`${API_BASE}/settings/featured_section`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ value: JSON.stringify({ title: featuredTitle, enabled: featuredEnabled, product_ids: featuredIds }) }) }); setFeaturedMsg("Saved!"); } catch { setFeaturedMsg("Failed"); } setTimeout(() => setFeaturedMsg(""), 3000); }} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
               {featuredIds.length > 0 && <button onClick={() => setFeaturedIds([])} style={{ padding: "10px 16px", borderRadius: 10, border: "1.5px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 13, cursor: "pointer" }}>Clear</button>}
               {featuredMsg && <span style={{ fontSize: 12, color: "#10b981", fontWeight: 600 }}>{featuredMsg}</span>}
             </div>
@@ -492,7 +492,7 @@ export default function AdminDashboard() {
           {/* Change Password */}
           <div className="dash-card" style={{ padding: 20, marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1e1b4b" }}>Change Password</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#111" }}>Change Password</p>
               <button onClick={() => { setShowChangePw(v => !v); setChangePwMsg(""); setChangePwForm({ current: "", next: "", confirm: "" }); }} style={{ padding: "8px 16px", borderRadius: 10, border: "1.5px solid #e5e7eb", background: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#6b7280" }}>
                 {showChangePw ? "Cancel" : "Change"}
               </button>
@@ -516,7 +516,7 @@ export default function AdminDashboard() {
                   setChangePwMsg("✅ Password changed!");
                   setChangePwForm({ current: "", next: "", confirm: "" });
                   setTimeout(() => setShowChangePw(false), 2000);
-                }} style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: 10, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
+                }} style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
               </div>
             )}
           </div>
@@ -526,8 +526,8 @@ export default function AdminDashboard() {
 
       {/* New Order Toast */}
       {newOrderToast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, background: "#1e1b4b", color: "#fff", borderRadius: 18, padding: "16px 20px", boxShadow: "0 8px 32px rgba(0,0,0,0.25)", display: "flex", alignItems: "center", gap: 14, minWidth: 280, animation: "slideUp 0.3s ease" }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <div style={{ position: "fixed", bottom: 24, right: 24, zIndex: 9999, background: "#1a1a2e", color: "#fff", borderRadius: 18, padding: "16px 20px", boxShadow: "0 8px 32px rgba(0,0,0,0.25)", display: "flex", alignItems: "center", gap: 14, minWidth: 280, animation: "slideUp 0.3s ease" }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <div style={{ width: 16, height: 16, borderRadius: 3, background: "#fff" }} />
           </div>
           <div>

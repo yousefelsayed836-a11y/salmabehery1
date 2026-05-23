@@ -9,6 +9,17 @@ const API = BACKEND + "/api";
 
 // Module-level cache persists across client-side navigations for the session
 const productCache = new Map<string, { product: any; similar: any[] }>();
+const _preloaded = new Set<string>();
+function preloadImages(urls: string[]) {
+  if (typeof window === "undefined") return;
+  urls.forEach(url => {
+    if (url && !_preloaded.has(url)) {
+      _preloaded.add(url);
+      const img = new window.Image();
+      img.src = url;
+    }
+  });
+}
 
 interface Variant {
   id?: number;
@@ -77,6 +88,9 @@ export default function ProductPage() {
         const p = d.product || d;
         setProduct(p);
         setLoading(false);
+        // Preload all images for this product into browser cache
+        const imgs = [p.main_image, ...(p.images || [])].filter(Boolean);
+        preloadImages(imgs);
         if (p.category_slug) {
           fetch(`${API}/products?collection=${p.category_slug}&is_active=true&limit=8`)
             .then(r => r.json())
@@ -88,6 +102,7 @@ export default function ProductPage() {
                 (x.stock === undefined || x.stock === null || x.stock > 0)
               ).slice(0, 4);
               setSimilar(sim);
+              preloadImages(sim.map((x: Product) => x.main_image || (x.images && x.images[0]) || "").filter(Boolean));
               productCache.set(productId, { product: p, similar: sim });
             })
             .catch(() => { productCache.set(productId, { product: p, similar: [] }); });
