@@ -116,15 +116,15 @@ export default function AdminCategories() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
-            <Link href="/admin" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 13 }}>← Dashboard</Link>
-            <h1 style={{ margin: "4px 0 0", fontSize: 22, fontWeight: 800, color: "#1e1b4b" }}>Categories</h1>
+            <Link href="/admin" style={{ color: "#1a1a2e", textDecoration: "none", fontSize: 13 }}>← Dashboard</Link>
+            <h1 style={{ margin: "4px 0 0", fontSize: 22, fontWeight: 800, color: "#111" }}>Categories</h1>
           </div>
-          <button onClick={startAdd} style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+          <button onClick={startAdd} style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
             + Add Category
           </button>
         </div>
 
-        {msg && <div style={{ background: msg.includes("!") ? "#dcfce7" : "#fee2e2", color: msg.includes("!") ? "#166534" : "#991b1b", padding: "10px 16px", borderRadius: 10, marginBottom: 16, fontWeight: 600 }}>{msg}</div>}
+        {msg && <div style={{ background: msg.includes("!") ? "#eef0f5" : "#fee2e2", color: msg.includes("!") ? "#1a1a2e" : "#ef4444", padding: "10px 16px", borderRadius: 10, marginBottom: 16, fontWeight: 600 }}>{msg}</div>}
 
         {/* Form */}
         {showForm && (
@@ -160,7 +160,7 @@ export default function AdminCategories() {
                 style={{ width: 100, padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 14, outline: "none" }} />
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={save} disabled={saving} style={{ padding: "12px 28px", borderRadius: 12, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+              <button onClick={save} disabled={saving} style={{ padding: "12px 28px", borderRadius: 12, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
                 {saving ? "Saving..." : editing ? "Save Changes" : "Create"}
               </button>
               <button onClick={cancel} style={{ padding: "12px 20px", borderRadius: 12, border: "1.5px solid #eee", background: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
@@ -189,13 +189,13 @@ export default function AdminCategories() {
                   <div style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>/{cat.slug} · order: {cat.sort_order}</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                  <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: cat.is_active ? "#dcfce7" : "#f3f4f6", color: cat.is_active ? "#166534" : "#6b7280" }}>
+                  <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: cat.is_active ? "#eef0f5" : "#f3f4f6", color: cat.is_active ? "#1a1a2e" : "#6b7280" }}>
                     {cat.is_active ? "Active" : "Hidden"}
                   </span>
                   <button onClick={() => toggleActive(cat)} style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #eee", background: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 600, color: "#555" }}>
                     {cat.is_active ? "Hide" : "Show"}
                   </button>
-                  <button onClick={() => startEdit(cat)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "#ede9fe", color: "#7c3aed", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  <button onClick={() => startEdit(cat)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "#fdf0f3", color: "#fda1b7", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                     Edit
                   </button>
                   <button onClick={() => deleteCat(cat.id)} style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fee2e2", color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
