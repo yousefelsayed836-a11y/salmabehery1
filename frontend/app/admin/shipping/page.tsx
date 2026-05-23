@@ -328,8 +328,8 @@ export default function ShippingPage() {
 
                       <button onClick={() => toggleActive(r)}
                         style={{ padding: "5px 12px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700,
-                          background: r.is_active ? "#dcfce7" : "#fee2e2",
-                          color: r.is_active ? "#166534" : "#991b1b" }}>
+                          background: r.is_active ? "#eef0f5" : "#fee2e2",
+                          color: r.is_active ? "#1a1a2e" : "#ef4444" }}>
                         {r.is_active ? "✓" : "✗"}
                       </button>
 
@@ -385,8 +385,8 @@ export default function ShippingPage() {
                                       </span>
                                       <button onClick={() => toggleCityActive(city, r.id)}
                                         style={{ padding: "4px 10px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700,
-                                          background: city.is_active ? "#dcfce7" : "#fee2e2",
-                                          color: city.is_active ? "#166534" : "#991b1b" }}>
+                                          background: city.is_active ? "#eef0f5" : "#fee2e2",
+                                          color: city.is_active ? "#1a1a2e" : "#ef4444" }}>
                                         {city.is_active ? "✓" : "✗"}
                                       </button>
                                       <button onClick={() => deleteCity(city.id, r.id)}

@@ -302,18 +302,18 @@ export default function OrdersPage() {
   };
 
   const getStatusColor = (s: string) => {
-    if (s === "pending") return "#f59e0b";
-    if (s === "processing") return "#3b82f6";
-    if (s === "partially_shipped") return "#8b5cf6";
-    if (s === "completed" || s === "delivered") return "#22c55e";
+    if (s === "pending") return "#fda1b7";
+    if (s === "processing") return "#1a1a2e";
+    if (s === "partially_shipped") return "#1a1a2e";
+    if (s === "completed" || s === "delivered") return "#1a1a2e";
     if (s === "cancelled") return "#ef4444";
     return "#6b7280";
   };
   const getStatusBg = (s: string) => {
-    if (s === "pending") return "#fef3c7";
-    if (s === "processing") return "#dbeafe";
-    if (s === "partially_shipped") return "#ede9fe";
-    if (s === "completed" || s === "delivered") return "#dcfce7";
+    if (s === "pending") return "#fdf0f3";
+    if (s === "processing") return "#eef0f5";
+    if (s === "partially_shipped") return "#eef0f5";
+    if (s === "completed" || s === "delivered") return "#eef0f5";
     if (s === "cancelled") return "#fee2e2";
     return "#f3f4f6";
   };
@@ -483,13 +483,13 @@ export default function OrdersPage() {
                         <td style={{ padding: 14, fontSize: 14 }} onClick={() => openOrder(order)}>{order.customer_name}</td>
                         <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>
                           <div>📞 {order.customer_phone}</div>
-                          {order.phone2 && <div style={{ color: "#25d366", fontSize: 12, marginTop: 2 }}>💬 {order.phone2}</div>}
+                          {order.phone2 && <div style={{ color: "#1a1a2e", fontSize: 12, marginTop: 2 }}>💬 {order.phone2}</div>}
                         </td>
                         <td style={{ padding: 14, fontSize: 13, maxWidth: 160 }} onClick={() => openOrder(order)}>{order.shipping_address || order.address || "-"}</td>
                         <td style={{ padding: 14, fontSize: 13 }} onClick={() => openOrder(order)}>{order.city || "-"}</td>
                         <td style={{ padding: 14, fontSize: 14, fontWeight: 700 }} onClick={() => openOrder(order)}>
                           <div>{fmt(order.total_amount)} EGP</div>
-                          {dep > 0 && <div style={{ fontSize: 11, color: "#22c55e", marginTop: 2 }}>Remaining: {fmt(remaining)}</div>}
+                          {dep > 0 && <div style={{ fontSize: 11, color: "#1a1a2e", marginTop: 2 }}>Remaining: {fmt(remaining)}</div>}
                         </td>
                         <td style={{ padding: 8 }} onClick={e => e.stopPropagation()}>
                           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -576,11 +576,11 @@ export default function OrdersPage() {
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e", marginBottom: 2 }}>{order.customer_name}</div>
                     <div style={{ fontSize: 13, color: "#555", marginBottom: 2 }}>📞 {order.customer_phone}</div>
-                    {order.phone2 && <div style={{ fontSize: 12, color: "#25d366", marginBottom: 2 }}>💬 {order.phone2}</div>}
+                    {order.phone2 && <div style={{ fontSize: 12, color: "#1a1a2e", marginBottom: 2 }}>💬 {order.phone2}</div>}
                     <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>{order.city || ""}{order.governorate ? ` · ${order.governorate}` : ""}</div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                       <span style={{ fontWeight: 800, fontSize: 15, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</span>
-                      {dep > 0 && <span style={{ fontSize: 12, color: "#22c55e" }}>Remaining: {fmt(remaining)}</span>}
+                      {dep > 0 && <span style={{ fontSize: 12, color: "#1a1a2e" }}>Remaining: {fmt(remaining)}</span>}
                     </div>
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
                       <input type="number" value={dep === 0 ? "" : dep}
@@ -682,7 +682,7 @@ export default function OrdersPage() {
                   {(deposits[selectedOrder.id] || 0) > 0 && (
                     <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", fontSize: 14 }}>
                       <span style={{ color: "#888" }}>Remaining to collect</span>
-                      <span style={{ fontWeight: 800, fontSize: 18, color: "#22c55e" }}>
+                      <span style={{ fontWeight: 800, fontSize: 18, color: "#1a1a2e" }}>
                         {fmt(Math.max(0, (selectedOrder.total_amount || 0) - (deposits[selectedOrder.id] || 0)))} EGP
                       </span>
                     </div>

@@ -46,6 +46,8 @@ export default function AdminDashboard() {
   const [heroUploading, setHeroUploading] = useState(false);
   const [heroMsg, setHeroMsg] = useState("");
   const [fbPixelId, setFbPixelId] = useState("");
+  const [emailTestMsg, setEmailTestMsg] = useState("");
+  const [emailTesting, setEmailTesting] = useState(false);
   const [fbPixelMsg, setFbPixelMsg] = useState("");
   const [featuredTitle, setFeaturedTitle] = useState("Featured Products");
   const [featuredEnabled, setFeaturedEnabled] = useState(false);
@@ -153,6 +155,18 @@ export default function AdminDashboard() {
     return () => es.close();
   }, [authed]);
 
+  const testEmail = async () => {
+    setEmailTesting(true);
+    setEmailTestMsg("");
+    try {
+      const r = await fetch(`${API_BASE}/orders/test-email`);
+      const d = await r.json();
+      setEmailTestMsg(d.ok ? `تم الإرسال إلى ${d.to}` : `فشل: ${d.error || "غير مفعل"}`);
+    } catch { setEmailTestMsg("فشل الاتصال بالسيرفر"); }
+    setEmailTesting(false);
+    setTimeout(() => setEmailTestMsg(""), 6000);
+  };
+
   const fetchData = async () => {
     try {
       const [ordersRes, productsRes] = await Promise.all([
@@ -246,7 +260,7 @@ export default function AdminDashboard() {
   // Status breakdown
   const statusMap: Record<string, number> = {};
   orders.forEach(o => { const s = o.status || "pending"; statusMap[s] = (statusMap[s] || 0) + 1; });
-  const statusColors: Record<string, string> = { pending: "#f59e0b", confirmed: "#1a1a2e", completed: "#10b981", delivered: "#10b981", cancelled: "#ef4444", shipped: "#3b82f6" };
+  const statusColors: Record<string, string> = { pending: "#fda1b7", confirmed: "#1a1a2e", completed: "#1a1a2e", delivered: "#1a1a2e", cancelled: "#ef4444", shipped: "#1a1a2e" };
 
   return (
     <>
@@ -282,9 +296,9 @@ export default function AdminDashboard() {
           <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 20 }}>
             {[
               { label: "Total Revenue", value: `${fmt(totalRevenue)} EGP`, sub: "confirmed orders", color: "#1a1a2e", bg: "#f0eeff" },
-              { label: "Total Orders",  value: totalOrders,                sub: `${pendingOrders} pending`,   color: "#f59e0b", bg: "#fffbeb" },
-              { label: "Products",      value: totalProducts,              sub: `${activeProducts} active`,   color: "#10b981", bg: "#ecfdf5" },
-              { label: "Low Stock",     value: lowStock,                   sub: `${outOfStock} out of stock`, color: "#ef4444", bg: "#fef2f2" },
+              { label: "Total Orders",  value: totalOrders,                sub: `${pendingOrders} pending`,   color: "#fda1b7", bg: "#fdf0f3" },
+              { label: "Products",      value: totalProducts,              sub: `${activeProducts} active`,   color: "#1a1a2e", bg: "#eef0f5" },
+              { label: "Low Stock",     value: lowStock,                   sub: `${outOfStock} out of stock`, color: "#fda1b7", bg: "#fdf0f3" },
             ].map(s => (
               <div key={s.label} className="dash-card" style={{ padding: "20px 18px" }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: s.bg, marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -309,11 +323,11 @@ export default function AdminDashboard() {
                 </div>
                 <div style={{ display: "flex", gap: 14, fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>
                   <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 24, height: 2, background: "#1a1a2e", display: "inline-block", borderRadius: 2 }} />Orders</span>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 24, height: 2, background: "#10b981", display: "inline-block", borderRadius: 2 }} />Revenue</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 24, height: 2, background: "#fda1b7", display: "inline-block", borderRadius: 2 }} />Revenue</span>
                 </div>
               </div>
               <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 90 }}>
-                <polyline points={revPts}   fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <polyline points={revPts}   fill="none" stroke="#fda1b7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <polyline points={countPts} fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 {last7.map((d, i) => {
                   const x = pad + (i / (last7.length - 1)) * (W - pad * 2);
@@ -437,6 +451,16 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          {/* Email Notifications */}
+          <div className="dash-card" style={{ padding: 20, marginBottom: 20 }}>
+            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#111" }}>Email Notifications</p>
+            <p style={{ margin: "0 0 14px", fontSize: 12, color: "#888" }}>بيجيلك إيميل على yousefelsayed836@gmail.com لما يجي أوردر جديد</p>
+            <button onClick={testEmail} disabled={emailTesting} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: emailTesting ? 0.7 : 1 }}>
+              {emailTesting ? "جاري الإرسال..." : "اختبار إرسال إيميل"}
+            </button>
+            {emailTestMsg && <p style={{ margin: "10px 0 0", fontSize: 13, fontWeight: 600, color: emailTestMsg.includes("تم") ? "#1a1a2e" : "#ef4444" }}>{emailTestMsg}</p>}
+          </div>
+
           {/* Facebook */}
           <div className="dash-card" style={{ padding: 20, marginBottom: 20 }}>
             <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#111" }}>Facebook Integration</p>
@@ -444,7 +468,7 @@ export default function AdminDashboard() {
               <input value={fbPixelId} onChange={e => setFbPixelId(e.target.value)} placeholder="Pixel ID" style={{ flex: 1, minWidth: 180, padding: "10px 14px", borderRadius: 10, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none" }} />
               <button onClick={async () => { try { await fetch(`${API_BASE}/settings/fb_pixel_id`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ value: fbPixelId }) }); setFbPixelMsg("Saved!"); } catch { setFbPixelMsg("Failed"); } setTimeout(() => setFbPixelMsg(""), 3000); }} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#1877f2", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
             </div>
-            {fbPixelMsg && <p style={{ margin: "8px 0 0", fontSize: 12, color: "#10b981", fontWeight: 600 }}>{fbPixelMsg}</p>}
+            {fbPixelMsg && <p style={{ margin: "8px 0 0", fontSize: 12, color: "#1a1a2e", fontWeight: 600 }}>{fbPixelMsg}</p>}
             <p style={{ margin: "10px 0 0", fontSize: 11, color: "#9ca3af" }}>Catalog Feed: <code style={{ background: "#f3f4f6", padding: "2px 6px", borderRadius: 4 }}>{typeof window !== "undefined" ? window.location.origin : ""}/api/fb-feed</code></p>
           </div>
 
@@ -485,7 +509,7 @@ export default function AdminDashboard() {
             <div style={{ display: "flex", gap: 10, marginTop: 12, alignItems: "center" }}>
               <button onClick={async () => { try { await fetch(`${API_BASE}/settings/featured_section`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ value: JSON.stringify({ title: featuredTitle, enabled: featuredEnabled, product_ids: featuredIds }) }) }); setFeaturedMsg("Saved!"); } catch { setFeaturedMsg("Failed"); } setTimeout(() => setFeaturedMsg(""), 3000); }} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Save</button>
               {featuredIds.length > 0 && <button onClick={() => setFeaturedIds([])} style={{ padding: "10px 16px", borderRadius: 10, border: "1.5px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 13, cursor: "pointer" }}>Clear</button>}
-              {featuredMsg && <span style={{ fontSize: 12, color: "#10b981", fontWeight: 600 }}>{featuredMsg}</span>}
+              {featuredMsg && <span style={{ fontSize: 12, color: "#1a1a2e", fontWeight: 600 }}>{featuredMsg}</span>}
             </div>
           </div>
 
@@ -531,7 +555,7 @@ export default function AdminDashboard() {
             <div style={{ width: 16, height: 16, borderRadius: 3, background: "#fff" }} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 14, color: "#a78bfa" }}>New Order</div>
+            <div style={{ fontWeight: 800, fontSize: 14, color: "#fda1b7" }}>New Order</div>
             <div style={{ fontSize: 13, marginTop: 2, color: "#e5e7eb" }}>{newOrderToast.name} — {newOrderToast.total.toLocaleString()} EGP</div>
           </div>
           <button onClick={() => setNewOrderToast(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: "#6b7280", fontSize: 20, cursor: "pointer", lineHeight: 1, padding: 0 }}>×</button>

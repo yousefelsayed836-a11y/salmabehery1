@@ -268,7 +268,7 @@ export default function ProductsPage() {
             </div>
             <div className="prod-header-btns" style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setAddForm({ ...emptyForm }); setAddError(""); setShowAddModal(true); }}
-                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#22c55e,#16a34a)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
+                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
                 ➕ Add Product
               </button>
               <button onClick={async () => {
@@ -278,7 +278,7 @@ export default function ProductsPage() {
                 ));
                 fetchProducts();
               }}
-                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#f59e0b,#d97706)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
+                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
                 ⚡ Activate All
               </button>
               <button onClick={fetchProducts}
@@ -353,14 +353,14 @@ export default function ProductsPage() {
                         <td style={{ padding: 12 }}>
                           {isEditing
                             ? <input type="number" value={editStock} onChange={e => setEditStock(e.target.value)} style={{ width: 80, padding: "6px 10px", borderRadius: 6, border: "1px solid #fda1b7", fontSize: 14 }} />
-                            : <span style={{ padding: "4px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: (p.stock || 0) > 10 ? "#dcfce7" : (p.stock || 0) > 0 ? "#fef3c7" : "#fee2e2", color: (p.stock || 0) > 10 ? "#166534" : (p.stock || 0) > 0 ? "#92400e" : "#991b1b" }}>
+                            : <span style={{ padding: "4px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, background: (p.stock || 0) > 10 ? "#eef0f5" : (p.stock || 0) > 0 ? "#fdf0f3" : "#fee2e2", color: (p.stock || 0) > 10 ? "#1a1a2e" : (p.stock || 0) > 0 ? "#fda1b7" : "#ef4444" }}>
                               {p.stock || 0}
                             </span>
                           }
                         </td>
                         <td style={{ padding: 12 }}>
                           <button onClick={() => toggleActive(p.id, p.is_active)}
-                            style={{ padding: "6px 14px", borderRadius: 20, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: p.is_active ? "#22c55e" : "#6b7280", color: "#fff" }}>
+                            style={{ padding: "6px 14px", borderRadius: 20, border: "none", fontSize: 11, fontWeight: 700, cursor: "pointer", background: p.is_active ? "#1a1a2e" : "#aaa", color: "#fff" }}>
                             {p.is_active ? "● ACTIVE" : "○ DRAFT"}
                           </button>
                         </td>
@@ -404,7 +404,7 @@ export default function ProductsPage() {
             <ProductFormFields form={addForm} onChange={handleAddChange} formId="add" categories={categories} uploadingImage={uploadingImage} onUploadImages={uploadImagesForAdd} />
             <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "flex-end" }}>
               <button onClick={() => setShowAddModal(false)} style={{ padding: "12px 24px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", color: "#666", cursor: "pointer" }}>Cancel</button>
-              <button onClick={saveAddProduct} disabled={addSaving} style={{ padding: "12px 32px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#22c55e,#16a34a)", color: "#fff", fontWeight: 700, cursor: addSaving ? "not-allowed" : "pointer", opacity: addSaving ? 0.7 : 1 }}>
+              <button onClick={saveAddProduct} disabled={addSaving} style={{ padding: "12px 32px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: addSaving ? "not-allowed" : "pointer", opacity: addSaving ? 0.7 : 1 }}>
                 {addSaving ? "💾 Adding..." : "💾 Add Product"}
               </button>
             </div>
