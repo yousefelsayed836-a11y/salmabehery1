@@ -137,7 +137,7 @@ export default function Header() {
             <span className="header-logo" style={{
               fontFamily: "'HelloParis', serif",
               fontWeight: 400,
-              fontSize: 32,
+              fontSize: 42,
               letterSpacing: 2,
               whiteSpace: "nowrap",
               color: isTransparent ? "#fff" : "#1a1a2e",
@@ -289,7 +289,7 @@ export default function Header() {
           .mobile-nav  { display: flex !important; }
           .header-root { padding: 4px 14px !important; }
           .header-logo {
-            font-size: 20px !important;
+            font-size: 28px !important;
             letter-spacing: 1px !important;
             -webkit-text-stroke: 0.4px currentColor;
           }
