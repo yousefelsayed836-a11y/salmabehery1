@@ -48,6 +48,9 @@ function getTransporter() {
     secure: true,
     auth: { user, pass },
     tls: { rejectUnauthorized: false },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
 }
 
@@ -59,7 +62,7 @@ async function sendOrderEmail(order, items) {
     return;
   }
   const transporter = getTransporter();
-  const to = process.env.ADMIN_EMAIL || user;
+  const to = process.env.ADMIN_EMAIL || 'yousefelsayed836@gmail.com';
   await transporter.sendMail({
     from: `"Salma Behery" <${user}>`,
     to,
@@ -208,16 +211,20 @@ router.post('/', async (req, res) => {
 router.get('/test-email', async (req, res) => {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
-  const to = process.env.ADMIN_EMAIL || user;
+  const to = process.env.ADMIN_EMAIL || 'yousefelsayed836@gmail.com';
   if (!user || !pass) {
-    return res.json({ ok: false, error: 'GMAIL_USER or GMAIL_APP_PASSWORD not set in env vars' });
+    return res.json({ ok: false, error: `Missing env vars: ${!user ? 'GMAIL_USER ' : ''}${!pass ? 'GMAIL_APP_PASSWORD' : ''}` });
   }
-  const fakeOrder = { id: 'TEST-001', customer_name: 'Test', customer_phone: '01000000000', shipping_address: 'Test Address', city: 'Cairo', governorate: '', notes: '', shipping_cost: 50, total_amount: 550 };
+  const fakeOrder = { id: 'TEST-001', customer_name: 'Test', customer_phone: '01000000000', shipping_address: 'Test', city: 'Cairo', governorate: '', notes: '', shipping_cost: 0, total_amount: 100 };
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT after 20s — check SMTP credentials')), 20000));
   try {
-    await sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 500 }]);
+    await Promise.race([
+      sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 100 }]),
+      timeout,
+    ]);
     res.json({ ok: true, to, from: user });
   } catch (e) {
-    console.error('[Email] Test failed:', e);
+    console.error('[Email] Test failed:', e.message);
     res.json({ ok: false, error: e.message, code: e.code || '' });
   }
 });
