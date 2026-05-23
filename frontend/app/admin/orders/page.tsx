@@ -538,31 +538,31 @@ export default function OrdersPage() {
 
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <div className="modal-overlay" style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
-          <div className="modal-box" style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 600, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={() => setSelectedOrder(null)}>
+          <div className="modal-box" style={{ background: "#fff", borderRadius: 16, width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
-            <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
+            <div className="modal-header" style={{ padding: "12px 16px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "16px 16px 0 0" }}>
               <div>
-                <h2 style={{ margin: 0, color: "#fff", fontSize: 20, fontWeight: 800 }}>Order #{selectedOrder.id.slice(-6)}</h2>
-                <p style={{ margin: "4px 0 0", color: "#fda1b7", fontSize: 13 }}>{new Date(selectedOrder.created_at).toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+                <h2 style={{ margin: 0, color: "#fff", fontSize: 16, fontWeight: 800 }}>Order #{selectedOrder.id.slice(-6)}</h2>
+                <p style={{ margin: "2px 0 0", color: "#fda1b7", fontSize: 11 }}>{new Date(selectedOrder.created_at).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" })}</p>
               </div>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <span style={{ padding: "6px 16px", borderRadius: 20, fontSize: 13, fontWeight: 700, background: getStatusBg(selectedOrder.status), color: getStatusColor(selectedOrder.status) }}>
-                  {selectedOrder.status === "partially_shipped" ? "Partially Shipped" : selectedOrder.status}
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, background: getStatusBg(selectedOrder.status), color: getStatusColor(selectedOrder.status) }}>
+                  {selectedOrder.status === "partially_shipped" ? "Part. Shipped" : selectedOrder.status}
                 </span>
                 <button onClick={() => handlePrint(selectedOrder)}
-                  style={{ padding: "8px 18px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
-                  🖨️ Print Waybill
+                  style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
+                  🖨️ Print
                 </button>
-                <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", color: "#fff", fontSize: 28, cursor: "pointer", lineHeight: 1 }}>×</button>
+                <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
               </div>
             </div>
 
-            <div className="modal-inner modal-grid" style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
+            <div className="modal-inner modal-grid" style={{ padding: 14, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
 
               {/* Customer Info */}
-              <div style={{ background: "#fafafa", borderRadius: 14, padding: 20 }}>
-                <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>📦 Customer</h3>
+              <div style={{ background: "#fafafa", borderRadius: 10, padding: 12 }}>
+                <h3 style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>📦 Customer</h3>
                 {[
                   ["Name", selectedOrder.customer_name],
                   ["Phone", `📞 ${selectedOrder.customer_phone}`],
@@ -572,52 +572,52 @@ export default function OrdersPage() {
                   selectedOrder.governorate ? ["Governorate", selectedOrder.governorate] : null,
                   selectedOrder.notes ? ["Notes", selectedOrder.notes] : null,
                 ].filter((x): x is string[] => Boolean(x)).map(([label, val], i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, padding: "8px 0", borderBottom: "1px solid #eee" }}>
-                    <span style={{ color: "#888", fontSize: 13, minWidth: 90 }}>{label}</span>
-                    <span style={{ fontWeight: 600, fontSize: 13, color: label === "WhatsApp" ? "#25d366" : "#1a1a2e" }}>{val}</span>
+                  <div key={i} style={{ display: "flex", gap: 8, padding: "5px 0", borderBottom: "1px solid #eee" }}>
+                    <span style={{ color: "#888", fontSize: 11, minWidth: 70 }}>{label}</span>
+                    <span style={{ fontWeight: 600, fontSize: 11, color: label === "WhatsApp" ? "#25d366" : "#1a1a2e" }}>{val}</span>
                   </div>
                 ))}
               </div>
 
               {/* Summary + Deposit */}
-              <div style={{ background: "#fafafa", borderRadius: 14, padding: 20 }}>
-                <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>💰 Summary</h3>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
-                  <span style={{ color: "#888", fontSize: 13 }}>Subtotal</span>
-                  <span style={{ fontWeight: 600 }}>{fmt((selectedOrder.total_amount || 0) - (selectedOrder.shipping_cost || 0))} EGP</span>
+              <div style={{ background: "#fafafa", borderRadius: 10, padding: 12 }}>
+                <h3 style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>💰 Summary</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #eee" }}>
+                  <span style={{ color: "#888", fontSize: 11 }}>Subtotal</span>
+                  <span style={{ fontWeight: 600, fontSize: 11 }}>{fmt((selectedOrder.total_amount || 0) - (selectedOrder.shipping_cost || 0))} EGP</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
-                  <span style={{ color: "#888", fontSize: 13 }}>Shipping</span>
-                  <span style={{ fontWeight: 600, color: (selectedOrder.shipping_cost || 0) === 0 ? "#22c55e" : "#333" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #eee" }}>
+                  <span style={{ color: "#888", fontSize: 11 }}>Shipping</span>
+                  <span style={{ fontWeight: 600, fontSize: 11, color: (selectedOrder.shipping_cost || 0) === 0 ? "#22c55e" : "#333" }}>
                     {(selectedOrder.shipping_cost || 0) === 0 ? "FREE 🎉" : `${selectedOrder.shipping_cost} EGP`}
                   </span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
-                  <span style={{ fontWeight: 800, fontSize: 15 }}>Total</span>
-                  <span style={{ fontWeight: 800, fontSize: 18, color: "#1a1a2e" }}>{fmt(selectedOrder.total_amount)} EGP</span>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #eee" }}>
+                  <span style={{ fontWeight: 800, fontSize: 12 }}>Total</span>
+                  <span style={{ fontWeight: 800, fontSize: 14, color: "#1a1a2e" }}>{fmt(selectedOrder.total_amount)} EGP</span>
                 </div>
 
                 {/* Deposit */}
-                <div style={{ marginTop: 14, padding: 14, background: "#fff", borderRadius: 10, border: "1.5px solid #fda1b7" }}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", display: "block", marginBottom: 8 }}>💵 Deposit (Paid in advance)</label>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ marginTop: 10, padding: 10, background: "#fff", borderRadius: 8, border: "1.5px solid #fda1b7" }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#1a1a2e", display: "block", marginBottom: 6 }}>💵 Deposit</label>
+                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <input
                       type="number"
                       value={depositInput}
                       onChange={e => setDepositInput(e.target.value)}
                       placeholder="0"
-                      style={{ flex: 1, padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 15, fontWeight: 700, outline: "none" }}
+                      style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, fontWeight: 700, outline: "none" }}
                     />
-                    <span style={{ fontWeight: 600, color: "#888" }}>EGP</span>
+                    <span style={{ fontWeight: 600, color: "#888", fontSize: 11 }}>EGP</span>
                     <button onClick={() => { const amt = parseFloat(depositInput) || 0; saveDeposit(selectedOrder.id, amt); }}
-                      style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
+                      style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
                       Save
                     </button>
                   </div>
                   {(deposits[selectedOrder.id] || 0) > 0 && (
-                    <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                      <span style={{ color: "#888" }}>Remaining to collect</span>
-                      <span style={{ fontWeight: 800, fontSize: 18, color: "#1a1a2e" }}>
+                    <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                      <span style={{ color: "#888" }}>Remaining</span>
+                      <span style={{ fontWeight: 800, fontSize: 14, color: "#1a1a2e" }}>
                         {fmt(Math.max(0, (selectedOrder.total_amount || 0) - (deposits[selectedOrder.id] || 0)))} EGP
                       </span>
                     </div>
@@ -625,10 +625,10 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Status */}
-                <div style={{ marginTop: 14 }}>
-                  <label style={{ fontSize: 12, color: "#888", fontWeight: 700, display: "block", marginBottom: 8 }}>UPDATE STATUS</label>
+                <div style={{ marginTop: 10 }}>
+                  <label style={{ fontSize: 11, color: "#888", fontWeight: 700, display: "block", marginBottom: 6 }}>STATUS</label>
                   <select value={selectedOrder.status} onChange={e => updateStatus(selectedOrder.id, e.target.value)}
-                    style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1.5px solid #f0d4dc", fontSize: 14, fontWeight: 700, color: getStatusColor(selectedOrder.status), cursor: "pointer", background: "#fff", outline: "none" }}>
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${getStatusColor(selectedOrder.status)}`, fontSize: 12, fontWeight: 700, color: getStatusColor(selectedOrder.status), cursor: "pointer", background: getStatusBg(selectedOrder.status), outline: "none" }}>
                     <option value="pending">Pending</option>
                     <option value="processing">Processing</option>
                     <option value="partially_shipped">Partially Shipped</option>
@@ -640,26 +640,25 @@ export default function OrdersPage() {
             </div>
 
             {/* Items */}
-            <div className="modal-inner" style={{ padding: "0 20px 20px" }}>
-              <h3 style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>🛍️ Items ({selectedOrder.items?.length || 0})</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="modal-inner" style={{ padding: "0 14px 14px" }}>
+              <h3 style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#111", textTransform: "uppercase", letterSpacing: 1 }}>🛍️ Items ({selectedOrder.items?.length || 0})</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {selectedOrder.items?.map((item, i) => {
                   const img = productImages[item.product_id];
                   return (
-                    <div key={i} style={{ display: "flex", gap: 14, padding: 14, background: "#fafafa", borderRadius: 12, alignItems: "center" }}>
-                      <div style={{ width: 70, height: 70, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: "#fdf0f3", border: "1px solid #eee" }}>
-                        <img src={img || `https://placehold.co/70x70/fdf0f3/fda1b7?text=💍`} alt={item.product_name || ""}
+                    <div key={i} style={{ display: "flex", gap: 10, padding: 10, background: "#fafafa", borderRadius: 10, alignItems: "center" }}>
+                      <div style={{ width: 52, height: 52, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#fdf0f3", border: "1px solid #eee" }}>
+                        <img src={img || `https://placehold.co/52x52/fdf0f3/fda1b7?text=💍`} alt={item.product_name || ""}
                           style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/70x70/fdf0f3/fda1b7?text=💍"; }} />
+                          onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/52x52/fdf0f3/fda1b7?text=💍"; }} />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e" }}>{item.product_name || "Product"}</div>
-                        {item.size && item.size !== "One Size" && <div style={{ fontSize: 13, color: "#888", marginTop: 3 }}>Size: {item.size}</div>}
+                        <div style={{ fontWeight: 700, fontSize: 12, color: "#1a1a2e" }}>{item.product_name || "Product"}</div>
+                        {item.size && item.size !== "One Size" && <div style={{ fontSize: 11, color: "#888", marginTop: 2 }}>Size: {item.size}</div>}
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ fontSize: 13, color: "#888" }}>x{item.quantity}</div>
-                        <div style={{ fontWeight: 700, color: "#1a1a2e", fontSize: 15 }}>{item.price} EGP</div>
-                        <div style={{ fontSize: 12, color: "#aaa" }}>{item.total || item.price * item.quantity} EGP total</div>
+                        <div style={{ fontSize: 11, color: "#888" }}>x{item.quantity}</div>
+                        <div style={{ fontWeight: 700, color: "#1a1a2e", fontSize: 12 }}>{item.price} EGP</div>
                       </div>
                     </div>
                   );
