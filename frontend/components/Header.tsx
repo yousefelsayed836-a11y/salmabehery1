@@ -137,14 +137,14 @@ export default function Header() {
             <span className="header-logo" style={{
               fontFamily: "'HelloParis', serif",
               fontWeight: 400,
-              fontSize: 22,
-              letterSpacing: 1,
+              fontSize: 26,
+              letterSpacing: 2,
               whiteSpace: "nowrap",
               color: isTransparent ? "#fff" : "#1a1a2e",
               transition: "color 0.3s ease",
               display: "block",
             }}>
-              Salma Be<span style={{ letterSpacing: 2 }}>h</span>ery
+              Salma behery
             </span>
           </Link>
 
