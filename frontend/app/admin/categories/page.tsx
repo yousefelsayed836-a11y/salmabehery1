@@ -110,16 +110,16 @@ export default function AdminCategories() {
   return (
     <>
     <style jsx global>{`input, select, textarea { font-size: 16px !important; }`}</style>
-    <div style={{ minHeight: "100vh", background: "#f5f5f5", padding: 20 }}>
+    <div style={{ minHeight: "100vh", background: "#f4f3ff", padding: 20 }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
-            <Link href="/admin" style={{ color: "#fda1b7", textDecoration: "none", fontSize: 13 }}>← Dashboard</Link>
-            <h1 style={{ margin: "4px 0 0", fontSize: 22, fontWeight: 800, color: "#1a1a2e" }}>🗂️ Categories</h1>
+            <Link href="/admin" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 13 }}>← Dashboard</Link>
+            <h1 style={{ margin: "4px 0 0", fontSize: 22, fontWeight: 800, color: "#1e1b4b" }}>Categories</h1>
           </div>
-          <button onClick={startAdd} style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+          <button onClick={startAdd} style={{ padding: "10px 20px", borderRadius: 12, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
             + Add Category
           </button>
         </div>
@@ -160,7 +160,7 @@ export default function AdminCategories() {
                 style={{ width: 100, padding: "10px 12px", borderRadius: 10, border: "1.5px solid #eee", fontSize: 14, outline: "none" }} />
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={save} disabled={saving} style={{ padding: "12px 28px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+              <button onClick={save} disabled={saving} style={{ padding: "12px 28px", borderRadius: 12, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
                 {saving ? "Saving..." : editing ? "Save Changes" : "Create"}
               </button>
               <button onClick={cancel} style={{ padding: "12px 20px", borderRadius: 12, border: "1.5px solid #eee", background: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
@@ -195,7 +195,7 @@ export default function AdminCategories() {
                   <button onClick={() => toggleActive(cat)} style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #eee", background: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 600, color: "#555" }}>
                     {cat.is_active ? "Hide" : "Show"}
                   </button>
-                  <button onClick={() => startEdit(cat)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "#fdf0f3", color: "#fda1b7", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  <button onClick={() => startEdit(cat)} style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: "#ede9fe", color: "#7c3aed", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                     Edit
                   </button>
                   <button onClick={() => deleteCat(cat.id)} style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fee2e2", color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>

@@ -247,7 +247,7 @@ export default function ProductsPage() {
     <>
       <style jsx global>{`
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f3ff; }
         input, select, textarea { font-size: 16px !important; }
         .prod-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
         .prod-table-wrap table { min-width: 700px; }
@@ -263,8 +263,8 @@ export default function ProductsPage() {
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <div className="prod-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
             <div>
-              <Link href="/admin" style={{ color: "#fda1b7", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
-              <h1 style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "#1a1a2e" }}>🛍️ Product Management</h1>
+              <Link href="/admin" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
+              <h1 style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "#1e1b4b" }}>Product Management</h1>
             </div>
             <div className="prod-header-btns" style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setAddForm({ ...emptyForm }); setAddError(""); setShowAddModal(true); }}
@@ -311,7 +311,7 @@ export default function ProductsPage() {
             <div className="prod-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "#1a1a2e", color: "#fff" }}>
+                  <tr style={{ background: "#7c3aed", color: "#fff" }}>
                     {["IMAGE", "PRODUCT", "CATEGORY", "PRICE", "STOCK", "STATUS", "ACTIONS"].map(h => (
                       <th key={h} style={{ padding: 16, textAlign: "left", fontSize: 13 }}>{h}</th>
                     ))}
@@ -371,8 +371,8 @@ export default function ProductsPage() {
                               <button onClick={() => setEditingId(null)} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", fontSize: 12, cursor: "pointer" }}>✕</button>
                             </div>
                             : <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                              <button onClick={() => { setEditingId(p.id); setEditPrice(String(p.price)); setEditStock(String(p.stock)); }} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#fda1b7", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>⚡ Quick</button>
-                              <button onClick={() => openFullEdit(p)} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>✏️ Edit</button>
+                              <button onClick={() => { setEditingId(p.id); setEditPrice(String(p.price)); setEditStock(String(p.stock)); }} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#8b5cf6", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Quick</button>
+                              <button onClick={() => openFullEdit(p)} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#7c3aed", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Edit</button>
                               <button onClick={() => deleteProduct(p.id)} style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", fontSize: 12, cursor: "pointer" }}>🗑️</button>
                             </div>
                           }

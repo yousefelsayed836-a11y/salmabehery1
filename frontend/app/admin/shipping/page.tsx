@@ -206,7 +206,7 @@ export default function ShippingPage() {
 
   return (
     <>
-      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f5f5; } input, select { font-size: 16px !important; }`}</style>
+      <style jsx global>{`* { box-sizing: border-box; } body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f3ff; } input, select { font-size: 16px !important; }`}</style>
 
       <div style={{ minHeight: "100vh", padding: "24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -214,13 +214,13 @@ export default function ShippingPage() {
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
             <div>
-              <Link href="/admin" style={{ color: "#fda1b7", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
-              <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1a1a2e" }}>🚚 Shipping Rates</h1>
+              <Link href="/admin" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
+              <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1e1b4b" }}>Shipping Rates</h1>
               <p style={{ margin: "4px 0 0", color: "#888", fontSize: 13 }}>اضغط على المحافظة لإدارة مدنها وأسعارها</p>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setShowAdd(true)}
-                style={{ padding: "11px 20px", borderRadius: 12, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
+                style={{ padding: "11px 20px", borderRadius: 12, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
                 + إضافة محافظة
               </button>
               <button onClick={saveAll} disabled={saving}
@@ -253,7 +253,7 @@ export default function ShippingPage() {
                   {addMsg && <p style={{ margin: 0, fontSize: 13, color: addMsg.includes("✅") ? "#166534" : "#991b1b", fontWeight: 600 }}>{addMsg}</p>}
                   <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                     <button onClick={addGovernorate}
-                      style={{ flex: 1, padding: "11px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: "pointer" }}>
+                      style={{ flex: 1, padding: "11px", borderRadius: 10, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: "pointer" }}>
                       إضافة
                     </button>
                     <button onClick={() => setShowAdd(false)}
@@ -275,7 +275,7 @@ export default function ShippingPage() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input type="number" value={freeThreshold} onChange={e => setFreeThreshold(Number(e.target.value))}
-                style={{ width: 120, padding: "10px 14px", borderRadius: 10, border: "2px solid #fda1b7", fontSize: 16, fontWeight: 700, textAlign: "center", outline: "none" }} />
+                style={{ width: 120, padding: "10px 14px", borderRadius: 10, border: "2px solid #7c3aed", fontSize: 16, fontWeight: 700, textAlign: "center", outline: "none" }} />
               <span style={{ fontWeight: 700, color: "#888" }}>EGP</span>
             </div>
           </div>
@@ -289,7 +289,7 @@ export default function ShippingPage() {
             ].map(s => (
               <div key={s.label} style={{ background: "#fff", borderRadius: 12, padding: "14px 16px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", textAlign: "center" }}>
                 <p style={{ margin: 0, fontSize: 12, color: "#888" }}>{s.label}</p>
-                <p style={{ margin: "4px 0 0", fontSize: 20, fontWeight: 800, color: "#fda1b7" }}>{s.value}</p>
+                <p style={{ margin: "4px 0 0", fontSize: 20, fontWeight: 800, color: "#7c3aed" }}>{s.value}</p>
               </div>
             ))}
           </div>
@@ -310,7 +310,7 @@ export default function ShippingPage() {
 
                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: i % 2 === 0 ? "#fff" : "#fffcfd" }}>
                     <button onClick={() => toggleExpand(r.id)}
-                      style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: expandedGov === r.id ? "#fda1b7" : "#f5f5f5", color: expandedGov === r.id ? "#fff" : "#555", cursor: "pointer", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                      style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: expandedGov === r.id ? "#7c3aed" : "#ede9fe", color: expandedGov === r.id ? "#fff" : "#7c3aed", cursor: "pointer", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
                       {expandedGov === r.id ? "▲" : "▼"}
                     </button>
 
@@ -323,7 +323,7 @@ export default function ShippingPage() {
                       <input type="number" value={r.cost}
                         onChange={e => setCost(r.id, Number(e.target.value))}
                         disabled={!r.is_active}
-                        style={{ width: 85, padding: "6px 10px", borderRadius: 8, border: "1.5px solid #f0d4dc", fontSize: 14, fontWeight: 700, textAlign: "center", outline: "none", color: "#fda1b7", background: r.is_active ? "#fff" : "#f5f5f5" }} />
+                        style={{ width: 85, padding: "6px 10px", borderRadius: 8, border: "1.5px solid #c4b5fd", fontSize: 14, fontWeight: 700, textAlign: "center", outline: "none", color: "#7c3aed", background: r.is_active ? "#fff" : "#f5f5f5" }} />
                       <span style={{ fontSize: 12, color: "#aaa" }}>EGP</span>
 
                       <button onClick={() => toggleActive(r)}
@@ -343,7 +343,7 @@ export default function ShippingPage() {
                   {/* Cities Panel */}
                   {expandedGov === r.id && (
                     <div style={{ borderTop: "2px solid #fdf0f3", background: "#fffbfc", padding: "14px 16px 16px" }}>
-                      <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#fda1b7" }}>🏙️ مدن {r.name_ar || r.name}</p>
+                      <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#7c3aed" }}>مدن {r.name_ar || r.name}</p>
 
                       {loadingCities && !cities[r.id] ? (
                         <div style={{ color: "#aaa", fontSize: 13, marginBottom: 12 }}>جاري التحميل...</div>
@@ -365,11 +365,11 @@ export default function ShippingPage() {
                                       <input type="number" placeholder={`افتراضي: ${r.cost}`}
                                         value={pendingCityCosts[city.id] ?? (city.cost !== null ? String(city.cost) : "")}
                                         onChange={e => setPendingCityCosts(p => ({ ...p, [city.id]: e.target.value }))}
-                                        style={{ width: 100, padding: "5px 8px", borderRadius: 8, border: "1.5px solid #fda1b7", fontSize: 13, outline: "none", textAlign: "center" }}
+                                        style={{ width: 100, padding: "5px 8px", borderRadius: 8, border: "1.5px solid #7c3aed", fontSize: 13, outline: "none", textAlign: "center" }}
                                         autoFocus />
                                       <span style={{ fontSize: 11, color: "#aaa" }}>EGP</span>
                                       <button onClick={() => saveCityCost(city, r.id)}
-                                        style={{ padding: "5px 12px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                                        style={{ padding: "5px 12px", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                                         حفظ
                                       </button>
                                       <button onClick={() => setEditingCity(null)}
@@ -380,7 +380,7 @@ export default function ShippingPage() {
                                   ) : (
                                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                       <span onClick={() => setEditingCity(city.id)}
-                                        style={{ padding: "4px 12px", borderRadius: 8, background: city.cost !== null ? "#fdf0f3" : "#f5f5f5", color: city.cost !== null ? "#fda1b7" : "#aaa", fontSize: 13, fontWeight: 700, cursor: "pointer", border: "1px dashed #fda1b766" }}>
+                                        style={{ padding: "4px 12px", borderRadius: 8, background: city.cost !== null ? "#ede9fe" : "#f5f5f5", color: city.cost !== null ? "#7c3aed" : "#aaa", fontSize: 13, fontWeight: 700, cursor: "pointer", border: "1px dashed #7c3aed66" }}>
                                         {city.cost !== null ? `${city.cost} EGP` : `${r.cost} EGP ↑`}
                                       </span>
                                       <button onClick={() => toggleCityActive(city, r.id)}
@@ -411,7 +411,7 @@ export default function ShippingPage() {
                               onChange={e => setAddCityForm(p => ({ ...p, cost: e.target.value }))}
                               style={{ width: 130, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 13, outline: "none" }} />
                             <button onClick={() => addCity(r.id)}
-                              style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                              style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
                               + إضافة مدينة
                             </button>
                           </div>

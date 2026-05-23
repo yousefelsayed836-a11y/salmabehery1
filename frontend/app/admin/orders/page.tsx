@@ -337,7 +337,7 @@ export default function OrdersPage() {
       <style jsx global>{`
         * { box-sizing: border-box; }
         html, body { margin: 0; overflow-x: hidden; max-width: 100%; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f3ff; }
         .orders-outer { width: 100%; max-width: 100%; overflow-x: hidden; }
         .orders-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 16px; }
         .orders-table-wrap table { min-width: 900px; }
@@ -401,8 +401,8 @@ export default function OrdersPage() {
           {/* Header */}
           <div className="orders-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
             <div>
-              <Link href="/admin" style={{ color: "#fda1b7", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
-              <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1a1a2e" }}>📦 Orders</h1>
+              <Link href="/admin" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
+              <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#1e1b4b" }}>Orders</h1>
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {selectedForPrint.size > 0 && (
@@ -456,7 +456,7 @@ export default function OrdersPage() {
             <div className="orders-table-wrap" style={{ background: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "#1a1a2e", color: "#fff" }}>
+                  <tr style={{ background: "#7c3aed", color: "#fff" }}>
                     <th style={{ padding: 14, width: 40 }}>
                       <input type="checkbox" onChange={e => {
                         if (e.target.checked) setSelectedForPrint(new Set(filteredOrders.map(o => o.id)));
@@ -477,7 +477,7 @@ export default function OrdersPage() {
                         <td style={{ padding: "0 14px" }} onClick={e => e.stopPropagation()}>
                           <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)} />
                         </td>
-                        <td style={{ padding: 14, fontSize: 14, fontWeight: 700, color: "#fda1b7" }} onClick={() => openOrder(order)}>
+                        <td style={{ padding: 14, fontSize: 14, fontWeight: 700, color: "#7c3aed" }} onClick={() => openOrder(order)}>
                           #{order.id.slice(-6)}
                         </td>
                         <td style={{ padding: 14, fontSize: 14 }} onClick={() => openOrder(order)}>{order.customer_name}</td>
@@ -517,8 +517,8 @@ export default function OrdersPage() {
                         <td style={{ padding: 14, textAlign: "center" }}>
                           <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                             <button onClick={e => { e.stopPropagation(); openOrder(order); }}
-                              style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-                              👁️ View
+                              style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                              View
                             </button>
                             <button onClick={e => { e.stopPropagation(); openOrder(order).then(() => handlePrint(order)); }}
                               style={{ padding: "7px 12px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
@@ -589,7 +589,7 @@ export default function OrdersPage() {
                         style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 16, outline: "none" }} />
                     </div>
                     <div className="order-card-actions">
-                      <button onClick={() => openOrder(order)} style={{ background: "#1a1a2e", color: "#fff" }}>👁️ View</button>
+                      <button onClick={() => openOrder(order)} style={{ background: "#7c3aed", color: "#fff" }}>View</button>
                       <button onClick={() => openOrder(order).then(() => handlePrint(order))} style={{ background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff" }}>🖨️ Print</button>
                     </div>
                   </div>
@@ -606,7 +606,7 @@ export default function OrdersPage() {
         <div className="modal-overlay" style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setSelectedOrder(null)}>
           <div className="modal-box" style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 900, maxHeight: "90vh", overflowY: "auto", overflowX: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }} onClick={e => e.stopPropagation()}>
 
-            <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a2e", borderRadius: "20px 20px 0 0" }}>
+            <div className="modal-header" style={{ padding: "16px 20px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#7c3aed", borderRadius: "20px 20px 0 0" }}>
               <div>
                 <h2 style={{ margin: 0, color: "#fff", fontSize: 20, fontWeight: 800 }}>Order #{selectedOrder.id.slice(-6)}</h2>
                 <p style={{ margin: "4px 0 0", color: "#fda1b7", fontSize: 13 }}>{new Date(selectedOrder.created_at).toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
@@ -659,7 +659,7 @@ export default function OrdersPage() {
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #eee" }}>
                   <span style={{ fontWeight: 800, fontSize: 15 }}>Total</span>
-                  <span style={{ fontWeight: 800, fontSize: 18, color: "#fda1b7" }}>{fmt(selectedOrder.total_amount)} EGP</span>
+                  <span style={{ fontWeight: 800, fontSize: 18, color: "#7c3aed" }}>{fmt(selectedOrder.total_amount)} EGP</span>
                 </div>
 
                 {/* Deposit */}
@@ -675,7 +675,7 @@ export default function OrdersPage() {
                     />
                     <span style={{ fontWeight: 600, color: "#888" }}>EGP</span>
                     <button onClick={() => { const amt = parseFloat(depositInput) || 0; saveDeposit(selectedOrder.id, amt); }}
-                      style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
+                      style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13 }}>
                       Save
                     </button>
                   </div>
@@ -723,7 +723,7 @@ export default function OrdersPage() {
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
                         <div style={{ fontSize: 13, color: "#888" }}>x{item.quantity}</div>
-                        <div style={{ fontWeight: 700, color: "#fda1b7", fontSize: 15 }}>{item.price} EGP</div>
+                        <div style={{ fontWeight: 700, color: "#7c3aed", fontSize: 15 }}>{item.price} EGP</div>
                         <div style={{ fontSize: 12, color: "#aaa" }}>{item.total || item.price * item.quantity} EGP total</div>
                       </div>
                     </div>
