@@ -3,40 +3,47 @@ const router = express.Router();
 const pool = require('../database/db');
 const fetch = require('node-fetch');
 
-const ADMIN_EMAIL = 'yousefelsayed836@gmail.com';
+const ADMIN_EMAIL = 'salmabehery14@gmail.com';
 
 function buildEmailHtml(order, items) {
   const itemsHtml = (items || []).map(i =>
     `<tr>
-      <td style="padding:6px 10px;border-bottom:1px solid #eee">${i.product_name || i.name || 'منتج'}${i.size && i.size !== 'One Size' ? ` <span style="color:#aaa;font-size:12px">(${i.size})</span>` : ''}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${i.price} EGP</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee">${i.product_name || i.name || 'Product'}${i.size && i.size !== 'One Size' ? ` <span style="color:#aaa;font-size:12px">(${i.size})</span>` : ''}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:700">${i.price} EGP</td>
     </tr>`
   ).join('');
   return `
-<div dir="rtl" style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden">
-  <div style="background:#1a1a2e;color:#fff;padding:20px;text-align:center">
-    <h2 style="margin:0">🛍️ طلب جديد #${order.id}</h2>
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #eee;border-radius:10px;overflow:hidden">
+  <div style="background:#1a1a2e;color:#fff;padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div style="font-size:12px;color:#fda1b7;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">New Order</div>
+      <div style="font-size:22px;font-weight:800">Salma Behery ✦</div>
+    </div>
+    <div style="font-size:20px;font-weight:700;color:#fda1b7">#${String(order.id).slice(-6)}</div>
   </div>
-  <div style="padding:20px">
-    <p><strong>العميل:</strong> ${order.customer_name}</p>
-    <p><strong>الهاتف:</strong> ${order.customer_phone}</p>
-    ${order.phone2 ? `<p><strong>واتساب:</strong> ${order.phone2}</p>` : ''}
-    <p><strong>العنوان:</strong> ${order.shipping_address || ''} — ${order.city || order.customer_city || ''} ${order.governorate ? '، ' + order.governorate : ''}</p>
-    ${order.notes ? `<p><strong>ملاحظات:</strong> ${order.notes}</p>` : ''}
-    <table style="width:100%;border-collapse:collapse;margin-top:16px">
-      <thead><tr style="background:#f5f5f5">
-        <th style="padding:8px 10px;text-align:right">المنتج</th>
-        <th style="padding:8px 10px">الكمية</th>
-        <th style="padding:8px 10px;text-align:right">السعر</th>
+  <div style="padding:20px 24px;background:#fff">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <tr><td style="padding:6px 0;color:#888;font-size:13px;width:120px">Customer</td><td style="padding:6px 0;font-weight:700;font-size:14px">${order.customer_name}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-size:13px">Phone</td><td style="padding:6px 0;font-size:14px">${order.customer_phone}${order.phone2 ? ' / ' + order.phone2 : ''}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-size:13px">Address</td><td style="padding:6px 0;font-size:14px">${order.shipping_address || order.address || '-'}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-size:13px">City</td><td style="padding:6px 0;font-size:14px">${order.city || '-'}${order.governorate ? ', ' + order.governorate : ''}</td></tr>
+      ${order.notes ? `<tr><td style="padding:6px 0;color:#888;font-size:13px">Notes</td><td style="padding:6px 0;font-size:14px;color:#555">${order.notes}</td></tr>` : ''}
+    </table>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #eee;border-radius:8px;overflow:hidden">
+      <thead><tr style="background:#f8f8f8">
+        <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;font-weight:600">ITEM</th>
+        <th style="padding:10px 12px;text-align:center;font-size:12px;color:#888;font-weight:600">QTY</th>
+        <th style="padding:10px 12px;text-align:right;font-size:12px;color:#888;font-weight:600">PRICE</th>
       </tr></thead>
       <tbody>${itemsHtml}</tbody>
     </table>
-    <div style="margin-top:16px;text-align:left">
-      <p style="margin:4px 0"><strong>الشحن:</strong> ${order.shipping_cost} EGP</p>
-      <p style="margin:4px 0;font-size:18px;color:#1a1a2e"><strong>الإجمالي: ${order.total_amount} EGP</strong></p>
+    <div style="margin-top:16px;border-top:2px solid #f0f0f0;padding-top:14px">
+      ${order.shipping_cost ? `<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:#888"><span>Shipping</span><span>${order.shipping_cost} EGP</span></div>` : ''}
+      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800;color:#1a1a2e"><span>Total</span><span>${order.total_amount} EGP</span></div>
     </div>
   </div>
+  <div style="background:#fdf0f3;padding:12px 24px;text-align:center;font-size:12px;color:#aaa">Salma Behery Store · salmabehery.com</div>
 </div>`;
 }
 
@@ -52,7 +59,7 @@ async function sendOrderEmail(order, items) {
     body: JSON.stringify({
       from: 'Salma Behery <onboarding@resend.dev>',
       to: [ADMIN_EMAIL],
-      subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
+      subject: `🛍️ New Order #${String(order.id).slice(-6)} — ${order.customer_name}`,
       html: buildEmailHtml(order, items),
     }),
   });
@@ -201,7 +208,7 @@ router.get('/test-email', async (req, res) => {
   if (!process.env.RESEND_API_KEY) {
     return res.json({ ok: false, error: 'RESEND_API_KEY غير موجود في Render — اضيف المتغير وحاول تاني' });
   }
-  const fakeOrder = { id: 'TEST-001', customer_name: 'اختبار', customer_phone: '01000000000', shipping_address: 'Cairo', city: 'Cairo', governorate: '', notes: '', shipping_cost: 0, total_amount: 100 };
+  const fakeOrder = { id: 'TEST-001', customer_name: 'Test Customer', customer_phone: '01000000000', shipping_address: '123 Test St', city: 'Cairo', governorate: 'Cairo', notes: '', shipping_cost: 50, total_amount: 550 };
   try {
     await sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 100 }]);
     res.json({ ok: true, to: ADMIN_EMAIL });
