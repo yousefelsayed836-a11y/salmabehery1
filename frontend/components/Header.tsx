@@ -133,7 +133,7 @@ export default function Header() {
           </div>
 
           {/* Center: Logo */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}>
             <span className="header-logo" style={{
               fontFamily: "'HelloParis', serif",
               fontWeight: 400,
