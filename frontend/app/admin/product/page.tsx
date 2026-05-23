@@ -249,42 +249,30 @@ export default function ProductsPage() {
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f3ff; }
         input, select, textarea { font-size: 16px !important; }
-        .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
         @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+        .prod-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
+        .prod-row-actions { display: flex; gap: 7px; margin-left: auto; flex-shrink: 0; }
         @media (max-width: 640px) {
           .prod-outer { padding: 10px !important; }
           .prod-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
           .prod-header-btns { width: 100% !important; }
-          .prod-header-btns button { flex: 1 !important; }
-          .prod-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
           .prod-modal-pad { padding: 10px !important; }
+          .prod-row { padding: 10px 12px; gap: 10px; }
+          .prod-row-name { font-size: 13px !important; }
+          .prod-row-meta { display: none !important; }
         }
       `}</style>
       <div className="prod-outer" style={{ minHeight: "100vh", padding: "14px" }}>
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <div className="prod-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
             <div>
-              <Link href="/admin" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
-              <h1 style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "#1e1b4b" }}>Product Management</h1>
+              <Link href="/admin" style={{ color: "#1a1a2e", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>← Back to Dashboard</Link>
+              <h1 style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "#111" }}>Product Management</h1>
             </div>
             <div className="prod-header-btns" style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setAddForm({ ...emptyForm }); setAddError(""); setShowAddModal(true); }}
                 style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
                 ➕ Add Product
-              </button>
-              <button onClick={async () => {
-                if (!confirm("Activate ALL draft products?")) return;
-                await Promise.all(products.filter(p => !p.is_active).map(p =>
-                  fetch(`${API_BASE}/products/${p.id}/toggle`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ is_active: true }) })
-                ));
-                fetchProducts();
-              }}
-                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
-                ⚡ Activate All
-              </button>
-              <button onClick={fetchProducts}
-                style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
-                🔄 Refresh
               </button>
             </div>
           </div>
@@ -307,95 +295,82 @@ export default function ProductsPage() {
           )}
 
           {loading ? (
-            <div className="prod-grid">
-              {[1,2,3,4,5,6,7,8].map(i => (
-                <div key={i} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee" }}>
-                  <div style={{ aspectRatio: "3/4", background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "400px 100%", animation: "shimmer 1.2s infinite" }} />
-                  <div style={{ padding: 12 }}>
-                    <div style={{ height: 13, background: "#f5f5f5", borderRadius: 6, marginBottom: 8, width: "75%" }} />
-                    <div style={{ height: 12, background: "#f5f5f5", borderRadius: 6, width: "45%" }} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {[1,2,3,4,5].map(i => (
+                <div key={i} style={{ background: "#fff", borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, border: "1px solid #f0f0f0" }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 10, background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "400px 100%", animation: "shimmer 1.2s infinite", flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ height: 13, background: "#f5f5f5", borderRadius: 6, marginBottom: 8, width: "50%" }} />
+                    <div style={{ height: 11, background: "#f5f5f5", borderRadius: 6, width: "30%" }} />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <>
-              <div className="prod-grid">
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {filtered.map(p => {
                   const isEditing = editingId === p.id;
                   const stockGood = (p.stock || 0) > 10;
                   const stockLow = (p.stock || 0) > 0 && (p.stock || 0) <= 10;
                   return (
-                    <div key={p.id} style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", opacity: p.is_active ? 1 : 0.6, display: "flex", flexDirection: "column" }}>
-                      {/* Image */}
-                      <div style={{ position: "relative", background: "#fdf0f3", aspectRatio: "3/4", overflow: "hidden" }}>
+                    <div key={p.id} className="prod-row" style={{ opacity: p.is_active ? 1 : 0.6 }}>
+                      {/* Thumbnail */}
+                      <div style={{ width: 56, height: 56, borderRadius: 10, overflow: "hidden", background: "#fdf0f3", flexShrink: 0 }}>
                         <img src={getProductImage(p)} alt={p.name_en}
-                          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                          onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/300x400/fda1b7/fff?text=?"; }} />
-                        <span style={{ position: "absolute", top: 7, left: 7, padding: "3px 8px", borderRadius: 20, fontSize: 9, fontWeight: 700, background: p.is_active ? "#1a1a2e" : "#888", color: "#fff" }}>
-                          {p.is_active ? "ACTIVE" : "DRAFT"}
-                        </span>
-                        <span style={{ position: "absolute", bottom: 7, left: 7, padding: "3px 8px", borderRadius: 20, fontSize: 9, fontWeight: 700, background: stockGood ? "#1a1a2e" : stockLow ? "#fda1b7" : "#ef4444", color: "#fff" }}>
-                          {p.stock || 0} pcs
-                        </span>
-                        {p.categories && p.categories.length > 0 && (
-                          <div style={{ position: "absolute", top: 7, right: 7, display: "flex", gap: 3, flexDirection: "column", alignItems: "flex-end" }}>
-                            {p.categories.slice(0,2).map(c => (
-                              <span key={c.id} style={{ fontSize: 8, color: "#fff", background: "#fda1b7", padding: "2px 6px", borderRadius: 20, fontWeight: 700 }}>{c.name_en}</span>
-                            ))}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/56x56/fda1b7/fff?text=?"; }} />
+                      </div>
+                      {/* Info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="prod-row-name" style={{ fontWeight: 700, fontSize: 14, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</div>
+                        {isEditing ? (
+                          <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                            <input type="number" value={editPrice} onChange={e => setEditPrice(e.target.value)} placeholder="Price" autoFocus
+                              style={{ width: 80, padding: "4px 8px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 13, outline: "none" }} />
+                            <input type="number" value={editStock} onChange={e => setEditStock(e.target.value)} placeholder="Stock"
+                              style={{ width: 60, padding: "4px 8px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 13, outline: "none" }} />
+                          </div>
+                        ) : (
+                          <div className="prod-row-meta" style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3, flexWrap: "wrap" }}>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
+                            {p.old_price && p.old_price > 0 && <span style={{ fontSize: 11, color: "#bbb", textDecoration: "line-through" }}>{p.old_price}</span>}
+                            <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, fontWeight: 700, background: p.is_active ? "#eef4ff" : "#f3f4f6", color: p.is_active ? "#1a1a2e" : "#888" }}>
+                              {p.is_active ? "Active" : "Draft"}
+                            </span>
+                            <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, fontWeight: 700, background: stockGood ? "#d1fae5" : stockLow ? "#fef3c7" : "#fee2e2", color: stockGood ? "#059669" : stockLow ? "#d97706" : "#ef4444" }}>
+                              {p.stock || 0} pcs
+                            </span>
                           </div>
                         )}
                       </div>
-                      {/* Info */}
-                      <div style={{ padding: "10px 10px 10px", flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                        <div style={{ fontWeight: 700, fontSize: 12, color: "#1a1a2e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name_en}</div>
+                      {/* Actions */}
+                      <div className="prod-row-actions">
                         {isEditing ? (
-                          <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
-                            <input type="number" value={editPrice} onChange={e => setEditPrice(e.target.value)} placeholder="Price" autoFocus
-                              style={{ flex: 1, padding: "5px 6px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 11, outline: "none" }} />
-                            <input type="number" value={editStock} onChange={e => setEditStock(e.target.value)} placeholder="Stock"
-                              style={{ width: 52, padding: "5px 6px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 11, outline: "none" }} />
-                          </div>
+                          <>
+                            <button onClick={() => saveQuickEdit(p.id)} disabled={saving}
+                              style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                              {saving ? "..." : "Save"}
+                            </button>
+                            <button onClick={() => setEditingId(null)}
+                              style={{ padding: "8px 10px", borderRadius: 8, border: "1.5px solid #eee", background: "#fff", color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
+                          </>
                         ) : (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <span style={{ fontSize: 14, fontWeight: 800, color: "#1a1a2e" }}>{p.price} EGP</span>
-                            {p.old_price && p.old_price > 0 && <span style={{ fontSize: 10, color: "#bbb", textDecoration: "line-through" }}>{p.old_price}</span>}
-                          </div>
+                          <>
+                            <button onClick={() => toggleActive(p.id, p.is_active)}
+                              style={{ padding: "8px 12px", borderRadius: 8, border: "1.5px solid #eee", background: "#fff", color: "#555", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                              {p.is_active ? "Hide" : "Show"}
+                            </button>
+                            <button onClick={() => { setEditingId(p.id); setEditPrice(String(p.price)); setEditStock(String(p.stock)); }}
+                              style={{ padding: "8px 12px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                              Quick
+                            </button>
+                            <button onClick={() => openFullEdit(p)}
+                              style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                              Edit
+                            </button>
+                          </>
                         )}
-                        {/* Actions */}
-                        <div style={{ display: "flex", gap: 4, marginTop: "auto", paddingTop: 6 }}>
-                          {isEditing ? (
-                            <>
-                              <button onClick={() => saveQuickEdit(p.id)} disabled={saving}
-                                style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 10, fontWeight: 700, cursor: "pointer" }}>
-                                {saving ? "..." : "Save"}
-                              </button>
-                              <button onClick={() => setEditingId(null)}
-                                style={{ padding: "7px 10px", borderRadius: 8, border: "1.5px solid #eee", background: "#fff", color: "#888", fontSize: 10, cursor: "pointer" }}>
-                                ✕
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button onClick={() => toggleActive(p.id, p.is_active)}
-                                style={{ padding: "6px 6px", borderRadius: 7, border: "1.5px solid #eee", background: "#fff", color: "#555", fontSize: 9, fontWeight: 600, cursor: "pointer" }}>
-                                {p.is_active ? "Hide" : "Show"}
-                              </button>
-                              <button onClick={() => { setEditingId(p.id); setEditPrice(String(p.price)); setEditStock(String(p.stock)); }}
-                                style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: "#fda1b7", color: "#fff", fontSize: 9, fontWeight: 700, cursor: "pointer" }}>
-                                Quick
-                              </button>
-                              <button onClick={() => openFullEdit(p)}
-                                style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 9, fontWeight: 700, cursor: "pointer" }}>
-                                Edit
-                              </button>
-                              <button onClick={() => deleteProduct(p.id)}
-                                style={{ padding: "6px 8px", borderRadius: 7, border: "none", background: "#fee2e2", color: "#ef4444", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>
-                                ×
-                              </button>
-                            </>
-                          )}
-                        </div>
                       </div>
                     </div>
                   );
@@ -441,11 +416,20 @@ export default function ProductsPage() {
             </div>
             {fullEditError && <div style={{ background: "#ef444418", border: "1px solid #ef4444", borderRadius: 10, padding: 12, marginBottom: 20, color: "#ef4444", fontWeight: 600 }}>⚠️ {fullEditError}</div>}
             <ProductFormFields form={fullEditForm} onChange={handleFullEditChange} formId="edit" categories={categories} uploadingImage={uploadingImage} onUploadImages={uploadImagesForEdit} />
-            <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "flex-end" }}>
-              <button onClick={() => setFullEditProduct(null)} style={{ padding: "12px 24px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", color: "#666", cursor: "pointer" }}>Cancel</button>
-              <button onClick={saveFullEdit} disabled={fullEditSaving} style={{ padding: "12px 32px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: fullEditSaving ? "not-allowed" : "pointer", opacity: fullEditSaving ? 0.7 : 1 }}>
-                {fullEditSaving ? "💾 Saving..." : "💾 Save Changes"}
+            <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "space-between", alignItems: "center" }}>
+              <button onClick={async () => {
+                if (!confirm(`Delete "${fullEditProduct?.name_en}"?`)) return;
+                await deleteProduct(fullEditProduct!.id);
+                setFullEditProduct(null);
+              }} style={{ padding: "12px 20px", borderRadius: 10, border: "none", background: "#fee2e2", color: "#ef4444", fontWeight: 700, cursor: "pointer" }}>
+                🗑️ Delete
               </button>
+              <div style={{ display: "flex", gap: 12 }}>
+                <button onClick={() => setFullEditProduct(null)} style={{ padding: "12px 24px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", color: "#666", cursor: "pointer" }}>Cancel</button>
+                <button onClick={saveFullEdit} disabled={fullEditSaving} style={{ padding: "12px 32px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: fullEditSaving ? "not-allowed" : "pointer", opacity: fullEditSaving ? 0.7 : 1 }}>
+                  {fullEditSaving ? "💾 Saving..." : "💾 Save Changes"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

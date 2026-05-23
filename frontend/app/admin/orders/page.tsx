@@ -302,18 +302,18 @@ export default function OrdersPage() {
   };
 
   const getStatusColor = (s: string) => {
-    if (s === "pending") return "#fda1b7";
-    if (s === "processing") return "#1a1a2e";
-    if (s === "partially_shipped") return "#1a1a2e";
-    if (s === "completed" || s === "delivered") return "#1a1a2e";
+    if (s === "pending") return "#d97706";
+    if (s === "processing") return "#2563eb";
+    if (s === "partially_shipped") return "#7c3aed";
+    if (s === "completed" || s === "delivered") return "#059669";
     if (s === "cancelled") return "#ef4444";
     return "#6b7280";
   };
   const getStatusBg = (s: string) => {
-    if (s === "pending") return "#fdf0f3";
-    if (s === "processing") return "#eef0f5";
-    if (s === "partially_shipped") return "#eef0f5";
-    if (s === "completed" || s === "delivered") return "#eef0f5";
+    if (s === "pending") return "#fef3c7";
+    if (s === "processing") return "#dbeafe";
+    if (s === "partially_shipped") return "#ede9fe";
+    if (s === "completed" || s === "delivered") return "#d1fae5";
     if (s === "cancelled") return "#fee2e2";
     return "#f3f4f6";
   };
