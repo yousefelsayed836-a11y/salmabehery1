@@ -161,10 +161,14 @@ export default function AdminDashboard() {
     try {
       const r = await fetch(`${API_BASE}/orders/test-email`);
       const d = await r.json();
-      setEmailTestMsg(d.ok ? `تم الإرسال إلى ${d.to}` : `فشل: ${d.error || "غير مفعل"}`);
-    } catch { setEmailTestMsg("فشل الاتصال بالسيرفر"); }
+      if (d.ok) {
+        setEmailTestMsg(`✅ تم الإرسال إلى ${d.to}`);
+      } else {
+        setEmailTestMsg(`❌ ${d.error || "فشل"}${d.code ? ` (${d.code})` : ""}`);
+      }
+    } catch { setEmailTestMsg("❌ فشل الاتصال بالسيرفر"); }
     setEmailTesting(false);
-    setTimeout(() => setEmailTestMsg(""), 6000);
+    setTimeout(() => setEmailTestMsg(""), 10000);
   };
 
   const fetchData = async () => {
@@ -453,12 +457,11 @@ export default function AdminDashboard() {
 
           {/* Email Notifications */}
           <div className="dash-card" style={{ padding: 20, marginBottom: 20 }}>
-            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#111" }}>Email Notifications</p>
-            <p style={{ margin: "0 0 14px", fontSize: 12, color: "#888" }}>بيجيلك إيميل على yousefelsayed836@gmail.com لما يجي أوردر جديد</p>
+            <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700, color: "#111" }}>Email Notifications</p>
             <button onClick={testEmail} disabled={emailTesting} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: emailTesting ? 0.7 : 1 }}>
               {emailTesting ? "جاري الإرسال..." : "اختبار إرسال إيميل"}
             </button>
-            {emailTestMsg && <p style={{ margin: "10px 0 0", fontSize: 13, fontWeight: 600, color: emailTestMsg.includes("تم") ? "#1a1a2e" : "#ef4444" }}>{emailTestMsg}</p>}
+            {emailTestMsg && <p style={{ margin: "10px 0 0", fontSize: 13, fontWeight: 600, color: emailTestMsg.includes("✅") ? "#059669" : "#ef4444" }}>{emailTestMsg}</p>}
           </div>
 
           {/* Facebook */}

@@ -39,33 +39,34 @@ function buildEmailHtml(order, items) {
 }
 
 function getTransporter() {
-  const user = process.env.GMAIL_USER || 'salmabehery14@gmail.com';
+  const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
-  if (!pass) return null;
+  if (!user || !pass) return null;
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: { user, pass },
+    tls: { rejectUnauthorized: false },
   });
 }
 
 async function sendOrderEmail(order, items) {
-  const transporter = getTransporter();
-  if (!transporter) {
-    console.log('[Email] No GMAIL_APP_PASSWORD set, skipping email');
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) {
+    console.log('[Email] GMAIL_USER or GMAIL_APP_PASSWORD not set');
     return;
   }
-  const to = process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com';
-  try {
-    await transporter.sendMail({
-      from: `"Salma Behery Store" <${process.env.GMAIL_USER || 'salmabehery14@gmail.com'}>`,
-      to,
-      subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
-      html: buildEmailHtml(order, items),
-    });
-    console.log('[Email] Sent successfully to', to);
-  } catch (e) {
-    console.error('[Email] Failed:', e.message);
-  }
+  const transporter = getTransporter();
+  const to = process.env.ADMIN_EMAIL || user;
+  await transporter.sendMail({
+    from: `"Salma Behery" <${user}>`,
+    to,
+    subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
+    html: buildEmailHtml(order, items),
+  });
+  console.log('[Email] Sent to', to);
 }
 
 
@@ -203,14 +204,21 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Test email endpoint (GET so it can be opened from browser)
+// Test email endpoint
 router.get('/test-email', async (req, res) => {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  const to = process.env.ADMIN_EMAIL || user;
+  if (!user || !pass) {
+    return res.json({ ok: false, error: 'GMAIL_USER or GMAIL_APP_PASSWORD not set in env vars' });
+  }
   const fakeOrder = { id: 'TEST-001', customer_name: 'Test', customer_phone: '01000000000', shipping_address: 'Test Address', city: 'Cairo', governorate: '', notes: '', shipping_cost: 50, total_amount: 550 };
   try {
     await sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 500 }]);
-    res.json({ ok: true, to: process.env.ADMIN_EMAIL || 'salmabehery14@gmail.com', configured: !!process.env.GMAIL_APP_PASSWORD });
+    res.json({ ok: true, to, from: user });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error('[Email] Test failed:', e);
+    res.json({ ok: false, error: e.message, code: e.code || '' });
   }
 });
 
