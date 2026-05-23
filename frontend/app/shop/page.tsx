@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "../../components/CartContext";
 
@@ -37,6 +37,7 @@ function getProductImage(p: Product): string {
 function ShopContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  const router = useRouter();
   const { cartItems, cartCount, cartTotal, addToCart: ctxAddToCart, updateQty, removeFromCart } = useCart();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -87,7 +88,7 @@ function ShopContent() {
 
   const addToCart = (product: Product) => {
     if (product.variants && product.variants.length > 0) {
-      window.location.href = `/products/${product.id}`;
+      router.push(`/products/${product.id}`);
       return;
     }
     ctxAddToCart(

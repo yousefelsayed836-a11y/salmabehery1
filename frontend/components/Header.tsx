@@ -135,7 +135,7 @@ export default function Header() {
           {/* Center: Logo */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
             <span className="header-logo" style={{
-              fontFamily: "'CinzelDecorative', serif",
+              fontFamily: "'HelloParis', serif",
               fontWeight: 400,
               fontSize: 22,
               letterSpacing: 1,
@@ -278,8 +278,8 @@ export default function Header() {
 
       <style jsx global>{`
         @font-face {
-          font-family: 'CinzelDecorative';
-          src: url('/fonts/CinzelDecorative.ttf') format('truetype');
+          font-family: 'HelloParis';
+          src: url('/fonts/HelloParis.ttf') format('truetype');
           font-weight: 400;
           font-display: swap;
         }
