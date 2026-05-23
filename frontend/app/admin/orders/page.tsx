@@ -473,19 +473,19 @@ export default function OrdersPage() {
             </div>
 
             {/* Unified card grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 8 }}>
               {filteredOrders.map(order => {
                 const dep = deposits[order.id] || 0;
                 const remaining = Math.max(0, (order.total_amount || 0) - dep);
                 return (
-                  <div key={order.id} style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", border: "1px solid #f0f0f0", display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div key={order.id} style={{ background: "#fff", borderRadius: 12, padding: "10px 12px", boxShadow: "0 1px 6px rgba(0,0,0,0.06)", border: "1px solid #f0f0f0", display: "flex", flexDirection: "column", gap: 7 }}>
                     {/* Top row: checkbox + order # + status */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <input type="checkbox" checked={selectedForPrint.has(order.id)} onChange={() => togglePrint(order.id)}
-                        style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#fda1b7", flexShrink: 0 }} />
-                      <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 15, flex: 1 }}>#{order.id.slice(-6)}</span>
+                        style={{ width: 14, height: 14, cursor: "pointer", accentColor: "#fda1b7", flexShrink: 0 }} />
+                      <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 13, flex: 1 }}>#{order.id.slice(-6)}</span>
                       <select value={order.status} onChange={e => updateStatus(order.id, e.target.value)}
-                        style={{ padding: "5px 8px", borderRadius: 8, border: "1px solid #eee", fontSize: 11, background: "#fff", color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer", maxWidth: 130 }}>
+                        style={{ padding: "3px 6px", borderRadius: 6, border: `1.5px solid ${getStatusColor(order.status)}`, fontSize: 10, background: getStatusBg(order.status), color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
                         <option value="partially_shipped">Part. Shipped</option>
@@ -496,35 +496,34 @@ export default function OrdersPage() {
 
                     {/* Customer info */}
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>{order.customer_name}</div>
-                      <div style={{ fontSize: 13, color: "#555", marginTop: 2 }}>📞 {order.customer_phone}</div>
-                      {order.phone2 && <div style={{ fontSize: 12, color: "#888", marginTop: 1 }}>💬 {order.phone2}</div>}
-                      <div style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>{order.city || ""}{order.governorate ? ` · ${order.governorate}` : ""}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1a2e" }}>{order.customer_name}</div>
+                      <div style={{ fontSize: 11, color: "#666", marginTop: 1 }}>📞 {order.customer_phone}{order.phone2 ? ` · 💬 ${order.phone2}` : ""}</div>
+                      <div style={{ fontSize: 11, color: "#aaa" }}>{order.city || ""}{order.governorate ? ` · ${order.governorate}` : ""}</div>
                     </div>
 
                     {/* Total + deposit */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: 16, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</div>
-                        {dep > 0 && <div style={{ fontSize: 11, color: "#888", marginTop: 1 }}>Remaining: {fmt(remaining)} EGP</div>}
+                        <span style={{ fontWeight: 800, fontSize: 13, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</span>
+                        {dep > 0 && <div style={{ fontSize: 10, color: "#888" }}>Remaining: {fmt(remaining)}</div>}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                         <input type="number" value={dep === 0 ? "" : dep}
                           onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
                           placeholder="Deposit" inputMode="numeric"
-                          style={{ width: 80, padding: "6px 8px", borderRadius: 8, border: "1.5px solid #eee", fontSize: 12, outline: "none" }} />
-                        <span style={{ fontSize: 11, color: "#aaa" }}>EGP</span>
+                          style={{ width: 70, padding: "4px 6px", borderRadius: 6, border: "1.5px solid #eee", fontSize: 11, outline: "none" }} />
+                        <span style={{ fontSize: 10, color: "#aaa" }}>EGP</span>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                    <div style={{ display: "flex", gap: 6 }}>
                       <button onClick={() => openOrder(order)}
-                        style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                        style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                         View
                       </button>
                       <button onClick={() => openOrder(order).then(() => handlePrint(order))}
-                        style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                        style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                         🖨️ Print
                       </button>
                     </div>

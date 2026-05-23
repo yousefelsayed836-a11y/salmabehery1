@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database/db');
-const nodemailer = require('nodemailer');
+const fetch = require('node-fetch');
+
+const ADMIN_EMAIL = 'yousefelsayed836@gmail.com';
 
 function buildEmailHtml(order, items) {
   const itemsHtml = (items || []).map(i =>
@@ -38,38 +40,25 @@ function buildEmailHtml(order, items) {
 </div>`;
 }
 
-function getTransporter() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
-  if (!user || !pass) return null;
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: { user, pass },
-    tls: { rejectUnauthorized: false },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-  });
-}
-
 async function sendOrderEmail(order, items) {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
-  if (!user || !pass) {
-    console.log('[Email] GMAIL_USER or GMAIL_APP_PASSWORD not set');
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log('[Email] RESEND_API_KEY not set, skipping');
     return;
   }
-  const transporter = getTransporter();
-  const to = process.env.ADMIN_EMAIL || 'yousefelsayed836@gmail.com';
-  await transporter.sendMail({
-    from: `"Salma Behery" <${user}>`,
-    to,
-    subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
-    html: buildEmailHtml(order, items),
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: 'Salma Behery <onboarding@resend.dev>',
+      to: [ADMIN_EMAIL],
+      subject: `🛍️ طلب جديد #${order.id} — ${order.customer_name}`,
+      html: buildEmailHtml(order, items),
+    }),
   });
-  console.log('[Email] Sent to', to);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || JSON.stringify(data));
+  console.log('[Email] Sent to', ADMIN_EMAIL, '| id:', data.id);
 }
 
 
@@ -209,23 +198,16 @@ router.post('/', async (req, res) => {
 
 // Test email endpoint
 router.get('/test-email', async (req, res) => {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
-  const to = process.env.ADMIN_EMAIL || 'yousefelsayed836@gmail.com';
-  if (!user || !pass) {
-    return res.json({ ok: false, error: `Missing env vars: ${!user ? 'GMAIL_USER ' : ''}${!pass ? 'GMAIL_APP_PASSWORD' : ''}` });
+  if (!process.env.RESEND_API_KEY) {
+    return res.json({ ok: false, error: 'RESEND_API_KEY غير موجود في Render — اضيف المتغير وحاول تاني' });
   }
-  const fakeOrder = { id: 'TEST-001', customer_name: 'Test', customer_phone: '01000000000', shipping_address: 'Test', city: 'Cairo', governorate: '', notes: '', shipping_cost: 0, total_amount: 100 };
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT after 20s — check SMTP credentials')), 20000));
+  const fakeOrder = { id: 'TEST-001', customer_name: 'اختبار', customer_phone: '01000000000', shipping_address: 'Cairo', city: 'Cairo', governorate: '', notes: '', shipping_cost: 0, total_amount: 100 };
   try {
-    await Promise.race([
-      sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 100 }]),
-      timeout,
-    ]);
-    res.json({ ok: true, to, from: user });
+    await sendOrderEmail(fakeOrder, [{ product_name: 'Test Product', quantity: 1, price: 100 }]);
+    res.json({ ok: true, to: ADMIN_EMAIL });
   } catch (e) {
     console.error('[Email] Test failed:', e.message);
-    res.json({ ok: false, error: e.message, code: e.code || '' });
+    res.json({ ok: false, error: e.message });
   }
 });
 
