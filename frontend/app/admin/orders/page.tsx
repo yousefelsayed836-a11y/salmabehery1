@@ -343,8 +343,8 @@ export default function OrdersPage() {
           .orders-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
           .orders-header > div:last-child { width: 100%; }
           .orders-header > div:last-child button { width: 100%; }
-          .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
-          .modal-box { border-radius: 16px 16px 0 0 !important; max-height: 85vh !important; width: 100% !important; max-width: 100% !important; }
+          .modal-overlay { padding: 12px !important; align-items: center !important; }
+          .modal-box { border-radius: 16px !important; max-height: 88vh !important; max-width: 420px !important; }
           .modal-grid { grid-template-columns: 1fr !important; gap: 8px !important; padding: 10px !important; }
           .modal-inner { padding: 0 10px 10px !important; }
           .modal-header { padding: 10px 12px !important; }
