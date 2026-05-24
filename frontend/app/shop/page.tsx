@@ -40,6 +40,9 @@ function preloadImages(urls: string[]) {
   });
 }
 
+interface ShopCache { key: string; products: Product[]; total: number; page: number; hasMore: boolean; }
+let _shopCache: ShopCache | null = null;
+
 function getProductImage(p: Product): string {
   const img = p.main_image || (p.images && p.images.find(i => i?.startsWith("http")));
   if (!img) return `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`;
@@ -74,6 +77,7 @@ function ShopContent() {
   const [total, setTotal] = useState(0);
   const PAGE_SIZE = 24;
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const productsRef = useRef<Product[]>([]);
 
   useEffect(() => { fetchProducts(1, false); }, [searchQuery]);
 
@@ -97,6 +101,17 @@ function ShopContent() {
   }, [hasMore, loadingMore, page]);
 
   const fetchProducts = async (pageNum = 1, append = false) => {
+    const cacheKey = searchQuery;
+    // Serve from cache immediately on initial load — no fetch, no loading state
+    if (!append && pageNum === 1 && _shopCache && _shopCache.key === cacheKey) {
+      setProducts(_shopCache.products);
+      productsRef.current = _shopCache.products;
+      setTotal(_shopCache.total);
+      setPage(_shopCache.page);
+      setHasMore(_shopCache.hasMore);
+      setLoading(false);
+      return;
+    }
     try {
       if (!append) setLoading(true); else setLoadingMore(true);
       setError("");
@@ -105,13 +120,17 @@ function ShopContent() {
       const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
-      const fetched = data.products || [];
+      const fetched: Product[] = data.products || [];
       const tot = data.pagination?.total ?? fetched.length;
+      const allProducts = append ? [...productsRef.current, ...fetched] : fetched;
+      const newHasMore = (pageNum * PAGE_SIZE) < tot;
       setTotal(tot);
-      setProducts(prev => append ? [...prev, ...fetched] : fetched);
-      setHasMore((pageNum * PAGE_SIZE) < tot);
+      setProducts(allProducts);
+      productsRef.current = allProducts;
+      setHasMore(newHasMore);
       preloadImages(fetched.map((p: Product) => getProductImage(p)));
       setPage(pageNum);
+      _shopCache = { key: cacheKey, products: allProducts, total: tot, page: pageNum, hasMore: newHasMore };
     } catch (err: any) { setError(err?.message || "Failed to load products"); }
     finally { setLoading(false); setLoadingMore(false); }
   };
