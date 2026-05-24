@@ -487,7 +487,7 @@ export default function OrdersPage() {
                         style={{ width: 14, height: 14, cursor: "pointer", accentColor: "#fda1b7", flexShrink: 0 }} />
                       <span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 13, flex: 1 }}>#{order.id.slice(-6)}</span>
                       <select value={order.status} onChange={e => updateStatus(order.id, e.target.value)}
-                        style={{ padding: "3px 6px", borderRadius: 6, border: `1.5px solid ${getStatusColor(order.status)}`, fontSize: 10, background: getStatusBg(order.status), color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
+                        style={{ padding: "2px 4px", borderRadius: 5, border: `1px solid ${getStatusColor(order.status)}`, fontSize: 9, background: getStatusBg(order.status), color: getStatusColor(order.status), fontWeight: 700, cursor: "pointer" }}>
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
                         <option value="partially_shipped">Part. Shipped</option>
