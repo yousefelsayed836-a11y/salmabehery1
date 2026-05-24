@@ -14,6 +14,9 @@ const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.co
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 const PAGE_SIZE = 24;
 
+interface ColCache { products: Product[]; total: number; page: number; hasMore: boolean; }
+const _colCache = new Map<string, ColCache>();
+
 function getImg(p: Product) {
   const img = p.main_image || (p.images && p.images[0]);
   if (!img) return `https://placehold.co/400x400/fda1b7/fff?text=??`;
@@ -40,8 +43,21 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
+  const productsRef = useRef<Product[]>([]);
 
   const fetchProducts = useCallback(async (pageNum = 1, append = false) => {
+    const cacheKey = `${collectionSlug}:${sortBy}`;
+    // Serve from cache immediately on initial load — no fetch, no loading state
+    if (!append && pageNum === 1 && _colCache.has(cacheKey)) {
+      const cached = _colCache.get(cacheKey)!;
+      setProducts(cached.products);
+      productsRef.current = cached.products;
+      setTotal(cached.total);
+      setPage(cached.page);
+      setHasMore(cached.hasMore);
+      setLoading(false);
+      return;
+    }
     try {
       if (!append) setLoading(true);
       else setLoadingMore(true);
@@ -52,10 +68,14 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
       const data = await res.json();
       const fetched: Product[] = data.products || [];
       const tot = data.pagination?.total ?? fetched.length;
+      const allProducts = append ? [...productsRef.current, ...fetched] : fetched;
+      const newHasMore = (pageNum * PAGE_SIZE) < tot;
       setTotal(tot);
-      setProducts(prev => append ? [...prev, ...fetched] : fetched);
-      setHasMore((pageNum * PAGE_SIZE) < tot);
+      setProducts(allProducts);
+      productsRef.current = allProducts;
+      setHasMore(newHasMore);
       setPage(pageNum);
+      _colCache.set(cacheKey, { products: allProducts, total: tot, page: pageNum, hasMore: newHasMore });
     } catch (e: any) { setError(e.message || "Failed"); }
     finally { setLoading(false); setLoadingMore(false); }
   }, [collectionSlug, sortBy]);
