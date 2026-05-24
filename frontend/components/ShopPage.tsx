@@ -20,6 +20,12 @@ function getImg(p: Product) {
   return img.startsWith("http") ? img : `${BACKEND}${img}`;
 }
 
+function getEffectiveStock(p: Product): number {
+  if (p.variants && p.variants.length > 0)
+    return p.variants.reduce((s: number, v: any) => s + (Number(v.quantity) || 0), 0);
+  return p.stock ?? 0;
+}
+
 interface Props { collectionSlug: string; title: string; breadcrumb: string; }
 
 export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
@@ -56,6 +62,14 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
 
   useEffect(() => { fetchProducts(1, false); }, [fetchProducts]);
 
+  const scrollKey = `shopScroll_${collectionSlug}`;
+  useEffect(() => {
+    if (!loading && products.length > 0) {
+      const saved = sessionStorage.getItem(scrollKey);
+      if (saved) { sessionStorage.removeItem(scrollKey); requestAnimationFrame(() => window.scrollTo(0, parseInt(saved))); }
+    }
+  }, [loading, products.length, scrollKey]);
+
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -69,14 +83,16 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   }, [hasMore, loadingMore, page, fetchProducts]);
 
   const handleAdd = (product: Product) => {
-    if ((product.stock ?? 1) === 0) return;
+    const eff = getEffectiveStock(product);
+    if (eff === 0) return;
     if (product.variants && product.variants.length > 0) {
+      sessionStorage.setItem(`shopScroll_${collectionSlug}`, String(window.scrollY));
       router.push(`/products/${product.id}`);
       return;
     }
     addToCart(
       { id: product.id, name_en: product.name_en, price: product.price, image_url: getImg(product) },
-      1, product.size_info || "", product.stock
+      1, product.size_info || "", eff
     );
   };
 
@@ -160,19 +176,20 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                 const img = getImg(p);
                 const hasD = p.old_price && p.old_price > p.price;
                 const disc = hasD ? Math.round((1 - p.price / p.old_price!) * 100) : 0;
-                const oos = (p.stock ?? 1) === 0;
-                const low = !oos && (p.stock ?? 99) <= 3;
+                const eff = getEffectiveStock(p);
+                const oos = eff === 0;
+                const low = !oos && eff <= 3;
                 const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
                 return (
                   <div key={p.id} className="pc">
-                    <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
+                    <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }} onClick={() => sessionStorage.setItem(`shopScroll_${collectionSlug}`, String(window.scrollY))}>
                     <div style={{ position: "relative", aspectRatio: "1/1", background: "#fafafa", overflow: "hidden" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi"
                         loading={idx < 4 ? "eager" : "lazy"} decoding="async"
                         onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
                       {oos && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
-                      {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>{p.stock} left</span>}
-                      {!oos && !low && p.stock !== undefined && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>In Stock</span>}
+                      {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>{eff} left</span>}
+                      {!oos && !low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>In Stock</span>}
                     </div>
                     </Link>
                     <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
