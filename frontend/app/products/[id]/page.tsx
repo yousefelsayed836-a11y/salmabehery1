@@ -261,22 +261,29 @@ export default function ProductPage() {
                       {groupVariants.map((v, i) => {
                         const isSelected = selectedVariant?.option_name === v.option_name && selectedVariant?.option_value === v.option_value;
                         const outOfStock = v.quantity === 0;
+                        const lowStock = !outOfStock && v.quantity <= 3;
                         return (
                           <button key={i} onClick={() => setSelectedVariant(isSelected ? null : v)}
                             disabled={outOfStock}
                             style={{
-                              padding: "8px 18px", borderRadius: 8, cursor: outOfStock ? "not-allowed" : "pointer",
+                              padding: "8px 16px 6px", borderRadius: 8, cursor: outOfStock ? "not-allowed" : "pointer",
                               border: `2px solid ${isSelected ? "#fda1b7" : "#ddd"}`,
                               background: isSelected ? "#fff5f8" : "#fff",
                               color: outOfStock ? "#bbb" : "#1a1a2e",
                               fontWeight: isSelected ? 700 : 400, fontSize: 14,
                               textDecoration: outOfStock ? "line-through" : "none",
                               transition: "all 0.15s",
+                              display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
                             }}>
-                            {v.option_value}
-                            {v.price_override && v.price_override !== product.price && (
-                              <span style={{ fontSize: 11, color: "#fda1b7", marginLeft: 4 }}>({v.price_override} EGP)</span>
-                            )}
+                            <span>
+                              {v.option_value}
+                              {v.price_override && v.price_override !== product.price && (
+                                <span style={{ fontSize: 11, color: "#fda1b7", marginLeft: 4 }}>({v.price_override} EGP)</span>
+                              )}
+                            </span>
+                            <span style={{ fontSize: 10, fontWeight: 400, color: outOfStock ? "#bbb" : lowStock ? "#ef4444" : "#6b7280" }}>
+                              {outOfStock ? "Out of stock" : lowStock ? `${v.quantity} left` : `${v.quantity} in stock`}
+                            </span>
                           </button>
                         );
                       })}

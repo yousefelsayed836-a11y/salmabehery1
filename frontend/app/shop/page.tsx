@@ -47,6 +47,14 @@ function getProductImage(p: Product): string {
   return `${process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com"}${img}`;
 }
 
+function getEffectiveStock(p: Product): number {
+  if (p.variants && p.variants.length > 0)
+    return p.variants.reduce((s: number, v: any) => s + (Number(v.quantity) || 0), 0);
+  return p.stock ?? 0;
+}
+
+const SCROLL_KEY = "shopScrollPos";
+
 function ShopContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
@@ -68,6 +76,14 @@ function ShopContent() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { fetchProducts(1, false); }, [searchQuery]);
+
+  // Restore scroll position when returning from product page
+  useEffect(() => {
+    if (!loading && products.length > 0) {
+      const saved = sessionStorage.getItem(SCROLL_KEY);
+      if (saved) { sessionStorage.removeItem(SCROLL_KEY); requestAnimationFrame(() => window.scrollTo(0, parseInt(saved))); }
+    }
+  }, [loading, products.length]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -102,12 +118,13 @@ function ShopContent() {
 
   const addToCart = (product: Product) => {
     if (product.variants && product.variants.length > 0) {
+      sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
       router.push(`/products/${product.id}`);
       return;
     }
     ctxAddToCart(
       { id: product.id, name_en: product.name_en, price: product.price, image_url: getProductImage(product) },
-      1, product.size_info || "", product.stock
+      1, product.size_info || "", getEffectiveStock(product)
     );
     setToast(`✓ ${product.name_en.slice(0, 20)} added`);
     setTimeout(() => setToast(""), 2000);
@@ -210,20 +227,21 @@ function ShopContent() {
                 const hasDiscount = p.old_price && p.old_price > p.price;
                 const discount = hasDiscount ? Math.round((1 - p.price / p.old_price!) * 100) : 0;
 
+                const eff = getEffectiveStock(p);
                 return (
                   <div key={p.id} className="product-card" style={{ background: "#fff", borderRadius: 16, overflow: "hidden", border: "1px solid #eee", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", transition: "transform 0.2s, box-shadow 0.2s" }}>
-                    <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }}>
+                    <Link href={`/products/${p.id}`} style={{ textDecoration: "none" }} onClick={() => sessionStorage.setItem(SCROLL_KEY, String(window.scrollY))}>
                     <div className="product-image-wrapper" style={{ position: "relative", background: "#fff", overflow: "hidden", cursor: "pointer" }}>
                       <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "transform 0.3s" }} className="product-image"
                         loading="eager" decoding="async"
                         onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`; }} />
                       {p.water_resistance && <span style={{ position: "absolute", top: 8, right: 8, background: "#3b82f6", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 600 }}>💧</span>}
-                      {p.stock !== undefined && p.stock > 0 && (
-                        <span style={{ position: "absolute", bottom: 6, left: 6, background: p.stock <= 3 ? "#ef4444" : "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>
-                          {p.stock <= 5 ? `${p.stock} left` : "In Stock"}
+                      {eff > 0 && (
+                        <span style={{ position: "absolute", bottom: 6, left: 6, background: eff <= 3 ? "#ef4444" : "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>
+                          {eff <= 5 ? `${eff} left` : "In Stock"}
                         </span>
                       )}
-                      {p.stock === 0 && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
+                      {eff === 0 && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
                       
                     </div>
                     </Link>

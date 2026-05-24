@@ -104,7 +104,8 @@ export default function AdminCategories() {
 
   const imgSrc = (img?: string) => {
     if (!img) return null;
-    return img.startsWith("http") ? img : `${BACKEND}${img}`;
+    if (img.startsWith("http") || img.startsWith("data:")) return img;
+    return `${BACKEND}${img}`;
   };
 
   return (
