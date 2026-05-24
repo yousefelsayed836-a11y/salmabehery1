@@ -81,7 +81,7 @@ function ShopContent() {
   useEffect(() => {
     if (!loading && products.length > 0) {
       const saved = sessionStorage.getItem(SCROLL_KEY);
-      if (saved) { sessionStorage.removeItem(SCROLL_KEY); requestAnimationFrame(() => window.scrollTo(0, parseInt(saved))); }
+      if (saved) { sessionStorage.removeItem(SCROLL_KEY); document.documentElement.style.scrollBehavior = "auto"; window.scrollTo(0, parseInt(saved)); requestAnimationFrame(() => { document.documentElement.style.scrollBehavior = ""; }); }
     }
   }, [loading, products.length]);
 
@@ -256,7 +256,7 @@ function ShopContent() {
                         </div>
                       {(() => {
                         const cartQty = cartItems.find(i => i.product.id === p.id)?.qty ?? 0;
-                        const oos = p.stock === 0;
+                        const oos = getEffectiveStock(p) === 0;
                         const size = p.size_info || "";
                         return oos ? (
                           <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Out of Stock</span>
