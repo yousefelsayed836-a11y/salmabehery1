@@ -17,6 +17,9 @@ const STATIC_CATEGORIES = [
   { id: "sets-and-offers", name_en: "Sets & Offers", slug: "sets-and-offers",image: "" },
 ];
 
+// Module-level cache — persists across client-side navigations
+let _catsCache: any[] | null = null;
+
 const SEED_REVIEWS = [
   { id: "s1",  customer_name: "Sara M.",    review_text: "Wallahi el khatm da te7fa! Galy fast w el shoghol na3em awy, msh shayfah 3ala edy khales. Ha2oleb tany akeed 100%", rating: 5 },
   { id: "s2",  customer_name: "Nour",       review_text: "El delivery kan super fast w el packaging 7elw awy! El 2erd elly shtrytu a7la mn el sora b kteer, colors zay ma howa", rating: 5 },
@@ -65,11 +68,14 @@ export default function HomePage() {
     // Fetch categories + featured in parallel — critical path (updates static fallback)
     fetch(`${API}/settings/hero_image`).then(r => r.json()).then(d => { if (d.value) setHeroUrl(d.value); }).catch(() => {});
 
+    // Serve categories from cache immediately — no loading state on repeat visits
+    if (_catsCache) { setApiCategories(_catsCache); setCatsLoading(false); }
+
     Promise.all([
       fetch(`${API}/categories`).then(r => r.json()).catch(() => null),
       fetch(`${API}/settings/featured_section`).then(r => r.json()).catch(() => null),
     ]).then(async ([cats, featuredRaw]) => {
-      if (Array.isArray(cats) && cats.length > 0) setApiCategories(cats);
+      if (Array.isArray(cats) && cats.length > 0) { _catsCache = cats; setApiCategories(cats); }
       setCatsLoading(false);
 
       if (featuredRaw?.value) {
@@ -315,7 +321,7 @@ export default function HomePage() {
             }}>
               <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f5e8ed", position: "relative" }}>
                 {imgUrl && <img src={imgUrl} alt={cat.name_en}
-                  loading="eager" decoding="async"
+                  loading="eager" decoding="async" fetchPriority="high"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} />}
               </div>
               <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>

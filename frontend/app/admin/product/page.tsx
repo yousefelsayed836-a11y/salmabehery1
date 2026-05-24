@@ -252,6 +252,10 @@ export default function ProductsPage() {
         @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
         .prod-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
         .prod-row-actions { display: flex; gap: 7px; margin-left: auto; flex-shrink: 0; }
+        .prod-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        @media (max-width: 768px) {
+          .prod-list { grid-template-columns: 1fr; }
+        }
         @media (max-width: 640px) {
           .prod-outer { padding: 10px !important; }
           .prod-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
@@ -308,7 +312,7 @@ export default function ProductsPage() {
             </div>
           ) : (
             <>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div className="prod-list">
                 {filtered.map(p => {
                   const isEditing = editingId === p.id;
                   const stockGood = (p.stock || 0) > 10;
