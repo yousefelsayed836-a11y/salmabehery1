@@ -348,11 +348,13 @@ export default function OrdersPage() {
           .orders-header > div:last-child { width: 100%; }
           .orders-header > div:last-child button { width: 100%; }
           .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
-          .modal-box { border-radius: 20px 20px 0 0 !important; max-height: 92vh !important; width: 100% !important; max-width: 100% !important; }
-          .modal-grid { grid-template-columns: 1fr !important; }
-          .modal-inner { padding: 14px !important; }
-          .modal-header { padding: 14px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
-          .modal-header > div:last-child { flex-wrap: wrap; gap: 6px; width: 100%; }
+          .modal-box { border-radius: 16px 16px 0 0 !important; max-height: 85vh !important; width: 100% !important; max-width: 100% !important; }
+          .modal-grid { grid-template-columns: 1fr !important; gap: 8px !important; padding: 10px !important; }
+          .modal-inner { padding: 0 10px 10px !important; }
+          .modal-header { padding: 10px 12px !important; }
+          .modal-header h2 { font-size: 14px !important; }
+          .modal-header p { font-size: 10px !important; }
+          .modal-header > div:last-child { gap: 6px; }
           .orders-table-wrap { display: none; }
           .orders-mobile-cards { display: flex; flex-direction: column; gap: 12px; }
           input, select, textarea { font-size: 16px !important; }
@@ -502,16 +504,21 @@ export default function OrdersPage() {
                     </div>
 
                     {/* Total + deposit */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 6 }}>
                       <div>
                         <span style={{ fontWeight: 800, fontSize: 13, color: "#1a1a2e" }}>{fmt(order.total_amount)} EGP</span>
-                        {dep > 0 && <div style={{ fontSize: 10, color: "#888" }}>Remaining: {fmt(remaining)}</div>}
+                        {dep > 0 && (
+                          <div style={{ marginTop: 2 }}>
+                            <div style={{ fontSize: 10, color: "#059669", fontWeight: 700 }}>Deposit: {fmt(dep)} EGP</div>
+                            <div style={{ fontSize: 10, color: "#d97706", fontWeight: 700 }}>Due: {fmt(remaining)} EGP</div>
+                          </div>
+                        )}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                         <input type="number" value={dep === 0 ? "" : dep}
                           onChange={e => saveDeposit(order.id, parseFloat(e.target.value) || 0)}
                           placeholder="Deposit" inputMode="numeric"
-                          style={{ width: 70, padding: "4px 6px", borderRadius: 6, border: "1.5px solid #eee", fontSize: 11, outline: "none" }} />
+                          style={{ width: 70, padding: "4px 6px", borderRadius: 6, border: dep > 0 ? "1.5px solid #059669" : "1.5px solid #eee", fontSize: 11, outline: "none" }} />
                         <span style={{ fontSize: 10, color: "#aaa" }}>EGP</span>
                       </div>
                     </div>
