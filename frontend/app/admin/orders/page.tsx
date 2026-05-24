@@ -24,6 +24,7 @@ interface Order {
   governorate?: string;
   total_amount: number;
   shipping_cost?: number;
+  deposit?: number;
   status: string;
   created_at: string;
   notes?: string;
@@ -85,9 +86,6 @@ function generateWaybillHtml(order: Order, deposit: number, productImages: Recor
               <span class="wb-item-qty">x${item.quantity}</span>
             </div>`).join("")}
           <div class="wb-totals">
-            <div class="wb-total-row"><span>الشحن</span><span>${shipping === 0 ? "مجاني 🎉" : shipping + " ج.م"}</span></div>
-            <div class="wb-total-row"><span>الإجمالي</span><span>${order.total_amount} ج.م</span></div>
-            ${deposit > 0 ? `<div class="wb-total-row"><span>مدفوع مقدم</span><span>${deposit} ج.م</span></div>` : ""}
             <div class="wb-total-final"><span>المتبقي للتحصيل</span><span>${remaining} ج.م</span></div>
           </div>
         </div>
@@ -115,18 +113,7 @@ export default function OrdersPage() {
     return () => { if (meta && original) meta.setAttribute("content", original); };
   }, []);
 
-  useEffect(() => {
-    fetchOrders();
-    const saved: Record<string, number> = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith("deposit_")) {
-        const id = key.replace("deposit_", "");
-        saved[id] = parseFloat(localStorage.getItem(key) || "0") || 0;
-      }
-    }
-    setDeposits(saved);
-  }, []);
+  useEffect(() => { fetchOrders(); }, []);
 
   const fetchOrders = async () => {
     try {
@@ -134,7 +121,12 @@ export default function OrdersPage() {
       const res = await fetch(`${API_BASE}/orders`, { headers: { Accept: "application/json" }, cache: "no-store" });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const data = await res.json();
-      setOrders(Array.isArray(data) ? data : data.orders || []);
+      const rows: Order[] = Array.isArray(data) ? data : data.orders || [];
+      setOrders(rows);
+      // Load deposits from DB
+      const deps: Record<string, number> = {};
+      rows.forEach(o => { if (o.deposit) deps[o.id] = Number(o.deposit); });
+      setDeposits(deps);
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
   };
@@ -161,8 +153,12 @@ export default function OrdersPage() {
   };
 
   const saveDeposit = (orderId: string, amount: number) => {
-    localStorage.setItem(`deposit_${orderId}`, String(amount));
     setDeposits(prev => ({ ...prev, [orderId]: amount }));
+    fetch(`${API_BASE}/orders/${orderId}/deposit`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deposit: amount }),
+    }).catch(() => {});
   };
 
   const updateStatus = async (id: string, status: string) => {

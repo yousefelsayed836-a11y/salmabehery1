@@ -68,6 +68,8 @@ async function sendOrderEmail(order, items) {
   console.log('[Email] Sent to', ADMIN_EMAIL, '| id:', data.id);
 }
 
+// Add deposit column if it doesn't exist
+pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS deposit DECIMAL(10,2) DEFAULT 0`).catch(() => {});
 
 async function getTableColumns(tableName) {
   try {
@@ -300,6 +302,21 @@ router.put('/:id/status', async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Update status error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Save deposit
+router.put('/:id/deposit', async (req, res) => {
+  try {
+    const { deposit } = req.body;
+    const result = await pool.query(
+      'UPDATE orders SET deposit = $1 WHERE id = $2 RETURNING id, deposit',
+      [parseFloat(deposit) || 0, req.params.id]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: 'Order not found' });
+    res.json(result.rows[0]);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
