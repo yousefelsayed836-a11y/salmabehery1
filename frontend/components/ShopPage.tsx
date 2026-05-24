@@ -66,7 +66,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   useEffect(() => {
     if (!loading && products.length > 0) {
       const saved = sessionStorage.getItem(scrollKey);
-      if (saved) { sessionStorage.removeItem(scrollKey); requestAnimationFrame(() => window.scrollTo(0, parseInt(saved))); }
+      if (saved) { sessionStorage.removeItem(scrollKey); document.documentElement.style.scrollBehavior = "auto"; window.scrollTo(0, parseInt(saved)); requestAnimationFrame(() => { document.documentElement.style.scrollBehavior = ""; }); }
     }
   }, [loading, products.length, scrollKey]);
 
