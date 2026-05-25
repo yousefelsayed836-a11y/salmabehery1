@@ -38,6 +38,11 @@ router.get('/image/:id', async (req, res) => {
     const result = await db.query('SELECT image FROM categories WHERE id=$1', [req.params.id]);
     if (!result.rows.length || !result.rows[0].image) return res.status(404).end();
     const img = result.rows[0].image;
+    // If stored as an HTTP URL, redirect to it directly
+    if (img.startsWith('http')) {
+      res.set('Cache-Control', 'public, max-age=86400');
+      return res.redirect(img);
+    }
     const m = img.match(/^data:([^;]+);base64,(.+)$/s);
     if (!m) return res.status(400).end();
     const buf = Buffer.from(m[2], 'base64');
