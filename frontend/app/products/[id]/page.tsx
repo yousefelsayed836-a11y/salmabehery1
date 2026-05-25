@@ -48,11 +48,16 @@ interface Product {
 }
 
 
+function imgUrl(img: string): string {
+  if (img.startsWith("http") || img.startsWith("data:")) return img;
+  return `${BACKEND}${img}`;
+}
+
 function getImg(p: Product, idx = 0): string {
   const imgs = p.images && p.images.length > 0 ? p.images : p.main_image ? [p.main_image] : [];
   const img = imgs[idx] || imgs[0] || "";
   if (!img) return `https://placehold.co/600x600/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`;
-  return img.startsWith("http") ? img : `${BACKEND}${img}`;
+  return imgUrl(img);
 }
 
 export default function ProductPage() {
@@ -159,9 +164,14 @@ export default function ProductPage() {
   const hasDiscount = product.old_price && product.old_price > product.price;
   const discount = hasDiscount ? Math.round((1 - product.price / product.old_price!) * 100) : 0;
   const activePrice = selectedVariant?.price_override ?? product.price;
-  const activeStock = selectedVariant ? selectedVariant.quantity : (product.stock ?? 1);
-  const inStock = activeStock > 0;
   const hasVariants = (product.variants || []).length > 0;
+  const totalVariantStock = hasVariants
+    ? (product.variants || []).reduce((s, v) => s + (Number(v.quantity) || 0), 0)
+    : 0;
+  const activeStock = selectedVariant
+    ? selectedVariant.quantity
+    : hasVariants ? totalVariantStock : (product.stock ?? 0);
+  const inStock = activeStock > 0;
   const needsVariant = hasVariants && !selectedVariant;
 
   // Group variants by option_name
@@ -184,7 +194,7 @@ export default function ProductPage() {
             {images.length > 1 && (
               <div className="thumbs-col">
                 {images.map((img, i) => {
-                  const src = img.startsWith("http") ? img : `${BACKEND}${img}`;
+                  const src = imgUrl(img);
                   return (
                     <div key={i} onClick={() => setActiveImg(i)}
                       style={{ width: 64, height: 64, borderRadius: 10, overflow: "hidden", cursor: "pointer", flexShrink: 0,
@@ -215,7 +225,7 @@ export default function ProductPage() {
             {images.length > 1 && (
               <div className="thumbs-row">
                 {images.map((img, i) => {
-                  const src = img.startsWith("http") ? img : `${BACKEND}${img}`;
+                  const src = imgUrl(img);
                   return (
                     <div key={i} onClick={() => setActiveImg(i)}
                       style={{ width: 56, height: 56, borderRadius: 8, overflow: "hidden", cursor: "pointer", flexShrink: 0,
