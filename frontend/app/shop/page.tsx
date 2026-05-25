@@ -43,11 +43,15 @@ function preloadImages(urls: string[]) {
 interface ShopCache { key: string; products: Product[]; total: number; page: number; hasMore: boolean; }
 let _shopCache: ShopCache | null = null;
 
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
+function resolveImg(img: string): string {
+  if (img.startsWith("http") || img.startsWith("data:")) return img;
+  return `${BACKEND}${img}`;
+}
 function getProductImage(p: Product): string {
-  const img = p.main_image || (p.images && p.images.find(i => i?.startsWith("http")));
+  const img = p.main_image || (p.images && p.images[0]);
   if (!img) return `https://placehold.co/400x400/fda1b7/fff?text=${encodeURIComponent(p.name_en?.slice(0, 6) || "??")}`;
-  if (img.startsWith("http")) return img;
-  return `${process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com"}${img}`;
+  return resolveImg(img);
 }
 
 function getEffectiveStock(p: Product): number {

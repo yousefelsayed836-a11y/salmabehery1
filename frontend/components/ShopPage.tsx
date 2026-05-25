@@ -17,10 +17,14 @@ const PAGE_SIZE = 24;
 interface ColCache { products: Product[]; total: number; page: number; hasMore: boolean; }
 const _colCache = new Map<string, ColCache>();
 
+function resolveImg(img: string): string {
+  if (img.startsWith("http") || img.startsWith("data:")) return img;
+  return `${BACKEND}${img}`;
+}
 function getImg(p: Product) {
   const img = p.main_image || (p.images && p.images[0]);
   if (!img) return `https://placehold.co/400x400/fda1b7/fff?text=??`;
-  return img.startsWith("http") ? img : `${BACKEND}${img}`;
+  return resolveImg(img);
 }
 
 function getEffectiveStock(p: Product): number {
