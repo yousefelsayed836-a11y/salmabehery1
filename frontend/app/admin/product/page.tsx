@@ -17,6 +17,12 @@ interface Product {
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
 
+function getEffectiveStock(p: Product): number {
+  if (p.variants && p.variants.length > 0)
+    return p.variants.reduce((s, v) => s + (Number(v.quantity) || 0), 0);
+  return p.stock ?? 0;
+}
+
 function getProductImage(p: Product) {
   const img = p.main_image || (p.images && p.images[0]) || p.image_url;
   if (!img) return "https://placehold.co/60x60/fda1b7/fff?text=??";
@@ -250,20 +256,16 @@ export default function ProductsPage() {
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f3ff; }
         input, select, textarea { font-size: 16px !important; }
         @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-        .prod-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
+        .prod-row { display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; min-width: 0; }
         .prod-row-actions { display: flex; gap: 7px; margin-left: auto; flex-shrink: 0; }
-        .prod-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        @media (max-width: 768px) {
-          .prod-list { grid-template-columns: 1fr; }
-        }
+        .prod-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
         @media (max-width: 640px) {
           .prod-outer { padding: 10px !important; }
           .prod-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
           .prod-header-btns { width: 100% !important; }
           .prod-modal-pad { padding: 10px !important; }
-          .prod-row { padding: 10px 12px; gap: 10px; }
-          .prod-row-name { font-size: 13px !important; }
-          .prod-row-meta { display: none !important; }
+          .prod-list { grid-template-columns: 1fr; }
+          .prod-row { padding: 14px 14px; gap: 12px; }
         }
       `}</style>
       <div className="prod-outer" style={{ minHeight: "100vh", padding: "14px" }}>
@@ -315,8 +317,9 @@ export default function ProductsPage() {
               <div className="prod-list">
                 {filtered.map(p => {
                   const isEditing = editingId === p.id;
-                  const stockGood = (p.stock || 0) > 10;
-                  const stockLow = (p.stock || 0) > 0 && (p.stock || 0) <= 10;
+                  const eff = getEffectiveStock(p);
+                  const stockGood = eff > 10;
+                  const stockLow = eff > 0 && eff <= 10;
                   return (
                     <div key={p.id} className="prod-row" style={{ opacity: p.is_active ? 1 : 0.6 }}>
                       {/* Thumbnail */}
@@ -343,7 +346,7 @@ export default function ProductsPage() {
                               {p.is_active ? "Active" : "Draft"}
                             </span>
                             <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, fontWeight: 700, background: stockGood ? "#d1fae5" : stockLow ? "#fef3c7" : "#fee2e2", color: stockGood ? "#059669" : stockLow ? "#d97706" : "#ef4444" }}>
-                              {p.stock || 0} pcs
+                              {eff} pcs
                             </span>
                           </div>
                         )}
