@@ -32,22 +32,25 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET category image — served as binary with caching (must be before /:slug)
+// GET category image — served as binary with ETag for instant cache invalidation
 router.get('/image/:id', async (req, res) => {
   try {
     const result = await db.query('SELECT image FROM categories WHERE id=$1', [req.params.id]);
     if (!result.rows.length || !result.rows[0].image) return res.status(404).end();
     const img = result.rows[0].image;
-    // If stored as an HTTP URL, redirect to it directly
     if (img.startsWith('http')) {
-      res.set('Cache-Control', 'public, max-age=86400');
+      res.set('Cache-Control', 'no-cache');
       return res.redirect(img);
     }
     const m = img.match(/^data:([^;]+);base64,(.+)$/s);
     if (!m) return res.status(400).end();
+    // ETag based on image content length so browser re-validates when image changes
+    const etag = `"${m[2].length}"`;
+    if (req.headers['if-none-match'] === etag) return res.status(304).end();
     const buf = Buffer.from(m[2], 'base64');
     res.set('Content-Type', m[1]);
-    res.set('Cache-Control', 'public, max-age=86400, immutable');
+    res.set('ETag', etag);
+    res.set('Cache-Control', 'no-cache');
     res.send(buf);
   } catch (e) {
     res.status(500).end();
