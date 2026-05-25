@@ -77,16 +77,16 @@ export default function ProductPage() {
   useEffect(() => {
     if (!productId) return;
 
-    // Serve from cache immediately (no loading flash on back-navigation)
+    // Serve from cache immediately, then always refetch in background for fresh data
     const cached = productCache.get(productId);
     if (cached) {
       setProduct(cached.product);
       setSimilar(cached.similar);
       setLoading(false);
-      return;
+      // fall through to background fetch (no loading state)
+    } else {
+      setLoading(true);
     }
-
-    setLoading(true);
     fetch(`${API}/products/${productId}`)
       .then(r => r.json())
       .then(d => {
