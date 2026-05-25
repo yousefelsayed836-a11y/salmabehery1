@@ -83,22 +83,35 @@ app.get('/api/images/:id', async (req, res) => {
   }
 });
 
-// ✅ Upload image to GitHub repo — free, permanent, survives redeploys
+// ✅ Upload image — tries GitHub CDN first, falls back to DB storage
 const fetch = require('node-fetch');
 const sharp = require('sharp');
 const GITHUB_REPO = 'yousefelsayed836-a11y/salmabehery1';
 
+// Ensure uploaded_images table exists
+db.query(`CREATE TABLE IF NOT EXISTS uploaded_images (
+  id SERIAL PRIMARY KEY,
+  mime_type VARCHAR(100),
+  data TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+)`).catch(e => console.error('uploaded_images table init error:', e));
+
 async function compressImage(buffer) {
-  return sharp(buffer)
-    .rotate()
-    .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 82, effort: 4 })
-    .toBuffer();
+  try {
+    return await sharp(buffer)
+      .rotate()
+      .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82, effort: 4 })
+      .toBuffer();
+  } catch (e) {
+    console.error('Image compression failed, using original:', e.message);
+    return buffer;
+  }
 }
 
 async function uploadToGitHub(buffer, mimetype) {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error('GITHUB_TOKEN not set on server');
+  if (!token) throw new Error('GITHUB_TOKEN not set');
   const compressed = await compressImage(buffer);
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
   const filePath = `images/${filename}`;
@@ -125,11 +138,30 @@ async function uploadToGitHub(buffer, mimetype) {
   return `https://cdn.jsdelivr.net/gh/${GITHUB_REPO}@main/${filePath}`;
 }
 
-// ✅ Single image upload → GitHub repo
+async function uploadToDB(buffer) {
+  const compressed = await compressImage(buffer);
+  const base64 = compressed.toString('base64');
+  const result = await db.query(
+    'INSERT INTO uploaded_images (mime_type, data) VALUES ($1, $2) RETURNING id',
+    ['image/webp', base64]
+  );
+  return `/api/images/${result.rows[0].id}`;
+}
+
+async function uploadImage(file) {
+  try {
+    return await uploadToGitHub(file.buffer, file.mimetype);
+  } catch (e) {
+    console.log(`GitHub upload failed (${e.message}), storing in DB`);
+    return await uploadToDB(file.buffer);
+  }
+}
+
+// ✅ Single image upload
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-    const url = await uploadToGitHub(req.file.buffer, req.file.mimetype);
+    const url = await uploadImage(req.file);
     res.json({ success: true, url });
   } catch (e) {
     console.error('Upload error:', e);
@@ -137,11 +169,11 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-// ✅ Multiple images upload → GitHub repo
+// ✅ Multiple images upload
 app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
-    const urls = await Promise.all(req.files.map(f => uploadToGitHub(f.buffer, f.mimetype)));
+    const urls = await Promise.all(req.files.map(f => uploadImage(f)));
     res.json({ success: true, urls });
   } catch (e) {
     console.error('Multiple upload error:', e);

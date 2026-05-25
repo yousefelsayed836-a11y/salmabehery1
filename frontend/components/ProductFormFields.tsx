@@ -131,7 +131,7 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
         {(form.images as string[] || []).length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
             {(form.images as string[]).map((img: string, i: number) => {
-              const src = img.startsWith("http") ? img : `${BACKEND_URL}${img}`;
+              const src = (img.startsWith("http") || img.startsWith("data:")) ? img : `${BACKEND_URL}${img}`;
               return (
                 <div key={i} style={{ position: "relative", width: 88, height: 88, flexShrink: 0 }}>
                   <img src={src} alt=""
