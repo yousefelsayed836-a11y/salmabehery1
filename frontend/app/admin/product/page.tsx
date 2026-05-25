@@ -23,11 +23,12 @@ function getEffectiveStock(p: Product): number {
   return p.stock ?? 0;
 }
 
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 function getProductImage(p: Product) {
   const img = p.main_image || (p.images && p.images[0]) || p.image_url;
   if (!img) return "https://placehold.co/60x60/fda1b7/fff?text=??";
-  if (img.startsWith("http")) return img;
-  return `${process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com"}${img}`;
+  if (img.startsWith("http") || img.startsWith("data:")) return img;
+  return `${BACKEND}${img}`;
 }
 
 const emptyForm = {
