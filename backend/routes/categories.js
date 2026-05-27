@@ -50,7 +50,7 @@ router.get('/image/:id', async (req, res) => {
     const buf = Buffer.from(m[2], 'base64');
     res.set('Content-Type', m[1]);
     res.set('ETag', etag);
-    res.set('Cache-Control', 'no-cache');
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=86400');
     res.send(buf);
   } catch (e) {
     res.status(500).end();

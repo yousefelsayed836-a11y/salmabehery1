@@ -60,14 +60,22 @@ export default function AdminCategories() {
 
   const handleUpload = (file: File) => {
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64 = e.target?.result as string;
-      if (base64) setForm(f => ({ ...f, image: base64 }));
+    const objectUrl = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      const MAX = 900;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL("image/jpeg", 0.82);
+      setForm(f => ({ ...f, image: compressed }));
+      URL.revokeObjectURL(objectUrl);
       setUploading(false);
     };
-    reader.onerror = () => { flash("Upload failed"); setUploading(false); };
-    reader.readAsDataURL(file);
+    img.onerror = () => { flash("Upload failed"); URL.revokeObjectURL(objectUrl); setUploading(false); };
+    img.src = objectUrl;
   };
 
   const save = async () => {
