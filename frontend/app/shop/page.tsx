@@ -106,19 +106,17 @@ function ShopContent() {
 
   const fetchProducts = async (pageNum = 1, append = false) => {
     const cacheKey = searchQuery;
-    const fromCache = !append && pageNum === 1 && _shopCache && _shopCache.key === cacheKey;
-    if (fromCache) {
-      // Serve immediately from cache, then fetch fresh in background
-      setProducts(_shopCache!.products);
-      productsRef.current = _shopCache!.products;
-      setTotal(_shopCache!.total);
-      setPage(_shopCache!.page);
-      setHasMore(_shopCache!.hasMore);
+    if (!append && pageNum === 1 && _shopCache && _shopCache.key === cacheKey) {
+      setProducts(_shopCache.products);
+      productsRef.current = _shopCache.products;
+      setTotal(_shopCache.total);
+      setPage(_shopCache.page);
+      setHasMore(_shopCache.hasMore);
       setLoading(false);
-    } else {
-      if (!append) setLoading(true); else setLoadingMore(true);
+      return;
     }
     try {
+      if (!append) setLoading(true); else setLoadingMore(true);
       setError("");
       let url = `${API_BASE}/products?is_active=true&limit=${PAGE_SIZE}&page=${pageNum}`;
       if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
@@ -136,7 +134,7 @@ function ShopContent() {
       preloadImages(fetched.map((p: Product) => getProductImage(p)));
       setPage(pageNum);
       _shopCache = { key: cacheKey, products: allProducts, total: tot, page: pageNum, hasMore: newHasMore };
-    } catch (err: any) { if (!fromCache) setError(err?.message || "Failed to load products"); }
+    } catch (err: any) { setError(err?.message || "Failed to load products"); }
     finally { setLoading(false); setLoadingMore(false); }
   };
 

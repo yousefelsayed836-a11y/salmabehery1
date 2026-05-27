@@ -51,8 +51,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
 
   const fetchProducts = useCallback(async (pageNum = 1, append = false) => {
     const cacheKey = `${collectionSlug}:${sortBy}`;
-    const fromCache = !append && pageNum === 1 && _colCache.has(cacheKey);
-    if (fromCache) {
+    if (!append && pageNum === 1 && _colCache.has(cacheKey)) {
       const cached = _colCache.get(cacheKey)!;
       setProducts(cached.products);
       productsRef.current = cached.products;
@@ -60,11 +59,11 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
       setPage(cached.page);
       setHasMore(cached.hasMore);
       setLoading(false);
-    } else {
-      if (!append) setLoading(true);
-      else setLoadingMore(true);
+      return;
     }
     try {
+      if (!append) setLoading(true);
+      else setLoadingMore(true);
       setError("");
       const res = await fetch(
         `${API_BASE}/products?is_active=true&collection=${collectionSlug}&limit=${PAGE_SIZE}&page=${pageNum}&sort=${sortBy}`
@@ -80,7 +79,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
       setHasMore(newHasMore);
       setPage(pageNum);
       _colCache.set(cacheKey, { products: allProducts, total: tot, page: pageNum, hasMore: newHasMore });
-    } catch (e: any) { if (!fromCache) setError(e.message || "Failed"); }
+    } catch (e: any) { setError(e.message || "Failed"); }
     finally { setLoading(false); setLoadingMore(false); }
   }, [collectionSlug, sortBy]);
 
