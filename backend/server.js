@@ -151,10 +151,12 @@ async function uploadToDB(buffer) {
 
 async function uploadImage(file) {
   try {
-    return await uploadToGitHub(file.buffer);
+    const url = await uploadToGitHub(file.buffer);
+    return { url, storage: 'github' };
   } catch (e) {
     console.log(`GitHub upload failed (${e.message}), storing in DB`);
-    return await uploadToDB(file.buffer);
+    const url = await uploadToDB(file.buffer);
+    return { url, storage: 'db' };
   }
 }
 
@@ -162,8 +164,8 @@ async function uploadImage(file) {
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-    const url = await uploadImage(req.file);
-    res.json({ success: true, url });
+    const { url, storage } = await uploadImage(req.file);
+    res.json({ success: true, url, storage });
   } catch (e) {
     console.error('Upload error:', e);
     res.status(500).json({ error: 'Upload failed: ' + e.message });
@@ -174,11 +176,29 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
 app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No images uploaded' });
-    const urls = await Promise.all(req.files.map(f => uploadImage(f)));
-    res.json({ success: true, urls });
+    const results = await Promise.all(req.files.map(f => uploadImage(f)));
+    const urls = results.map(r => r.url);
+    const storage = results.every(r => r.storage === 'github') ? 'github' : results.some(r => r.storage === 'github') ? 'mixed' : 'db';
+    res.json({ success: true, urls, storage });
   } catch (e) {
     console.error('Multiple upload error:', e);
     res.status(500).json({ error: 'Upload failed: ' + e.message });
+  }
+});
+
+// ✅ GitHub token health check
+app.get('/api/admin/github-status', async (req, res) => {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return res.json({ ok: false, reason: 'GITHUB_TOKEN not set' });
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
+      headers: { Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' }
+    });
+    if (r.ok) return res.json({ ok: true });
+    const e = await r.json().catch(() => ({}));
+    res.json({ ok: false, reason: e.message || `GitHub ${r.status}` });
+  } catch (e) {
+    res.json({ ok: false, reason: e.message });
   }
 });
 

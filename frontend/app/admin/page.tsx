@@ -44,6 +44,7 @@ export default function AdminDashboard() {
   const [changePwForm, setChangePwForm] = useState({ current: "", next: "", confirm: "" });
   const [changePwMsg, setChangePwMsg] = useState("");
   const [newOrderToast, setNewOrderToast] = useState<{ name: string; total: number } | null>(null);
+  const [githubStatus, setGithubStatus] = useState<'unknown'|'ok'|'fail'>('unknown');
   const [faviconUrl, setFaviconUrl] = useState("");
   const [faviconUploading, setFaviconUploading] = useState(false);
   const [faviconMsg, setFaviconMsg] = useState("");
@@ -63,6 +64,10 @@ export default function AdminDashboard() {
   useEffect(() => { fetchData(); }, []);
 
   useEffect(() => {
+    fetch(`${API_BASE}/admin/github-status`)
+      .then(r => r.json())
+      .then(d => setGithubStatus(d.ok ? 'ok' : 'fail'))
+      .catch(() => setGithubStatus('fail'));
     fetch(`${API_BASE}/settings/favicon`)
       .then(r => r.json())
       .then(d => { if (d.value) setFaviconUrl(resolveUrl(d.value)); })
@@ -426,6 +431,17 @@ export default function AdminDashboard() {
                 })}
               </div>
             )}
+          </div>
+
+          {/* ── GitHub Status ── */}
+          <div className="dash-card" style={{ padding: "12px 18px", marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: githubStatus === 'ok' ? '#22c55e' : githubStatus === 'fail' ? '#ef4444' : '#d1d5db', flexShrink: 0, display: "inline-block" }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#555" }}>
+              GitHub Image Storage:&nbsp;
+              {githubStatus === 'ok' ? <span style={{ color: "#22c55e" }}>✓ Connected — images uploading to GitHub</span>
+               : githubStatus === 'fail' ? <span style={{ color: "#ef4444" }}>✗ Not connected — images saving to DB (add GITHUB_TOKEN on Render)</span>
+               : <span style={{ color: "#888" }}>Checking…</span>}
+            </span>
           </div>
 
           {/* ── Settings ── */}
