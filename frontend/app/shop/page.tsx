@@ -82,6 +82,7 @@ function ShopContent() {
   const PAGE_SIZE = 24;
   const sentinelRef = useRef<HTMLDivElement>(null);
   const productsRef = useRef<Product[]>([]);
+  const appendingRef = useRef(false);
 
   useEffect(() => { fetchProducts(1, false); }, [searchQuery]);
 
@@ -116,7 +117,12 @@ function ShopContent() {
       return;
     }
     try {
-      if (!append) setLoading(true); else setLoadingMore(true);
+      if (!append) { setLoading(true); }
+      else {
+        if (appendingRef.current) return;
+        appendingRef.current = true;
+        setLoadingMore(true);
+      }
       setError("");
       let url = `${API_BASE}/products?is_active=true&limit=${PAGE_SIZE}&page=${pageNum}`;
       if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
@@ -135,7 +141,7 @@ function ShopContent() {
       setPage(pageNum);
       _shopCache = { key: cacheKey, products: allProducts, total: tot, page: pageNum, hasMore: newHasMore };
     } catch (err: any) { setError(err?.message || "Failed to load products"); }
-    finally { setLoading(false); setLoadingMore(false); }
+    finally { appendingRef.current = false; setLoading(false); setLoadingMore(false); }
   };
 
   const addToCart = (product: Product) => {
