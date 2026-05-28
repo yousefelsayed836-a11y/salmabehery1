@@ -5,6 +5,29 @@ const fetch = require('node-fetch');
 
 const ADMIN_EMAIL = 'salmabehery14@gmail.com';
 
+// Deduct or restore stock for a product and its specific variant (if size matches)
+async function adjustStock(productId, size, qty, direction /* 'deduct' | 'restore' */) {
+  const sign = direction === 'deduct' ? '-' : '+';
+  try {
+    await pool.query(
+      `UPDATE products SET stock = GREATEST(0, stock ${sign} $1) WHERE id = $2`,
+      [qty, productId]
+    );
+  } catch (e) { console.error('Product stock adjust error:', e.message); }
+
+  if (size && size.includes(': ')) {
+    const colonIdx = size.indexOf(': ');
+    const optionName = size.substring(0, colonIdx).trim();
+    const optionValue = size.substring(colonIdx + 2).trim();
+    try {
+      await pool.query(
+        `UPDATE product_variants SET quantity = GREATEST(0, quantity ${sign} $1)
+         WHERE product_id = $2 AND option_name = $3 AND option_value = $4`,
+        [qty, productId, optionName, optionValue]
+      );
+    } catch (e) { console.error('Variant stock adjust error:', e.message); }
+  }
+}
 function buildEmailHtml(order, items) {
   const itemsHtml = (items || []).map(i =>
     `<tr>
@@ -170,14 +193,7 @@ router.post('/', async (req, res) => {
           itemValues
         );
 
-        try {
-          await pool.query(
-            'UPDATE products SET stock = GREATEST(0, stock - $1) WHERE id = $2',
-            [item.quantity, item.product_id]
-          );
-        } catch (e) {
-          console.error('Stock deduction error:', e.message);
-        }
+        await adjustStock(item.product_id, item.size, item.quantity, 'deduct');
       }
     }
 
@@ -262,37 +278,21 @@ router.put('/:id/status', async (req, res) => {
 
     if (status === 'cancelled' && oldStatus !== 'cancelled') {
       const items = await pool.query(
-        'SELECT product_id, quantity FROM order_items WHERE order_id = $1',
+        'SELECT product_id, quantity, size FROM order_items WHERE order_id = $1',
         [orderId]
       );
-      for (const item of items.rows) {
-        try {
-          await pool.query(
-            'UPDATE products SET stock = stock + $1 WHERE id = $2',
-            [item.quantity, item.product_id]
-          );
-        } catch (e) {
-          console.error('Stock restore error:', e.message);
-        }
-      }
+      for (const item of items.rows)
+        await adjustStock(item.product_id, item.size, item.quantity, 'restore');
       console.log(`✅ Stock restored for cancelled order ${orderId}`);
     }
 
     if (oldStatus === 'cancelled' && status !== 'cancelled') {
       const items = await pool.query(
-        'SELECT product_id, quantity FROM order_items WHERE order_id = $1',
+        'SELECT product_id, quantity, size FROM order_items WHERE order_id = $1',
         [orderId]
       );
-      for (const item of items.rows) {
-        try {
-          await pool.query(
-            'UPDATE products SET stock = GREATEST(0, stock - $1) WHERE id = $2',
-            [item.quantity, item.product_id]
-          );
-        } catch (e) {
-          console.error('Stock deduction error:', e.message);
-        }
-      }
+      for (const item of items.rows)
+        await adjustStock(item.product_id, item.size, item.quantity, 'deduct');
     }
 
     const result = await pool.query(
@@ -327,17 +327,11 @@ router.delete('/:id', async (req, res) => {
     const orderId = req.params.id;
 
     const items = await pool.query(
-      'SELECT product_id, quantity FROM order_items WHERE order_id = $1',
+      'SELECT product_id, quantity, size FROM order_items WHERE order_id = $1',
       [orderId]
     );
-    for (const item of items.rows) {
-      try {
-        await pool.query(
-          'UPDATE products SET stock = stock + $1 WHERE id = $2',
-          [item.quantity, item.product_id]
-        );
-      } catch (e) {}
-    }
+    for (const item of items.rows)
+      await adjustStock(item.product_id, item.size, item.quantity, 'restore');
 
     await pool.query('DELETE FROM order_items WHERE order_id = $1', [orderId]);
     await pool.query('DELETE FROM orders WHERE id = $1', [orderId]);
