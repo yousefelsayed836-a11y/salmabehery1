@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: "Necklaces",     href: "/shop/necklace" },
   { label: "Bracelets",     href: "/shop/bracelet" },
   { label: "Earrings",      href: "/shop/earrings" },
+  { label: "Hand Chains",   href: "/shop/hand-chains" },
   { label: "Sets & Offers", href: "/shop/sets-and-offers" },
 ];
 
