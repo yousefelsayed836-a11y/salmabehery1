@@ -48,6 +48,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
   const productsRef = useRef<Product[]>([]);
+  const appendingRef = useRef(false);
 
   const fetchProducts = useCallback(async (pageNum = 1, append = false) => {
     const cacheKey = `${collectionSlug}:${sortBy}`;
@@ -62,8 +63,12 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
       return;
     }
     try {
-      if (!append) setLoading(true);
-      else setLoadingMore(true);
+      if (!append) { setLoading(true); }
+      else {
+        if (appendingRef.current) return;
+        appendingRef.current = true;
+        setLoadingMore(true);
+      }
       setError("");
       const res = await fetch(
         `${API_BASE}/products?is_active=true&collection=${collectionSlug}&limit=${PAGE_SIZE}&page=${pageNum}&sort=${sortBy}`
@@ -80,7 +85,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
       setPage(pageNum);
       _colCache.set(cacheKey, { products: allProducts, total: tot, page: pageNum, hasMore: newHasMore });
     } catch (e: any) { setError(e.message || "Failed"); }
-    finally { setLoading(false); setLoadingMore(false); }
+    finally { appendingRef.current = false; setLoading(false); setLoadingMore(false); }
   }, [collectionSlug, sortBy]);
 
   useEffect(() => { fetchProducts(1, false); }, [fetchProducts]);
