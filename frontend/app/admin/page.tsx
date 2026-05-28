@@ -101,9 +101,10 @@ export default function AdminDashboard() {
       });
       setFaviconUrl(url);
       setFaviconMsg("✅ Favicon updated!");
-      let link = document.getElementById("dynamic-favicon") as HTMLLinkElement | null;
-      if (!link) { link = document.createElement("link"); link.id = "dynamic-favicon"; link.rel = "icon"; document.head.appendChild(link); }
-      link.href = url + "?t=" + Date.now();
+      const ts = "?t=" + Date.now();
+      const favLinks = document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]');
+      if (favLinks.length > 0) { favLinks.forEach(el => { el.href = url + ts; }); }
+      else { const l = document.createElement("link"); l.rel = "icon"; l.href = url + ts; document.head.appendChild(l); }
     } catch (e: any) { setFaviconMsg("❌ " + e.message); }
     setFaviconUploading(false);
     setTimeout(() => setFaviconMsg(""), 4000);
