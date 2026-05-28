@@ -99,8 +99,8 @@ async function compressImage(buffer) {
   try {
     return await sharp(buffer)
       .rotate()
-      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 100, lossless: true })
+      .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 85, effort: 4 })
       .toBuffer();
   } catch (e) {
     console.error('Image compression failed, using original:', e.message);
