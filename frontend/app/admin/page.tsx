@@ -22,6 +22,11 @@ interface Product {
 }
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com") + "/api";
+const BACKEND_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
+function resolveUrl(url: string) {
+  if (!url) return url;
+  return url.startsWith("http") ? url : `${BACKEND_BASE}${url}`;
+}
 
 const getAdminPw = () => (typeof window !== "undefined" ? localStorage.getItem("admin_pw") || "1122" : "1122");
 
@@ -60,11 +65,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetch(`${API_BASE}/settings/favicon`)
       .then(r => r.json())
-      .then(d => { if (d.value) setFaviconUrl(d.value); })
+      .then(d => { if (d.value) setFaviconUrl(resolveUrl(d.value)); })
       .catch(() => {});
     fetch(`${API_BASE}/settings/hero_image`)
       .then(r => r.json())
-      .then(d => { if (d.value) setHeroUrl(d.value); })
+      .then(d => { if (d.value) setHeroUrl(resolveUrl(d.value)); })
       .catch(() => {});
     fetch(`${API_BASE}/settings/fb_pixel_id`)
       .then(r => r.json())
@@ -94,12 +99,13 @@ export default function AdminDashboard() {
       const up = await fetch(`${API_BASE}/upload`, { method: "POST", body: form });
       if (!up.ok) throw new Error(`Upload error ${up.status}`);
       const { url } = await up.json();
+      const fullUrl = resolveUrl(url);
       await fetch(`${API_BASE}/settings/favicon`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: url }),
+        body: JSON.stringify({ value: fullUrl }),
       });
-      setFaviconUrl(url);
+      setFaviconUrl(fullUrl);
       setFaviconMsg("✅ Favicon updated!");
       const ts = "?t=" + Date.now();
       const favLinks = document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]');
