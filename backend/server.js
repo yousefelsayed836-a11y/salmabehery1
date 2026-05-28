@@ -182,6 +182,54 @@ app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) =>
   }
 });
 
+// ✅ One-time migration: move DB images → GitHub, update product/category URLs, purge DB
+app.post('/api/admin/migrate-images-to-github', async (req, res) => {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return res.status(400).json({ error: 'GITHUB_TOKEN not set' });
+
+  try {
+    const images = await db.query('SELECT id, mime_type, data FROM uploaded_images ORDER BY id');
+    const results = { migrated: 0, failed: 0, errors: [] };
+
+    for (const img of images.rows) {
+      try {
+        const buf = Buffer.from(img.data, 'base64');
+        const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+        const filePath = `images/${filename}`;
+        const apiRes = await fetch(
+          `https://api.github.com/repos/${GITHUB_REPO}/contents/${filePath}`,
+          {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
+            body: JSON.stringify({ message: `migrate: ${filename}`, content: img.data, branch: 'main' }),
+          }
+        );
+        if (!apiRes.ok) throw new Error((await apiRes.json().catch(() => ({}))).message || `GitHub ${apiRes.status}`);
+
+        const newUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/${filePath}`;
+        const oldUrl = `/api/images/${img.id}`;
+
+        // Update products: replace old URL in images array and main_image
+        await db.query(`UPDATE products SET images = array_replace(images, $1, $2) WHERE $1 = ANY(images)`, [oldUrl, newUrl]);
+        await db.query(`UPDATE products SET main_image = $1 WHERE main_image = $2`, [newUrl, oldUrl]);
+        // Update categories
+        await db.query(`UPDATE categories SET image = $1 WHERE image = $2`, [newUrl, oldUrl]);
+
+        // Delete from DB
+        await db.query('DELETE FROM uploaded_images WHERE id = $1', [img.id]);
+        results.migrated++;
+      } catch (e) {
+        results.failed++;
+        results.errors.push(`id=${img.id}: ${e.message}`);
+      }
+    }
+
+    res.json(results);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ✅ SSE
 const clients = new Set();
 app.get('/api/events', (req, res) => {
