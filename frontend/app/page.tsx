@@ -50,19 +50,9 @@ export default function HomePage() {
   const [submitted, setSubmitted] = useState(false);
   const [apiCategories, setApiCategories] = useState<any[]>([]);
   const [catsLoading, setCatsLoading] = useState(true);
-  const [showPopup, setShowPopup] = useState(false);
+
   const [featuredSection, setFeaturedSection] = useState<{ title: string; enabled: boolean; products: any[] } | null>(null);
   const [heroUrl, setHeroUrl] = useState("/images/hero-bg.jpg");
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && !sessionStorage.getItem("popup_shown")) {
-      const t = setTimeout(() => {
-        setShowPopup(true);
-        sessionStorage.setItem("popup_shown", "1");
-      }, 800);
-      return () => clearTimeout(t);
-    }
-  }, []);
 
   useEffect(() => {
     // Fetch categories + featured in parallel — critical path (updates static fallback)
@@ -190,62 +180,6 @@ export default function HomePage() {
           .sparkle-img:hover { transform: scale(1.05); }
         }
       `}</style>
-
-      {/* ── POPUP ── */}
-      {showPopup && (
-        <div
-          onClick={() => setShowPopup(false)}
-          style={{
-            position: "fixed", inset: 0, zIndex: 999999,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex", justifyContent: "center", alignItems: "center",
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: "#fff", color: "#333",
-              padding: "35px 40px", borderRadius: 16,
-              maxWidth: 420, width: "90%", textAlign: "center",
-              fontFamily: "Arial, sans-serif", position: "relative",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-              borderTop: "4px solid #fda1b7",
-            }}
-          >
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{
-                position: "absolute", top: 15, right: 15,
-                width: 32, height: 32, border: "none",
-                background: "#f5f5f5", borderRadius: "50%",
-                fontSize: 20, color: "#666", cursor: "pointer",
-              }}
-            >×</button>
-
-            <div style={{ fontSize: 48, marginBottom: 15 }}>📦</div>
-
-            <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 15, color: "#222" }}>
-              Important Notice
-            </h3>
-
-            <p style={{ fontSize: 16, lineHeight: 1.6, color: "#555", marginBottom: 25 }}>
-              Any product that is not available on the website is considered{" "}
-              <strong style={{ color: "#fda1b7" }}>Sold Out</strong>.
-            </p>
-
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{
-                background: "#fda1b7", color: "#fff", border: "none",
-                padding: "12px 35px", fontSize: 16, borderRadius: 8,
-                cursor: "pointer", fontWeight: 500, minWidth: 120,
-              }}
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── HERO ── */}
       <section
