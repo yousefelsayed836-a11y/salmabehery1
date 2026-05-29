@@ -232,7 +232,7 @@ export default function AdminDashboard() {
             onChange={e => { setPw(e.target.value); setPwError(false); }}
             onKeyDown={e => { if (e.key === "Enter") { if (pw === getAdminPw()) { sessionStorage.setItem("admin_auth", "1"); setAuthed(true); } else setPwError(true); } }}
             placeholder="Password"
-            style={{ width: "100%", padding: "14px 16px", borderRadius: 12, border: `1.5px solid ${pwError ? "#ef4444" : "#e5e7eb"}`, fontSize: 15, outline: "none", boxSizing: "border-box", color: "#1a1a2e", background: "#fafafa" }}
+            style={{ width: "100%", padding: "14px 16px", borderRadius: 12, border: `1.5px solid ${pwError ? "#ef4444" : "#e5e7eb"}`, fontSize: 16, outline: "none", boxSizing: "border-box", color: "#1a1a2e", background: "#fafafa" }}
           />
           {pwError && <p style={{ margin: 0, fontSize: 13, color: "#ef4444" }}>كلمة المرور غلط</p>}
           <button
