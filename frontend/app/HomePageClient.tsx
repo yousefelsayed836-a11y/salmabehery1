@@ -7,7 +7,27 @@ import Image from "next/image";
 const API = (process.env.NEXT_PUBLIC_API_URL || "https://salmabehery.com") + "/api";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salmabehery.com";
 
-let _catsCache: any[] | null = null;
+const LS_CATS_KEY = 'sb_cats_v2';
+const LS_CATS_TS  = 'sb_cats_ts_v2';
+const LS_TTL = 60 * 60 * 1000; // 1 hour
+
+function saveCatsToCache(cats: any[]) {
+  try {
+    localStorage.setItem(LS_CATS_KEY, JSON.stringify(cats));
+    localStorage.setItem(LS_CATS_TS, String(Date.now()));
+  } catch {}
+}
+
+function loadCatsFromCache(): any[] | null {
+  try {
+    const ts = parseInt(localStorage.getItem(LS_CATS_TS) || '0');
+    if (Date.now() - ts > LS_TTL) return null;
+    const raw = localStorage.getItem(LS_CATS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch { return null; }
+}
 
 const SEED_REVIEWS = [
   { id: "s1",  customer_name: "Sara M.",    review_text: "Wallahi el khatm da te7fa! Galy fast w el shoghol na3em awy, msh shayfah 3ala edy khales. Ha2oleb tany akeed 100%", rating: 5 },
@@ -43,25 +63,30 @@ export default function HomePageClient({ initialCategories, initialHeroUrl }: Pr
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [apiCategories, setApiCategories] = useState<any[]>(initialCategories);
+  const [loadedImgUrls, setLoadedImgUrls] = useState<Set<string>>(new Set());
   const [featuredSection, setFeaturedSection] = useState<{ title: string; enabled: boolean; products: any[] } | null>(null);
   const [heroUrl, setHeroUrl] = useState(initialHeroUrl);
 
-  if (_catsCache === null && initialCategories.length > 0) {
-    _catsCache = initialCategories;
-  }
-
   useEffect(() => {
-    fetch(`${API}/settings/hero_image`).then(r => r.json()).then(d => { if (d.value) setHeroUrl(d.value); }).catch(() => {});
-
-    if (_catsCache && _catsCache !== initialCategories) {
-      setApiCategories(_catsCache);
+    // Immediately show cached categories (no shimmer flash on refresh)
+    const cached = loadCatsFromCache();
+    if (cached) {
+      setApiCategories(cached);
+      setLoadedImgUrls(new Set(cached.map((c: any) => c.image_url).filter(Boolean)));
+    } else if (initialCategories.length > 0) {
+      saveCatsToCache(initialCategories);
     }
+
+    fetch(`${API}/settings/hero_image`).then(r => r.json()).then(d => { if (d.value) setHeroUrl(d.value); }).catch(() => {});
 
     Promise.all([
       fetch(`${API}/categories`).then(r => r.json()).catch(() => null),
       fetch(`${API}/settings/featured_section`).then(r => r.json()).catch(() => null),
     ]).then(async ([cats, featuredRaw]) => {
-      if (Array.isArray(cats) && cats.length > 0) { _catsCache = cats; setApiCategories(cats); }
+      if (Array.isArray(cats) && cats.length > 0) {
+        setApiCategories(cats);
+        saveCatsToCache(cats);
+      }
 
       if (featuredRaw?.value) {
         try {
@@ -195,10 +220,14 @@ export default function HomePageClient({ initialCategories, initialHeroUrl }: Pr
             return (
               <Link key={cat.id} href={`/shop/${cat.slug}`} className="cat-card" style={{ textDecoration: "none", color: "#222", borderRadius: 20, boxShadow: "0 6px 20px rgba(0,0,0,0.08)", background: "#fff", display: "flex", flexDirection: "column", overflow: "hidden", border: "1px solid #eee" }}>
                 <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f5e8ed", position: "relative" }}>
-                  <div className="cat-img-sh" />
+                  <div className="cat-img-sh" style={{ opacity: loadedImgUrls.has(cat.image_url) ? 0 : 1 }} />
                   {imgUrl && <img src={imgUrl} alt={cat.name_en} loading="eager" decoding="async" fetchPriority="high"
                     style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "relative", zIndex: 2 }}
-                    onLoad={e => { const sh = (e.target as HTMLImageElement).parentElement?.querySelector('.cat-img-sh') as HTMLElement; if (sh) sh.style.opacity = '0'; }} />}
+                    onLoad={e => {
+                      const sh = (e.target as HTMLImageElement).parentElement?.querySelector('.cat-img-sh') as HTMLElement;
+                      if (sh) sh.style.opacity = '0';
+                      setLoadedImgUrls(prev => new Set([...prev, cat.image_url]));
+                    }} />}
                 </div>
                 <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>
                   <div className="cat-title" style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4, letterSpacing: 0.5 }}>{cat.name_en}</div>
