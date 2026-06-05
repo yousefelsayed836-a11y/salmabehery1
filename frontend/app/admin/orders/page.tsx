@@ -104,6 +104,7 @@ export default function OrdersPage() {
   const [selectedForPrint, setSelectedForPrint] = useState<Set<string>>(new Set());
   const [translatedAddresses, setTranslatedAddresses] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [printOverlay, setPrintOverlay] = useState<{ html: string; title: string } | null>(null);
 
   useEffect(() => {
     // Disable pinch-zoom on admin orders page (mobile dashboard)
@@ -279,26 +280,7 @@ export default function OrdersPage() {
   `;
 
   const openPrintWindow = (html: string, title: string) => {
-    const shareBar = `
-      <div class="mobile-share-bar">
-        <button class="mobile-share-btn btn-print" onclick="window.print()">🖨️ طباعة</button>
-        <button class="mobile-share-btn btn-pdf" onclick="
-          if(navigator.share){navigator.share({title:'${title}',text:'بوليصة الشحن'}).catch(()=>{})}
-          else{window.print()}
-        ">📤 مشاركة / PDF</button>
-      </div>`;
-    const autoprint = `<script>if(!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)){window.onload=function(){setTimeout(function(){window.print();},800);}}<\/script>`;
-    const fullHtml = html.replace('</body>', `${shareBar}${autoprint}</body>`);
-    const blob = new Blob([fullHtml], { type: 'text/html; charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url, '_blank');
-    if (!w) {
-      const a = document.createElement('a');
-      a.href = url;
-      a.target = '_blank';
-      a.click();
-    }
-    setTimeout(() => URL.revokeObjectURL(url), 120000);
+    setPrintOverlay({ html, title });
   };
 
   const handlePrint = (order: Order) => {
@@ -699,6 +681,31 @@ export default function OrdersPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── PRINT OVERLAY ── */}
+      {printOverlay && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", flexDirection: "column", background: "#222" }}>
+          <style>{`
+            @media print {
+              body > *:not(.wb-print-root) { display: none !important; }
+              .wb-print-root { position: static !important; background: #fff !important; }
+              .wb-print-bar { display: none !important; }
+            }
+            ${waybillCss}
+          `}</style>
+          <div className="wb-print-bar" style={{ background: "#1a1a2e", padding: "10px 14px", display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+            <button onClick={() => setPrintOverlay(null)} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", padding: "0 6px", lineHeight: 1 }}>✕</button>
+            <span style={{ color: "#fda1b7", fontWeight: 700, fontSize: 13, flex: 1 }}>{printOverlay.title}</span>
+            <button onClick={() => window.print()} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة / PDF</button>
+            <button onClick={() => {
+              if (navigator.share) navigator.share({ title: printOverlay.title, text: "بوليصة الشحن - Salma Behery" }).catch(() => {});
+              else window.print();
+            }} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📤 مشاركة</button>
+          </div>
+          <div className="wb-print-root" style={{ flex: 1, overflowY: "auto", background: "#f5f5f5", padding: 16 }}
+            dangerouslySetInnerHTML={{ __html: printOverlay.html }} />
         </div>
       )}
     </>
