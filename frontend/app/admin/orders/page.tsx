@@ -270,29 +270,46 @@ export default function OrdersPage() {
       .page-pair { background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
       .waybill { height: auto; min-height: 200px; }
       .wb-grid { grid-template-columns: 1fr; gap: 6px; }
+      .mobile-share-bar { display: flex; gap: 10px; justify-content: center; padding: 16px; position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -2px 8px rgba(0,0,0,0.08); }
+      .mobile-share-btn { flex: 1; max-width: 200px; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: Cairo, Arial, sans-serif; }
+      .btn-print { background: #1a1a2e; color: #fff; }
+      .btn-pdf { background: #fda1b7; color: #fff; }
     }
+    @media print { .mobile-share-bar { display: none !important; } }
   `;
 
-  const openPrintWindow = (html: string) => {
-    const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+  const isMobile = () => /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  const openPrintWindow = (html: string, title: string) => {
+    const isMob = isMobile();
+    const mobileBar = isMob ? `
+      <div class="mobile-share-bar">
+        <button class="mobile-share-btn btn-print" onclick="window.print()">🖨️ طباعة</button>
+        <button class="mobile-share-btn btn-pdf" onclick="
+          if(navigator.share){navigator.share({title:'${title}',text:'بوليصة الشحن'}).catch(()=>{})}
+          else{window.print()}
+        ">📤 مشاركة / PDF</button>
+      </div>` : '';
+    const autoprint = isMob ? '' : `<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script>`;
+    const fullHtml = html.replace('</body>', `${mobileBar}${autoprint}</body>`);
+    const blob = new Blob([fullHtml], { type: 'text/html; charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const w = window.open(url, '_blank');
     if (!w) {
-      // fallback: navigate current tab to blob URL
       const a = document.createElement('a');
       a.href = url;
       a.target = '_blank';
       a.click();
     }
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
   };
 
   const handlePrint = (order: Order) => {
     const deposit = deposits[order.id] || 0;
     const addr = translatedAddresses[order.id];
     const body = `<div class="page-pair">${generateWaybillHtml(order, deposit, productImages, addr)}</div>`;
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`;
-    openPrintWindow(html);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}</body></html>`;
+    openPrintWindow(html, `بوليصة #${order.id.slice(-6)}`);
   };
 
   const handleBatchPrint = () => {
@@ -309,8 +326,8 @@ export default function OrdersPage() {
         : "";
       pages.push(`<div class="page-pair">${a}${cutOrEmpty}${b}</div>`);
     }
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pages.join("")}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`;
-    openPrintWindow(html);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pages.join("")}</body></html>`;
+    openPrintWindow(html, 'طباعة بوليصات');
   };
 
   const getStatusColor = (s: string) => {
