@@ -76,7 +76,10 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
       const data = await res.json();
       const fetched: Product[] = data.products || [];
       const tot = data.pagination?.total ?? fetched.length;
-      const allProducts = append ? [...productsRef.current, ...fetched] : fetched;
+      const merged = append ? [...productsRef.current, ...fetched] : fetched;
+      // Deduplicate by ID (prevents duplication from scroll race conditions)
+      const seenIds = new Set<string>();
+      const allProducts = merged.filter(p => { if (seenIds.has(p.id)) return false; seenIds.add(p.id); return true; });
       const newHasMore = (pageNum * PAGE_SIZE) < tot;
       setTotal(tot);
       setProducts(allProducts);
@@ -102,13 +105,13 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
   useEffect(() => {
     if (!sentinelRef.current) return;
     const obs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore && !loadingMore) {
+      if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
         fetchProducts(page + 1, true);
       }
     }, { rootMargin: "200px" });
     obs.observe(sentinelRef.current);
     return () => obs.disconnect();
-  }, [hasMore, loadingMore, page, fetchProducts]);
+  }, [hasMore, loadingMore, loading, page, fetchProducts]);
 
   const handleAdd = (product: Product) => {
     const eff = getEffectiveStock(product);
