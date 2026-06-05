@@ -246,7 +246,7 @@ export default function HomePage() {
               </div>
             </div>
           )) : apiCategories.map((cat) => {
-            const imgUrl = cat.has_image ? `${BACKEND}/api/categories/image/${cat.id}` : null;
+            const imgUrl = cat.image_url ? (cat.image_url.startsWith('http') ? cat.image_url : `${BACKEND}${cat.image_url}`) : null;
             return (
             <Link key={cat.id} href={`/shop/${cat.slug}`} className="cat-card" style={{
               textDecoration: "none", color: "#222", borderRadius: 20,

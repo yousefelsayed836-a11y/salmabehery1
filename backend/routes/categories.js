@@ -14,15 +14,17 @@ router.get('/', async (req, res) => {
       const result = await db.query(`SELECT * FROM categories ${where} ORDER BY sort_order ASC NULLS LAST, name_en ASC`);
       return res.json(result.rows);
     }
-    // Public: omit heavy base64 image, return lightweight metadata + image_url reference
+    // Public: return direct GitHub URL if available, else backend proxy
     const result = await db.query(
       `SELECT id, name_en, name_ar, slug, sort_order, is_active,
-              (image IS NOT NULL AND image != '') AS has_image
+              (image IS NOT NULL AND image != '') AS has_image,
+              CASE WHEN image LIKE 'http%' THEN image ELSE NULL END AS direct_url
        FROM categories ${where} ORDER BY sort_order ASC NULLS LAST, name_en ASC`
     );
     const rows = result.rows.map(r => ({
       ...r,
-      image_url: r.has_image ? `/api/categories/image/${r.id}` : null,
+      image_url: r.has_image ? (r.direct_url || `/api/categories/image/${r.id}`) : null,
+      direct_url: undefined,
     }));
     res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60');
     res.json(rows);
