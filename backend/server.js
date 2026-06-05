@@ -238,6 +238,85 @@ app.post('/api/admin/migrate-images-to-local', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ✅ Repair images — download all GitHub/DB images to local disk so they survive even if GitHub goes down
+app.post('/api/admin/repair-images', async (req, res) => {
+  const results = { fixed: 0, skipped: 0, failed: 0, errors: [] };
+
+  async function downloadToLocal(url, prefix) {
+    if (!url || !url.startsWith('http')) return null;
+    const r = await fetch(url, { timeout: 15000 });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const buf = Buffer.from(await r.arrayBuffer());
+    const compressed = await sharp(buf).rotate()
+      .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 85 }).toBuffer();
+    const filename = `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.webp`;
+    fs.writeFileSync(path.join(uploadsDir, filename), compressed);
+    return `/uploads/${filename}`;
+  }
+
+  try {
+    // 1. Migrate remaining DB images
+    const dbImgs = await db.query('SELECT id, data FROM uploaded_images');
+    for (const img of dbImgs.rows) {
+      try {
+        const buf = Buffer.from(img.data, 'base64');
+        const compressed = await sharp(buf).rotate().webp({ quality: 85 }).toBuffer();
+        const filename = `dbimg-${img.id}-${Date.now()}.webp`;
+        fs.writeFileSync(path.join(uploadsDir, filename), compressed);
+        const newUrl = `/uploads/${filename}`, oldUrl = `/api/images/${img.id}`;
+        await db.query(`UPDATE products SET images = array_replace(images,$1,$2) WHERE $1=ANY(images)`, [oldUrl, newUrl]);
+        await db.query(`UPDATE products SET main_image=$1 WHERE main_image=$2`, [newUrl, oldUrl]);
+        await db.query(`UPDATE categories SET image=$1 WHERE image=$2`, [newUrl, oldUrl]);
+        await db.query('DELETE FROM uploaded_images WHERE id=$1', [img.id]);
+        results.fixed++;
+      } catch (e) { results.failed++; results.errors.push(`db-img ${img.id}: ${e.message}`); }
+    }
+
+    // 2. Download GitHub category images to local disk
+    const cats = await db.query(`SELECT id, image FROM categories WHERE image LIKE 'http%'`);
+    for (const cat of cats.rows) {
+      try {
+        const newUrl = await downloadToLocal(cat.image, `cat-${cat.id}`);
+        if (newUrl) { await db.query('UPDATE categories SET image=$1 WHERE id=$2', [newUrl, cat.id]); results.fixed++; }
+      } catch (e) { results.failed++; results.errors.push(`cat ${cat.id}: ${e.message}`); }
+    }
+
+    // 3. Download GitHub product images to local disk
+    const prods = await db.query(`SELECT id, main_image, images FROM products WHERE main_image LIKE 'http%' OR images::text LIKE '%http%'`);
+    for (const p of prods.rows) {
+      if (p.main_image && p.main_image.startsWith('http')) {
+        try {
+          const newUrl = await downloadToLocal(p.main_image, `prod-${p.id}-main`);
+          if (newUrl) { await db.query('UPDATE products SET main_image=$1 WHERE id=$2', [newUrl, p.id]); results.fixed++; }
+        } catch (e) { results.failed++; results.errors.push(`prod-main ${p.id}: ${e.message}`); }
+      }
+      const imgs = Array.isArray(p.images) ? p.images : [];
+      const newImgs = [...imgs];
+      let changed = false;
+      for (let i = 0; i < newImgs.length; i++) {
+        if (newImgs[i] && newImgs[i].startsWith('http')) {
+          try {
+            const newUrl = await downloadToLocal(newImgs[i], `prod-${p.id}-img${i}`);
+            if (newUrl) { newImgs[i] = newUrl; changed = true; results.fixed++; }
+          } catch (e) { results.failed++; results.errors.push(`prod-img ${p.id}[${i}]: ${e.message}`); }
+        }
+      }
+      if (changed) await db.query('UPDATE products SET images=$1 WHERE id=$2', [newImgs, p.id]);
+    }
+
+    // 4. Report missing local files
+    const localProds = await db.query(`SELECT id, main_image, images FROM products WHERE main_image LIKE '/uploads/%' OR images::text LIKE '%/uploads/%'`);
+    for (const p of localProds.rows) {
+      if (p.main_image?.startsWith('/uploads/') && !fs.existsSync(path.join(uploadsDir, path.basename(p.main_image)))) {
+        results.errors.push(`MISSING FILE: prod ${p.id} main_image ${p.main_image}`);
+      } else if (p.main_image?.startsWith('/uploads/')) results.skipped++;
+    }
+
+    res.json(results);
+  } catch (e) { res.status(500).json({ error: e.message, ...results }); }
+});
+
 // ✅ GitHub token health check
 app.get('/api/admin/github-status', async (req, res) => {
   const token = process.env.GITHUB_TOKEN;
