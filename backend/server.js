@@ -149,14 +149,27 @@ async function uploadToDB(buffer) {
   return `/api/images/${result.rows[0].id}`;
 }
 
+async function uploadToLocal(buffer) {
+  const compressed = await compressImage(buffer);
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+  fs.writeFileSync(path.join(uploadsDir, filename), compressed);
+  return `/uploads/${filename}`;
+}
+
 async function uploadImage(file) {
   try {
-    const url = await uploadToGitHub(file.buffer);
-    return { url, storage: 'github' };
+    const url = await uploadToLocal(file.buffer);
+    return { url, storage: 'local' };
   } catch (e) {
-    console.log(`GitHub upload failed (${e.message}), storing in DB`);
-    const url = await uploadToDB(file.buffer);
-    return { url, storage: 'db' };
+    console.log(`Local upload failed (${e.message}), trying GitHub`);
+    try {
+      const url = await uploadToGitHub(file.buffer);
+      return { url, storage: 'github' };
+    } catch (e2) {
+      console.log(`GitHub upload failed (${e2.message}), storing in DB`);
+      const url = await uploadToDB(file.buffer);
+      return { url, storage: 'db' };
+    }
   }
 }
 
@@ -184,6 +197,45 @@ app.post('/api/upload/multiple', upload.array('images', 20), async (req, res) =>
     console.error('Multiple upload error:', e);
     res.status(500).json({ error: 'Upload failed: ' + e.message });
   }
+});
+
+// ✅ Migrate DB images → local filesystem
+app.post('/api/admin/migrate-images-to-local', async (req, res) => {
+  try {
+    const images = await db.query('SELECT id, mime_type, data FROM uploaded_images ORDER BY id');
+    const results = { migrated: 0, failed: 0, errors: [] };
+    for (const img of images.rows) {
+      try {
+        const buf = Buffer.from(img.data, 'base64');
+        const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+        fs.writeFileSync(path.join(uploadsDir, filename), buf);
+        const newUrl = `/uploads/${filename}`;
+        const oldUrl = `/api/images/${img.id}`;
+        await db.query(`UPDATE products SET images = array_replace(images, $1, $2) WHERE $1 = ANY(images)`, [oldUrl, newUrl]);
+        await db.query(`UPDATE products SET main_image = $1 WHERE main_image = $2`, [newUrl, oldUrl]);
+        await db.query(`UPDATE categories SET image = $1 WHERE image = $2`, [newUrl, oldUrl]);
+        await db.query('DELETE FROM uploaded_images WHERE id = $1', [img.id]);
+        results.migrated++;
+      } catch (e) { results.failed++; results.errors.push(`id=${img.id}: ${e.message}`); }
+    }
+
+    // Also migrate base64 category images to local disk
+    const cats = await db.query(`SELECT id, image FROM categories WHERE image IS NOT NULL AND image != '' AND image NOT LIKE 'http%' AND image NOT LIKE '/uploads/%'`);
+    for (const cat of cats.rows) {
+      try {
+        const m = cat.image.match(/^data:([^;]+);base64,(.+)$/s);
+        if (!m) continue;
+        const buf = Buffer.from(m[2], 'base64');
+        const compressed = await sharp(buf).rotate().resize({ width: 800, height: 1100, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
+        const filename = `cat-${cat.id}-${Date.now()}.webp`;
+        fs.writeFileSync(path.join(uploadsDir, filename), compressed);
+        await db.query('UPDATE categories SET image = $1 WHERE id = $2', [`/uploads/${filename}`, cat.id]);
+        results.migrated++;
+      } catch (e) { results.failed++; results.errors.push(`cat=${cat.id}: ${e.message}`); }
+    }
+
+    res.json(results);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ✅ GitHub token health check
