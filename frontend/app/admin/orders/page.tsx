@@ -699,10 +699,19 @@ export default function OrdersPage() {
             <button onClick={() => setPrintOverlay(null)} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", padding: "0 6px", lineHeight: 1 }}>✕</button>
             <span style={{ color: "#fda1b7", fontWeight: 700, fontSize: 13, flex: 1 }}>{printOverlay.title}</span>
             <button onClick={() => window.print()} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة / PDF</button>
-            <button onClick={() => {
-              if (navigator.share) navigator.share({ title: printOverlay.title, text: "بوليصة الشحن - Salma Behery" }).catch(() => {});
-              else window.print();
-            }} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📤 مشاركة</button>
+            <button onClick={async () => {
+              const blob = new Blob([printOverlay.html], { type: "text/html" });
+              const fileName = `${printOverlay.title.replace(/[^a-zA-Z0-9؀-ۿ]/g, "_")}.html`;
+              const file = new File([blob], fileName, { type: "text/html" });
+              if (navigator.share && (navigator as any).canShare?.({ files: [file] })) {
+                try { await navigator.share({ files: [file], title: printOverlay.title }); return; } catch {}
+              }
+              // Fallback: download the file
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url; a.download = fileName; a.click();
+              setTimeout(() => URL.revokeObjectURL(url), 10000);
+            }} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📤 مشاركة / تنزيل</button>
           </div>
           <div className="wb-print-root" style={{ flex: 1, overflowY: "auto", background: "#f5f5f5", padding: 16 }}
             dangerouslySetInnerHTML={{ __html: printOverlay.html }} />
