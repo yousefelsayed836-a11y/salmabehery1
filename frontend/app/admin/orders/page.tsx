@@ -265,16 +265,34 @@ export default function OrdersPage() {
     .wb-totals { margin-top: auto; border-top: 1.5px solid #000; padding-top: 4px; }
     .wb-total-row { display: flex; justify-content: space-between; font-size: 10px; padding: 1px 0; color: #555; }
     .wb-total-final { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #000; margin-top: 3px; border-top: 1px solid #999; padding-top: 3px; }
+    @media screen {
+      body { padding: 10px; background: #f5f5f5; }
+      .page-pair { background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+      .waybill { height: auto; min-height: 200px; }
+      .wb-grid { grid-template-columns: 1fr; gap: 6px; }
+    }
   `;
+
+  const openPrintWindow = (html: string) => {
+    const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, '_blank');
+    if (!w) {
+      // fallback: navigate current tab to blob URL
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.click();
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
 
   const handlePrint = (order: Order) => {
     const deposit = deposits[order.id] || 0;
     const addr = translatedAddresses[order.id];
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
     const body = `<div class="page-pair">${generateWaybillHtml(order, deposit, productImages, addr)}</div>`;
-    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script></body></html>`);
-    printWindow.document.close();
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`;
+    openPrintWindow(html);
   };
 
   const handleBatchPrint = () => {
@@ -291,10 +309,8 @@ export default function OrdersPage() {
         : "";
       pages.push(`<div class="page-pair">${a}${cutOrEmpty}${b}</div>`);
     }
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pages.join("")}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`);
-    printWindow.document.close();
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pages.join("")}<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>`;
+    openPrintWindow(html);
   };
 
   const getStatusColor = (s: string) => {
