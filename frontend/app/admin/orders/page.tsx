@@ -278,20 +278,17 @@ export default function OrdersPage() {
     @media print { .mobile-share-bar { display: none !important; } }
   `;
 
-  const isMobile = () => /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
   const openPrintWindow = (html: string, title: string) => {
-    const isMob = isMobile();
-    const mobileBar = isMob ? `
+    const shareBar = `
       <div class="mobile-share-bar">
         <button class="mobile-share-btn btn-print" onclick="window.print()">🖨️ طباعة</button>
         <button class="mobile-share-btn btn-pdf" onclick="
           if(navigator.share){navigator.share({title:'${title}',text:'بوليصة الشحن'}).catch(()=>{})}
           else{window.print()}
         ">📤 مشاركة / PDF</button>
-      </div>` : '';
-    const autoprint = isMob ? '' : `<script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script>`;
-    const fullHtml = html.replace('</body>', `${mobileBar}${autoprint}</body>`);
+      </div>`;
+    const autoprint = `<script>if(!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)){window.onload=function(){setTimeout(function(){window.print();},800);}}<\/script>`;
+    const fullHtml = html.replace('</body>', `${shareBar}${autoprint}</body>`);
     const blob = new Blob([fullHtml], { type: 'text/html; charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const w = window.open(url, '_blank');
