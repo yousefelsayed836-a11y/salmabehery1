@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     const result = await db.query(
       `SELECT id, name_en, name_ar, slug, sort_order, is_active,
               (image IS NOT NULL AND image != '') AS has_image,
-              CASE WHEN image LIKE 'http%' THEN image ELSE NULL END AS direct_url
+              CASE WHEN image LIKE 'http%' OR image LIKE '/uploads/%' THEN image ELSE NULL END AS direct_url
        FROM categories ${where} ORDER BY sort_order ASC NULLS LAST, name_en ASC`
     );
     const rows = result.rows.map(r => ({
@@ -40,12 +40,12 @@ router.get('/image/:id', async (req, res) => {
     const result = await db.query('SELECT image FROM categories WHERE id=$1', [req.params.id]);
     if (!result.rows.length || !result.rows[0].image) return res.status(404).end();
     const img = result.rows[0].image;
-    if (img.startsWith('http')) {
+    if (img.startsWith('http') || img.startsWith('/uploads/')) {
       res.set('Cache-Control', 'public, max-age=31536000, immutable');
       return res.redirect(301, img);
     }
     const m = img.match(/^data:([^;]+);base64,(.+)$/s);
-    if (!m) return res.status(400).end();
+    if (!m) return res.status(404).end();
     const etag = `"${m[2].length}"`;
     if (req.headers['if-none-match'] === etag) return res.status(304).end();
     const buf = Buffer.from(m[2], 'base64');
