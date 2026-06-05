@@ -32,28 +32,65 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET category image — served as binary with ETag for instant cache invalidation
+// GET category image — served as binary with long cache
 router.get('/image/:id', async (req, res) => {
   try {
     const result = await db.query('SELECT image FROM categories WHERE id=$1', [req.params.id]);
     if (!result.rows.length || !result.rows[0].image) return res.status(404).end();
     const img = result.rows[0].image;
     if (img.startsWith('http')) {
-      res.set('Cache-Control', 'no-cache');
-      return res.redirect(img);
+      res.set('Cache-Control', 'public, max-age=31536000, immutable');
+      return res.redirect(301, img);
     }
     const m = img.match(/^data:([^;]+);base64,(.+)$/s);
     if (!m) return res.status(400).end();
-    // ETag based on image content length so browser re-validates when image changes
     const etag = `"${m[2].length}"`;
     if (req.headers['if-none-match'] === etag) return res.status(304).end();
     const buf = Buffer.from(m[2], 'base64');
     res.set('Content-Type', m[1]);
     res.set('ETag', etag);
-    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=86400');
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
     res.send(buf);
   } catch (e) {
     res.status(500).end();
+  }
+});
+
+// POST migrate category images from base64 DB → GitHub
+router.post('/migrate-to-github', async (req, res) => {
+  const fetch = require('node-fetch');
+  const sharp = require('sharp');
+  const token = process.env.GITHUB_TOKEN;
+  const REPO = 'yousefelsayed836-a11y/salmabehery1';
+  if (!token) return res.status(400).json({ error: 'GITHUB_TOKEN not set' });
+  try {
+    const cats = await db.query(`SELECT id, name_en, image FROM categories WHERE image IS NOT NULL AND image != '' AND image NOT LIKE 'http%'`);
+    const results = { migrated: 0, failed: 0, errors: [] };
+    for (const cat of cats.rows) {
+      try {
+        const m = cat.image.match(/^data:([^;]+);base64,(.+)$/s);
+        if (!m) { results.failed++; continue; }
+        const buf = Buffer.from(m[2], 'base64');
+        const compressed = await sharp(buf).rotate().resize({ width: 800, height: 1100, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
+        const filename = `cat-${cat.id}-${Date.now()}.webp`;
+        const filePath = `images/${filename}`;
+        const apiRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${filePath}`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
+          body: JSON.stringify({ message: `cat-img: ${cat.name_en}`, content: compressed.toString('base64'), branch: 'main' }),
+        });
+        if (!apiRes.ok) throw new Error((await apiRes.json().catch(() => ({}))).message || `GitHub ${apiRes.status}`);
+        const newUrl = `https://raw.githubusercontent.com/${REPO}/main/${filePath}`;
+        await db.query('UPDATE categories SET image = $1 WHERE id = $2', [newUrl, cat.id]);
+        results.migrated++;
+      } catch (e) {
+        results.failed++;
+        results.errors.push(`id=${cat.id}: ${e.message}`);
+      }
+    }
+    res.json(results);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
