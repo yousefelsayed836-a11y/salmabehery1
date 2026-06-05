@@ -134,6 +134,7 @@ export default function HomePage() {
         }
         .cat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .cat-card img { transition: transform 0.45s ease; }
+        .cat-img-sh { position: absolute; inset: 0; background: linear-gradient(90deg,#fdf0f3 25%,#f9dde5 50%,#fdf0f3 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; transition: opacity 0.4s; z-index: 1; }
         @media (hover: hover) {
           .cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(253,161,183,0.25) !important; }
           .cat-card:hover img { transform: scale(1.07); }
@@ -254,9 +255,11 @@ export default function HomePage() {
               border: "1px solid #eee",
             }}>
               <div className="cat-img" style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden", background: "#f5e8ed", position: "relative" }}>
+                <div className="cat-img-sh" />
                 {imgUrl && <img src={imgUrl} alt={cat.name_en}
                   loading="eager" decoding="async" fetchPriority="high"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} />}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "relative", zIndex: 2 }}
+                  onLoad={e => { const sh = (e.target as HTMLImageElement).parentElement?.querySelector('.cat-img-sh') as HTMLElement; if (sh) sh.style.opacity = '0'; }} />}
               </div>
               <div className="cat-text" style={{ background: "#fff", padding: "10px 12px 12px", flexGrow: 1, textAlign: "center" }}>
                 <div className="cat-title" style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4, letterSpacing: 0.5 }}>{cat.name_en}</div>

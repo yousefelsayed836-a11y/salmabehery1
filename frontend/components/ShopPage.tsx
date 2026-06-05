@@ -212,9 +212,11 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                   <div key={p.id} className="pc">
                     <Link href={`/products/${p.id}`} style={{ textDecoration: "none", display: "block" }} onClick={() => sessionStorage.setItem(`shopScroll_${collectionSlug}`, String(window.scrollY))}>
                     <div style={{ position: "relative", aspectRatio: "1/1", background: "#fafafa", overflow: "hidden" }}>
-                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }} className="pi"
+                      <div className="img-sh" />
+                      <img src={img} alt={p.name_en} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", position: "relative", zIndex: 2 }} className="pi"
                         loading={idx < 4 ? "eager" : "lazy"} decoding="async"
-                        onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; }} />
+                        onLoad={e => { const sh = (e.target as HTMLImageElement).parentElement?.querySelector('.img-sh') as HTMLElement; if (sh) sh.style.opacity = '0'; }}
+                        onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; const sh = (e.target as HTMLImageElement).parentElement?.querySelector('.img-sh') as HTMLElement; if (sh) sh.style.opacity = '0'; }} />
                       {oos && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
                       {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>{eff} left</span>}
                       {!oos && !low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>In Stock</span>}
@@ -267,6 +269,7 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
         .sk-img{aspect-ratio:1/1;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:400px 100%;animation:shimmer 1.2s infinite}
         .sk-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:400px 100%;animation:shimmer 1.2s infinite}
         @media(max-width:768px){.sg{grid-template-columns:repeat(2,1fr);gap:10px}}
+        .img-sh{position:absolute;inset:0;background:linear-gradient(90deg,#fdf0f3 25%,#f9dde5 50%,#fdf0f3 75%);background-size:400px 100%;animation:shimmer 1.4s infinite;transition:opacity 0.4s;z-index:1}
       `}</style>
     </div>
   );
