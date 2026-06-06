@@ -340,9 +340,8 @@ export default function ProductPage() {
               <div>
                 <div style={{ borderTop: "1px solid #eee", margin: "4px 0 12px" }} />
                 <p style={{ fontSize: 16, fontWeight: 400, color: "#1a1a2e", letterSpacing: 0, textTransform: "none", margin: "0 0 8px" }}>Description</p>
-                <div style={{ fontSize: 13, lineHeight: 1.8, color: "#1a1a2e", fontWeight: 400 }}>
-                  ● <span dangerouslySetInnerHTML={{ __html: product.description_en }} />
-                </div>
+                <div style={{ fontSize: 13, lineHeight: 1.8, color: "#1a1a2e", fontWeight: 400 }}
+                  dangerouslySetInnerHTML={{ __html: product.description_en.replace(/\n/g, "<br/>") }} />
               </div>
             )}
 
