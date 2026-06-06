@@ -220,9 +220,9 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
                         loading={idx < 4 ? "eager" : "lazy"} decoding="async"
                         onLoad={e => { const sh = (e.target as HTMLImageElement).parentElement?.querySelector('.img-sh') as HTMLElement; if (sh) sh.style.opacity = '0'; }}
                         onError={e => { (e.target as HTMLImageElement).src = "https://placehold.co/400x400/fda1b7/fff?text=??"; const sh = (e.target as HTMLImageElement).parentElement?.querySelector('.img-sh') as HTMLElement; if (sh) sh.style.opacity = '0'; }} />
-                      {oos && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>Out of stock</span>}
-                      {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>{eff} left</span>}
-                      {!oos && !low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700 }}>In Stock</span>}
+                      {oos && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#6b7280", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700, zIndex: 3 }}>Out of stock</span>}
+                      {low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#ef4444", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700, zIndex: 3 }}>{eff} left</span>}
+                      {!oos && !low && <span style={{ position: "absolute", bottom: 6, left: 6, background: "#22c55e", color: "#fff", padding: "2px 7px", borderRadius: 20, fontSize: 9, fontWeight: 700, zIndex: 3 }}>In Stock</span>}
                     </div>
                     </Link>
                     <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
