@@ -33,9 +33,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => { window.removeEventListener("cartUpdated", sync); window.removeEventListener("storage", sync); };
   }, []);
 
-  // Save to localStorage on change (but don't re-trigger sync)
+  // Save to localStorage on change and notify header
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(cartItems)); } catch {}
+    try {
+      localStorage.setItem(KEY, JSON.stringify(cartItems));
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch {}
   }, [cartItems]);
 
   const addToCart = useCallback((product: CartItem["product"], qty: number, size: string, stock?: number): boolean => {
