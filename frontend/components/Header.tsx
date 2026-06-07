@@ -52,6 +52,7 @@ export default function Header() {
 
   const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
   const isHome = pathname === '/';
+  const isCheckout = pathname === '/checkout';
 
   useEffect(() => {
     const update = () => {
@@ -82,6 +83,24 @@ export default function Header() {
   if (isDashboard) return null;
 
   const isTransparent = isHome && !scrolled;
+
+  // Compact checkout header
+  if (isCheckout) return (
+    <header style={{ position: "sticky", top: "40px", zIndex: 100, background: "#fff", borderBottom: "1px solid #f5e6ea", padding: "8px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Link href="/" style={{ textDecoration: "none", color: "#1a1a2e", fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+        ← متابعة التسوق
+      </Link>
+      <span style={{ fontFamily: "'HelloParis', serif", fontSize: 22, color: "#1a1a2e", letterSpacing: 1 }}>Salma behery</span>
+      <Link href="/checkout" style={{ position: "relative", color: "#1a1a2e", textDecoration: "none", display: "flex", alignItems: "center", padding: "4px 6px" }}>
+        <BagIcon />
+        {cartCount > 0 && (
+          <span style={{ position: "absolute", top: 0, right: 0, background: "#fda1b7", color: "#fff", width: 16, height: 16, borderRadius: "50%", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {cartCount > 9 ? "9+" : cartCount}
+          </span>
+        )}
+      </Link>
+    </header>
+  );
 
   return (
     <>
