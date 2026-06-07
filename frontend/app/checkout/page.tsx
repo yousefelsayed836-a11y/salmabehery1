@@ -117,9 +117,11 @@ export default function CheckoutPage() {
   const shippingCost = freeShipping ? 0 : activeShipping;
   const finalTotal = subtotal + shippingCost;
 
-  // Use DB cities if available, else fallback to EGYPT_DATA
-  const cities = form.governorate
-    ? (dbCities.length > 0 ? dbCities.map(c => c.name) : (EGYPT_DATA[form.governorate]?.cities || []))
+  // City options: { value, label } — Arabic + English
+  const cityOptions: { value: string; label: string }[] = form.governorate
+    ? (dbCities.length > 0
+        ? dbCities.map(c => ({ value: c.name, label: c.name_ar && c.name_ar !== c.name ? `${c.name} — ${c.name_ar}` : c.name }))
+        : (EGYPT_DATA[form.governorate]?.cities || []).map(c => ({ value: c, label: c })))
     : [];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -289,7 +291,7 @@ export default function CheckoutPage() {
                   <div>
                     <label style={labelStyle}>Governorate *</label>
                     <select value={form.governorate} onChange={e => setForm(p => ({ ...p, governorate: e.target.value, city: "" }))} style={{ ...inputStyle, cursor: "pointer" }} required>
-                      <option value="">Select Governorate</option>
+                      <option value="">اختر المحافظة / Select Governorate</option>
                       {Object.keys(shippingRates).length > 0
                         ? Object.entries(shippingRates).map(([name]) => {
                             const ar = EGYPT_DATA[name]?.nameAr || "";
@@ -304,8 +306,8 @@ export default function CheckoutPage() {
                   <div>
                     <label style={labelStyle}>City *</label>
                     <select value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} style={{ ...inputStyle, cursor: "pointer" }} required disabled={!form.governorate}>
-                      <option value="">Select City</option>
-                      {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                      <option value="">اختر المدينة / Select City</option>
+                      {cityOptions.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
                   </div>
                 </div>
