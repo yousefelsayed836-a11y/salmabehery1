@@ -207,7 +207,7 @@ export default function CheckoutPage() {
   return (
     <div style={{ background: "#f9f0f3", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "24px 16px 40px" }}>
-        <h1 className="checkout-title" style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", margin: "0 0 20px" }}>🛒 Checkout</h1>
+        <h1 className="checkout-title" style={{ fontSize: 26, fontWeight: 800, color: "#1a1a2e", margin: "0 0 20px", borderBottom: "2px solid #fda1b7", paddingBottom: 12 }}>🛒 Checkout</h1>
 
         <div className="checkout-grid">
 
