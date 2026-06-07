@@ -15,18 +15,27 @@ interface CartCtx {
 const CartContext = createContext<CartCtx | null>(null);
 const KEY = "cart";
 
+function readCart(): CartItem[] {
+  try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
+  // Initial load
+  useEffect(() => { setCartItems(readCart()); }, []);
+
+  // Listen for cart changes from other tabs OR from checkout page
   useEffect(() => {
-    try { setCartItems(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch {}
+    const sync = () => setCartItems(readCart());
+    window.addEventListener("cartUpdated", sync);
+    window.addEventListener("storage", sync);
+    return () => { window.removeEventListener("cartUpdated", sync); window.removeEventListener("storage", sync); };
   }, []);
 
+  // Save to localStorage on change (but don't re-trigger sync)
   useEffect(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(cartItems));
-      window.dispatchEvent(new Event("cartUpdated"));
-    } catch {}
+    try { localStorage.setItem(KEY, JSON.stringify(cartItems)); } catch {}
   }, [cartItems]);
 
   const addToCart = useCallback((product: CartItem["product"], qty: number, size: string, stock?: number): boolean => {
@@ -54,3 +63,4 @@ export function useCart() {
   if (!ctx) throw new Error("useCart must be inside CartProvider");
   return ctx;
 }
+
