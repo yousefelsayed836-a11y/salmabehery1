@@ -86,11 +86,14 @@ export default function Header() {
 
   // Compact checkout header
   if (isCheckout) return (
-    <header style={{ position: "sticky", top: "40px", zIndex: 100, background: "#fff", borderBottom: "1px solid #f5e6ea", padding: "8px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-      <Link href="/" style={{ textDecoration: "none", color: "#1a1a2e", fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
-        ← متابعة التسوق
+    <header style={{ position: "sticky", top: "40px", zIndex: 100, background: "#fff", borderBottom: "1px solid #f5e6ea", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Link href="/shop" style={{ textDecoration: "none", color: "#1a1a2e", fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+        ← Shop
       </Link>
-      <span style={{ fontFamily: "'HelloParis', serif", fontSize: 22, color: "#1a1a2e", letterSpacing: 1 }}>Salma behery</span>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+        <span style={{ fontFamily: "'HelloParis', serif", fontSize: 20, color: "#1a1a2e", letterSpacing: 1, lineHeight: 1 }}>Salma behery</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: "#fda1b7", letterSpacing: 3, textTransform: "uppercase" }}>Checkout</span>
+      </div>
       <Link href="/checkout" style={{ position: "relative", color: "#1a1a2e", textDecoration: "none", display: "flex", alignItems: "center", padding: "4px 6px" }}>
         <BagIcon />
         {cartCount > 0 && (
