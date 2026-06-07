@@ -25,12 +25,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Initial load
   useEffect(() => { setCartItems(readCart()); }, []);
 
-  // Listen for cart changes from other tabs OR from checkout page
+  // Listen ONLY to storage event (fires in OTHER tabs) — not cartUpdated (that would cause infinite loop)
   useEffect(() => {
     const sync = () => setCartItems(readCart());
-    window.addEventListener("cartUpdated", sync);
     window.addEventListener("storage", sync);
-    return () => { window.removeEventListener("cartUpdated", sync); window.removeEventListener("storage", sync); };
+    return () => window.removeEventListener("storage", sync);
   }, []);
 
   // Save to localStorage on change and notify header
