@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "https://salmabehery.com") + "/api";
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://salmabehery.com";
@@ -77,11 +78,11 @@ export default function HomePageClient({ initialCategories, initialHeroUrl }: Pr
       saveCatsToCache(initialCategories);
     }
 
-    fetch(`${API}/settings/hero_image`).then(r => r.json()).then(d => { if (d.value) setHeroUrl(d.value); }).catch(() => {});
+    fetchWithTimeout(`${API}/settings/hero_image`, {}, 8000).then(r => r.json()).then(d => { if (d.value) setHeroUrl(d.value); }).catch(() => {});
 
     Promise.all([
-      fetch(`${API}/categories`).then(r => r.json()).catch(() => null),
-      fetch(`${API}/settings/featured_section`).then(r => r.json()).catch(() => null),
+      fetchWithTimeout(`${API}/categories`, {}, 10000).then(r => r.json()).catch(() => null),
+      fetchWithTimeout(`${API}/settings/featured_section`, {}, 8000).then(r => r.json()).catch(() => null),
     ]).then(async ([cats, featuredRaw]) => {
       if (Array.isArray(cats) && cats.length > 0) {
         setApiCategories(cats);
@@ -94,7 +95,7 @@ export default function HomePageClient({ initialCategories, initialHeroUrl }: Pr
           if (cfg.enabled && cfg.product_ids?.length) {
             const ids: string[] = cfg.product_ids;
             const fetched = await Promise.all(
-              ids.map(id => fetch(`${API}/products/${id}`).then(r => r.json()).catch(() => null))
+              ids.map(id => fetchWithTimeout(`${API}/products/${id}`, {}, 8000).then(r => r.json()).catch(() => null))
             );
             const picked = fetched.filter(Boolean).filter((p: any) => {
               const prod = p.product || p;
@@ -106,7 +107,7 @@ export default function HomePageClient({ initialCategories, initialHeroUrl }: Pr
       }
     });
 
-    fetch(`${API}/reviews`).then(r => r.json()).then(reviewsRaw => {
+    fetchWithTimeout(`${API}/reviews`, {}, 8000).then(r => r.json()).then(reviewsRaw => {
       if (reviewsRaw?.reviews?.length) {
         const seedIds = new Set(SEED_REVIEWS.map((r: any) => r.id));
         setAllReviews([...reviewsRaw.reviews, ...SEED_REVIEWS.filter((r: any) => !seedIds.has(r.id))]);

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "./CartContext";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 interface Product {
   id: string; name_en: string; name_ar?: string; description_en?: string;
@@ -70,8 +71,9 @@ export default function ShopPage({ collectionSlug, title, breadcrumb }: Props) {
         setLoadingMore(true);
       }
       setError("");
-      const res = await fetch(
-        `${API_BASE}/products?is_active=true&collection=${collectionSlug}&limit=${PAGE_SIZE}&page=${pageNum}&sort=${sortBy}`
+      const res = await fetchWithTimeout(
+        `${API_BASE}/products?is_active=true&collection=${collectionSlug}&limit=${PAGE_SIZE}&page=${pageNum}&sort=${sortBy}`,
+        {}, 12000
       );
       const data = await res.json();
       const fetched: Product[] = data.products || [];

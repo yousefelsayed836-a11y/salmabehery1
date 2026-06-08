@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || "https://api.salmabehery.com";
 const API = BACKEND + "/api";
@@ -85,23 +86,21 @@ export default function ProductPage() {
       return;
     }
     setLoading(true);
-    fetch(`${API}/products/${productId}`)
-      .then(r => r.json())
+    fetchWithTimeout(`${API}/products/${productId}`, {}, 10000)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(d => {
         const p = d.product || d;
         setProduct(p);
         setLoading(false);
-        // Preload all images for this product into browser cache
         const imgs = [p.main_image, ...(p.images || [])].filter(Boolean);
         preloadImages(imgs);
         if (p.category_slug) {
-          fetch(`${API}/products?collection=${p.category_slug}&is_active=true&limit=8`)
+          fetchWithTimeout(`${API}/products?collection=${p.category_slug}&is_active=true&limit=8`, {}, 8000)
             .then(r => r.json())
             .then(data => {
               const all: Product[] = data.products || data.data || [];
               const sim = all.filter((x: Product) =>
-                x.id !== productId &&
-                x.is_active !== false &&
+                x.id !== productId && x.is_active !== false &&
                 (x.stock === undefined || x.stock === null || x.stock > 0)
               ).slice(0, 4);
               setSimilar(sim);
