@@ -143,51 +143,59 @@ router.get('/', async (req, res) => {
 });
 
 // ───────────────────────────────────────────────
-// GET /api/products/:id
+// GET /api/products/:id  (also supports slug lookup)
 // ───────────────────────────────────────────────
+const PRODUCT_SELECT = `
+  SELECT
+    p.id, p.name_en, p.name_ar, p.description_en, p.description_ar,
+    p.price, p.old_price, p.material, p.water_resistance, p.size_info,
+    p.images, p.main_image, p.stock, p.is_active, p.is_featured, p.created_at,
+    c.id as category_id, c.name_en as category_name, c.slug as category_slug,
+    COALESCE(
+      (SELECT json_agg(json_build_object('id', cat.id, 'name_en', cat.name_en, 'slug', cat.slug))
+       FROM product_categories pc2
+       JOIN categories cat ON cat.id = pc2.category_id
+       WHERE pc2.product_id = p.id),
+      '[]'::json
+    ) as categories,
+    COALESCE(
+      json_agg(
+        json_build_object(
+          'id', pv.id, 'option_name', pv.option_name,
+          'option_value', pv.option_value, 'sku', pv.sku,
+          'quantity', pv.quantity, 'price_override', pv.price_override
+        ) ORDER BY pv.option_value
+      ) FILTER (WHERE pv.id IS NOT NULL),
+      '[]'::json
+    ) as variants
+  FROM products p
+  LEFT JOIN categories c ON p.category_id = c.id
+  LEFT JOIN product_variants pv ON p.id = pv.product_id
+`;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 router.get('/:id', async (req, res) => {
   try {
     await ensureProductCategoriesTable();
     const { id } = req.params;
 
-    const result = await db.query(`
-      SELECT
-        p.id, p.name_en, p.name_ar, p.description_en, p.description_ar,
-        p.price, p.old_price, p.material, p.water_resistance, p.size_info,
-        p.images, p.main_image, p.stock, p.is_active, p.is_featured, p.created_at,
-        c.id as category_id, c.name_en as category_name, c.slug as category_slug,
-        COALESCE(
-          (SELECT json_agg(json_build_object('id', cat.id, 'name_en', cat.name_en, 'slug', cat.slug))
-           FROM product_categories pc2
-           JOIN categories cat ON cat.id = pc2.category_id
-           WHERE pc2.product_id = p.id),
-          '[]'::json
-        ) as categories,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', pv.id, 'option_name', pv.option_name,
-              'option_value', pv.option_value, 'sku', pv.sku,
-              'quantity', pv.quantity, 'price_override', pv.price_override
-            ) ORDER BY pv.option_value
-          ) FILTER (WHERE pv.id IS NOT NULL),
-          '[]'::json
-        ) as variants
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_variants pv ON p.id = pv.product_id
-      WHERE p.id = $1
-      GROUP BY p.id, c.id, c.name_en, c.slug
-    `, [id]);
+    let result;
+    if (UUID_RE.test(id)) {
+      result = await db.query(`${PRODUCT_SELECT} WHERE p.id = $1 GROUP BY p.id, c.id, c.name_en, c.slug`, [id]);
+    } else {
+      // Slug lookup: "Hand-in-hand--two-necklaces-" → search by name similarity
+      const nameSearch = id.replace(/-+/g, ' ').trim();
+      result = await db.query(
+        `${PRODUCT_SELECT} WHERE LOWER(REPLACE(p.name_en, ' ', '-')) = LOWER($1) OR p.name_en ILIKE $2 GROUP BY p.id, c.id, c.name_en, c.slug LIMIT 1`,
+        [id, `%${nameSearch}%`]
+      );
+    }
 
     if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
 
     const product = result.rows[0];
-    // Derive category_ids array from categories
-    product.category_ids = Array.isArray(product.categories)
-      ? product.categories.map((c) => c.id)
-      : [];
-
+    product.category_ids = Array.isArray(product.categories) ? product.categories.map((c) => c.id) : [];
     res.json({ success: true, product });
   } catch (error) {
     console.error('Get product error:', error);
