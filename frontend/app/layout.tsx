@@ -7,6 +7,7 @@ import { CartProvider } from '../components/CartContext';
 import FaviconUpdater from '../components/FaviconUpdater';
 import FacebookPixel from '../components/FacebookPixel';
 import KeepAlive from '../components/KeepAlive';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
@@ -43,7 +44,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Ticker />
           <Header />
           <main style={{ minHeight: '100vh', background: '#fff' }}>
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </main>
         </CartProvider>
         <Analytics />

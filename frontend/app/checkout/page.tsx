@@ -60,11 +60,19 @@ export default function CheckoutPage() {
   const [loadingCities, setLoadingCities] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("cart");
-      if (saved) setCart(JSON.parse(saved));
-    } catch {}
+    const loadCart = () => {
+      try {
+        const saved = localStorage.getItem("cart");
+        if (saved) setCart(JSON.parse(saved));
+        else setCart([]);
+      } catch { setCart([]); }
+    };
+    loadCart();
+    window.addEventListener("cartUpdated", loadCart);
+    return () => window.removeEventListener("cartUpdated", loadCart);
+  }, []);
 
+  useEffect(() => {
     fetch(`${API_BASE}/shipping`)
       .then(r => r.json())
       .then(data => {
