@@ -93,7 +93,7 @@ export default function HomePageClient({ initialCategories, initialHeroUrl }: Pr
         try {
           const cfg = JSON.parse(featuredRaw.value);
           if (cfg.enabled && cfg.product_ids?.length) {
-            const ids: string[] = cfg.product_ids;
+            const ids: string[] = cfg.product_ids.filter((id: any) => typeof id === 'string' && id.length > 0);
             const fetched = await Promise.all(
               ids.map(id => fetchWithTimeout(`${API}/products/${id}`, {}, 8000).then(r => r.json()).catch(() => null))
             );
