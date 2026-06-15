@@ -201,7 +201,9 @@ export default function HomePageClient({ initialCategories, initialHeroUrl }: Pr
 
       {/* ── HERO ── */}
       <section className="hero-section" style={{ width: "100%", height: "85vh", minHeight: "550px", maxHeight: "800px", display: "flex", alignItems: "flex-end", justifyContent: "center", textAlign: "center", position: "relative", paddingBottom: "60px", overflow: "hidden" }}>
-        <Image src={heroUrl} alt="Salma Behery hero" fill priority sizes="100vw" style={{ objectFit: "cover", objectPosition: "center", filter: "saturate(1.12) contrast(1.04)" }} />
+        <img src={heroUrl} alt="Salma Behery hero" loading="eager" decoding="async" fetchPriority="high"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", filter: "saturate(1.12) contrast(1.04)" }}
+          onError={e => { (e.target as HTMLImageElement).src = "/images/hero-bg.jpg"; }} />
         <div style={{ position: "relative", zIndex: 1, padding: "0 20px" }}>
           <Link href="/shop" style={{ display: "inline-block", background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", color: "#fff", padding: "16px 48px", borderRadius: 50, textDecoration: "none", fontWeight: 500, fontSize: 15, border: "1px solid rgba(255,255,255,0.4)", letterSpacing: 2, textTransform: "uppercase", transition: "all 0.3s ease" }}>
             Shop Now
