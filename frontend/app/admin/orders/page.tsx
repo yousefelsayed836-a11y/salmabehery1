@@ -281,8 +281,6 @@ export default function OrdersPage() {
 
   const openPrintWindow = (html: string, title: string) => {
     setPrintOverlay({ html, title });
-    // auto-trigger print after overlay renders so user can Save as PDF
-    setTimeout(() => window.print(), 400);
   };
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
@@ -538,8 +536,12 @@ export default function OrdersPage() {
                         عرض
                       </button>
                       <button onClick={() => handlePrint(order)}
-                        style={{ flex: 2, padding: "6px 0", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        🖨️ طباعة / PDF
+                        style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                        🖨️ طباعة
+                      </button>
+                      <button onClick={() => handlePrint(order)}
+                        style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                        📄 PDF
                       </button>
                     </div>
                   </div>
@@ -566,8 +568,12 @@ export default function OrdersPage() {
                   {selectedOrder.status === "partially_shipped" ? "Part. Shipped" : selectedOrder.status}
                 </span>
                 <button onClick={() => handlePrint(selectedOrder)}
+                  style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
+                  🖨️ طباعة
+                </button>
+                <button onClick={() => handlePrint(selectedOrder)}
                   style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
-                  🖨️ طباعة / PDF
+                  📄 PDF
                 </button>
                 <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
               </div>
@@ -698,7 +704,8 @@ export default function OrdersPage() {
           <div className="wb-print-bar" style={{ background: "#1a1a2e", padding: "10px 14px", display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
             <button onClick={() => setPrintOverlay(null)} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", padding: "0 6px", lineHeight: 1 }}>✕</button>
             <span style={{ color: "#fda1b7", fontWeight: 700, fontSize: 13, flex: 1 }}>{printOverlay.title}</span>
-            <button onClick={() => window.print()} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة / حفظ PDF</button>
+            <button onClick={() => window.print()} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة</button>
+            <button onClick={() => window.print()} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📄 PDF</button>
           </div>
           <div className="wb-print-root" style={{ flex: 1, overflowY: "auto", background: "#f5f5f5", padding: 16 }}
             dangerouslySetInnerHTML={{ __html: printOverlay.html }} />
