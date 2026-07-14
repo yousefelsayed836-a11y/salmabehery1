@@ -283,6 +283,15 @@ export default function OrdersPage() {
     setPrintOverlay({ html, title });
   };
 
+  const doPrint = (html: string) => {
+    const win = window.open("", "_blank", "width=900,height=700");
+    if (!win) return;
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { win.focus(); win.print(); };
+  };
+
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
     const pages: string[] = [];
     for (let i = 0; i < orderList.length; i += 2) {
@@ -692,20 +701,12 @@ export default function OrdersPage() {
 
       {/* ── PRINT OVERLAY ── */}
       {printOverlay && (
-        <div className="wb-print-root" style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", flexDirection: "column", background: "#222" }}>
-          <style>{`
-            @media print {
-              body > *:not(.wb-print-root) { display: none !important; }
-              .wb-print-root { position: static !important; background: #fff !important; height: auto !important; }
-              .wb-print-bar { display: none !important; }
-            }
-            ${waybillCss}
-          `}</style>
+        <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", flexDirection: "column", background: "#222" }}>
           <div className="wb-print-bar" style={{ background: "#1a1a2e", padding: "10px 14px", display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
             <button onClick={() => setPrintOverlay(null)} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", padding: "0 6px", lineHeight: 1 }}>✕</button>
             <span style={{ color: "#fda1b7", fontWeight: 700, fontSize: 13, flex: 1 }}>{printOverlay.title}</span>
-            <button onClick={() => window.print()} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة</button>
-            <button onClick={() => window.print()} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📄 PDF</button>
+            <button onClick={() => doPrint(printOverlay.html)} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة</button>
+            <button onClick={() => doPrint(printOverlay.html)} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📄 PDF</button>
           </div>
           <div className="wb-print-root" style={{ flex: 1, overflowY: "auto", background: "#f5f5f5", padding: 16 }}
             dangerouslySetInnerHTML={{ __html: printOverlay.html }} />
