@@ -283,30 +283,52 @@ export default function OrdersPage() {
     setPrintOverlay({ html, title });
   };
 
+  const downloadPdf = (html: string, _title: string) => {
+    // Inject auto-print script so the new tab triggers print dialog immediately
+    const htmlWithAutoPrint = html.replace(
+      "</head>",
+      `<script>window.onload=function(){setTimeout(function(){window.print();},400);};<\/script></head>`
+    );
+    const win = window.open("", "_blank");
+    if (!win) { alert("يرجى السماح بفتح نوافذ منبثقة ثم المحاولة مرة أخرى"); return; }
+    win.document.open();
+    win.document.write(htmlWithAutoPrint);
+    win.document.close();
+  };
+
+  const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
+    const pages: string[] = [];
+    for (let i = 0; i < orderList.length; i += 2) {
+      const a = generateWaybillHtml(orderList[i], deposits[orderList[i].id] || 0, productImages, translatedAddresses[orderList[i].id]);
+      const cutOrEmpty = i + 1 < orderList.length ? `<div class="cut-line"></div>` : `<div style="height:140mm"></div>`;
+      const b = i + 1 < orderList.length
+        ? generateWaybillHtml(orderList[i + 1], deposits[orderList[i + 1].id] || 0, productImages, translatedAddresses[orderList[i + 1].id])
+        : "";
+      pages.push(`<div class="page-pair">${a}${cutOrEmpty}${b}</div>`);
+    }
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titleStr}</title><style>${waybillCss}</style></head><body>${pages.join("")}</body></html>`;
+  };
+
   const handlePrint = (order: Order) => {
-    const deposit = deposits[order.id] || 0;
-    const addr = translatedAddresses[order.id];
-    const body = `<div class="page-pair">${generateWaybillHtml(order, deposit, productImages, addr)}</div>`;
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بوليصة #${order.id.slice(-6)}</title><style>${waybillCss}</style></head><body>${body}</body></html>`;
+    const html = buildWaybillHtml([order], `بوليصة #${order.id.slice(-6)}`);
     openPrintWindow(html, `بوليصة #${order.id.slice(-6)}`);
+  };
+
+  const handleDownloadPdf = (order: Order) => {
+    const html = buildWaybillHtml([order], `بوليصة #${order.id.slice(-6)}`);
+    downloadPdf(html, `بوليصة #${order.id.slice(-6)}`);
   };
 
   const handleBatchPrint = () => {
     const toPrint = orders.filter(o => selectedForPrint.has(o.id));
     if (toPrint.length === 0) return;
-    const pages: string[] = [];
-    for (let i = 0; i < toPrint.length; i += 2) {
-      const a = generateWaybillHtml(toPrint[i], deposits[toPrint[i].id] || 0, productImages, translatedAddresses[toPrint[i].id]);
-      const cutOrEmpty = i + 1 < toPrint.length
-        ? `<div class="cut-line"></div>`
-        : `<div style="height:140mm"></div>`;
-      const b = i + 1 < toPrint.length
-        ? generateWaybillHtml(toPrint[i + 1], deposits[toPrint[i + 1].id] || 0, productImages, translatedAddresses[toPrint[i + 1].id])
-        : "";
-      pages.push(`<div class="page-pair">${a}${cutOrEmpty}${b}</div>`);
-    }
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>طباعة بوليصات</title><style>${waybillCss}</style></head><body>${pages.join("")}</body></html>`;
-    openPrintWindow(html, 'طباعة بوليصات');
+    openPrintWindow(buildWaybillHtml(toPrint, "طباعة بوليصات"), "طباعة بوليصات");
+  };
+
+  const handleBatchDownloadPdf = () => {
+    const toPrint = orders.filter(o => selectedForPrint.has(o.id));
+    if (toPrint.length === 0) return;
+    downloadPdf(buildWaybillHtml(toPrint, `بوليصات (${toPrint.length})`), `بوليصات_${toPrint.length}`);
   };
 
   const getStatusColor = (s: string) => {
@@ -415,11 +437,14 @@ export default function OrdersPage() {
               <h1 style={{ margin: "8px 0 0", fontSize: 24, fontWeight: 800, color: "#111" }}>Orders</h1>
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {selectedForPrint.size > 0 && (
+              {selectedForPrint.size > 0 && (<>
                 <button onClick={handleBatchPrint} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1a1a2e,#333)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
-                  🖨️ Print {selectedForPrint.size} Waybill{selectedForPrint.size > 1 ? "s" : ""}
+                  🖨️ طباعة {selectedForPrint.size}
                 </button>
-              )}
+                <button onClick={handleBatchDownloadPdf} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
+                  📥 تحميل PDF ({selectedForPrint.size})
+                </button>
+              </>)}
               <button onClick={fetchOrders} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>🔄 Refresh</button>
             </div>
           </div>
@@ -475,11 +500,14 @@ export default function OrdersPage() {
               <span style={{ fontSize: 14, fontWeight: 600, color: "#555" }}>
                 {selectedForPrint.size > 0 ? `${selectedForPrint.size} selected` : "Select all"}
               </span>
-              {selectedForPrint.size > 0 && (
+              {selectedForPrint.size > 0 && (<>
                 <button onClick={handleBatchPrint} style={{ marginLeft: "auto", padding: "8px 16px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                  🖨️ Print {selectedForPrint.size}
+                  🖨️ طباعة {selectedForPrint.size}
                 </button>
-              )}
+                <button onClick={handleBatchDownloadPdf} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                  📥 PDF
+                </button>
+              </>)}
             </div>
 
             {/* Unified card grid */}
@@ -535,11 +563,15 @@ export default function OrdersPage() {
                     <div style={{ display: "flex", gap: 6 }}>
                       <button onClick={() => openOrder(order)}
                         style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        View
+                        عرض
                       </button>
                       <button onClick={() => openOrder(order).then(() => handlePrint(order))}
+                        style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                        🖨️ طباعة
+                      </button>
+                      <button onClick={() => handleDownloadPdf(order)}
                         style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        🖨️ Print
+                        📥 PDF
                       </button>
                     </div>
                   </div>
@@ -566,8 +598,12 @@ export default function OrdersPage() {
                   {selectedOrder.status === "partially_shipped" ? "Part. Shipped" : selectedOrder.status}
                 </span>
                 <button onClick={() => handlePrint(selectedOrder)}
+                  style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
+                  🖨️ طباعة
+                </button>
+                <button onClick={() => handleDownloadPdf(selectedOrder)}
                   style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
-                  🖨️ Print
+                  📥 PDF
                 </button>
                 <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
               </div>
@@ -698,7 +734,8 @@ export default function OrdersPage() {
           <div className="wb-print-bar" style={{ background: "#1a1a2e", padding: "10px 14px", display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
             <button onClick={() => setPrintOverlay(null)} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", padding: "0 6px", lineHeight: 1 }}>✕</button>
             <span style={{ color: "#fda1b7", fontWeight: 700, fontSize: 13, flex: 1 }}>{printOverlay.title}</span>
-            <button onClick={() => window.print()} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة / PDF</button>
+            <button onClick={() => downloadPdf(printOverlay.html, printOverlay.title)} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📥 تحميل PDF</button>
+            <button onClick={() => window.print()} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة</button>
             <button onClick={async () => {
               const blob = new Blob([printOverlay.html], { type: "text/html" });
               const fileName = `${printOverlay.title.replace(/[^a-zA-Z0-9؀-ۿ]/g, "_")}.html`;
