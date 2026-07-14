@@ -692,11 +692,11 @@ export default function OrdersPage() {
 
       {/* ── PRINT OVERLAY ── */}
       {printOverlay && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", flexDirection: "column", background: "#222" }}>
+        <div className="wb-print-root" style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", flexDirection: "column", background: "#222" }}>
           <style>{`
             @media print {
               body > *:not(.wb-print-root) { display: none !important; }
-              .wb-print-root { position: static !important; background: #fff !important; }
+              .wb-print-root { position: static !important; background: #fff !important; height: auto !important; }
               .wb-print-bar { display: none !important; }
             }
             ${waybillCss}
