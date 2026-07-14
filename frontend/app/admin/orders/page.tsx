@@ -184,59 +184,35 @@ export default function OrdersPage() {
 
   const waybillCss = `
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
-    @page {
-      size: A4 portrait;
-      margin: 5mm 8mm;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       font-family: 'Cairo', Arial, sans-serif;
       direction: rtl;
-      color: #1a1a2e;
+      color: #000;
       font-size: 13px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
       background: #fff;
     }
-
-    /* === PAGE WRAPPER: always 1 page === */
     .page-pair {
       display: flex;
       flex-direction: column;
-      gap: 7mm;
-      page-break-after: always;
-      break-after: page;
-      page-break-inside: avoid;
-      break-inside: avoid;
+      gap: 10px;
+      margin-bottom: 20px;
     }
-    .page-pair:last-child {
-      page-break-after: auto;
-      break-after: auto;
-    }
-
-    /* === WAYBILL: 2 fit in 80% of A4 page === */
     .waybill {
       width: 100%;
-      height: 111mm;
-      border: 1.5px solid #000;
-      border-radius: 6px;
-      padding: 8px 12px;
+      border: 2px solid #000;
+      border-radius: 4px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      overflow: hidden;
-      page-break-inside: avoid;
-      break-inside: avoid;
+      gap: 6px;
       background: #fff;
     }
-
-    /* Dashed cut line between the two waybills */
     .cut-line {
       height: 0;
-      border-top: 1.5px dashed #000;
+      border-top: 2px dashed #000;
       text-align: center;
       position: relative;
-      flex-shrink: 0;
     }
     .cut-line::before {
       content: '✂';
@@ -249,34 +225,32 @@ export default function OrdersPage() {
       font-size: 13px;
       color: #000;
     }
-
-    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 5px; margin-bottom: 4px; }
+    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 4px; }
     .wb-logo { font-size: 16px; font-weight: 800; color: #000; }
-    .wb-order { font-size: 11px; color: #555; }
-    .wb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 0; }
-    .wb-col { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
-    .wb-row { display: flex; gap: 6px; font-size: 11px; padding: 2px 0; border-bottom: 1px solid #ddd; }
+    .wb-order { font-size: 11px; color: #333; }
+    .wb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wb-col { display: flex; flex-direction: column; gap: 2px; }
+    .wb-row { display: flex; gap: 6px; font-size: 11px; padding: 3px 0; border-bottom: 1px solid #ccc; }
     .wb-label { color: #555; min-width: 58px; font-size: 10px; flex-shrink: 0; }
     .wb-val { font-weight: 700; flex: 1; font-size: 11px; word-break: break-word; color: #000; }
-    .wb-items-title { font-size: 10px; color: #000; font-weight: 700; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 3px; }
+    .wb-items-title { font-size: 10px; color: #000; font-weight: 700; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 4px; }
     .wb-item { display: grid; grid-template-columns: 1fr auto auto; gap: 4px; align-items: center; font-size: 10px; padding: 3px 0; border-bottom: 1px dotted #ccc; }
     .wb-item-name { font-weight: 600; color: #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .wb-item-size { color: #777; font-size: 9px; text-align: center; white-space: nowrap; }
-    .wb-item-qty { color: #000; font-weight: 800; direction: ltr; unicode-bidi: embed; text-align: left; white-space: nowrap; }
-    .wb-totals { margin-top: auto; border-top: 1.5px solid #000; padding-top: 4px; }
-    .wb-total-row { display: flex; justify-content: space-between; font-size: 10px; padding: 1px 0; color: #555; }
-    .wb-total-final { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #000; margin-top: 3px; border-top: 1px solid #999; padding-top: 3px; }
-    @media screen {
-      body { padding: 10px; background: #f5f5f5; }
-      .page-pair { background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-      .waybill { height: auto; min-height: 200px; }
-      .wb-grid { grid-template-columns: 1fr; gap: 6px; }
-      .mobile-share-bar { display: flex; gap: 10px; justify-content: center; padding: 16px; position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -2px 8px rgba(0,0,0,0.08); }
-      .mobile-share-btn { flex: 1; max-width: 200px; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: Cairo, Arial, sans-serif; }
-      .btn-print { background: #1a1a2e; color: #fff; }
-      .btn-pdf { background: #fda1b7; color: #fff; }
+    .wb-item-size { color: #555; font-size: 9px; text-align: center; white-space: nowrap; }
+    .wb-item-qty { color: #000; font-weight: 800; direction: ltr; text-align: left; white-space: nowrap; }
+    .wb-totals { border-top: 2px solid #000; padding-top: 6px; margin-top: 6px; }
+    .wb-total-final { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; color: #000; }
+    .mobile-share-bar { display: flex; gap: 10px; justify-content: center; padding: 20px; border-top: 1px solid #eee; margin-top: 10px; }
+    .mobile-share-btn { flex: 1; max-width: 200px; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: Cairo, Arial, sans-serif; }
+    .btn-print { background: #1a1a2e; color: #fff; }
+    .btn-pdf { background: #fda1b7; color: #fff; }
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .mobile-share-bar { display: none !important; }
+      .page-pair { page-break-after: always; }
+      .page-pair:last-child { page-break-after: auto; }
     }
-    @media print { .mobile-share-bar { display: none !important; } }
   `;
 
   const openPrintWindow = (html: string, title: string) => {
