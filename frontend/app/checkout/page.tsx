@@ -53,6 +53,8 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [confirmedSubtotal, setConfirmedSubtotal] = useState(0);
+  const [confirmedShipping, setConfirmedShipping] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
   const [shippingRates, setShippingRates] = useState<Record<string, { cost: number; id: number }>>({});
   const [freeThreshold, setFreeThreshold] = useState(900);
@@ -179,6 +181,8 @@ export default function CheckoutPage() {
       if (res.ok) {
         const data = await res.json();
         setOrderId(data.order?.id || data.id || "");
+        setConfirmedSubtotal(subtotal);
+        setConfirmedShipping(shippingCost);
         localStorage.removeItem("cart");
         window.dispatchEvent(new Event("cartUpdated"));
         setSuccess(true);
@@ -201,9 +205,9 @@ export default function CheckoutPage() {
         {orderId && <p style={{ color: "#888", margin: "0 0 8px" }}>Order #{orderId.slice(-6)}</p>}
         <p style={{ color: "#555", fontSize: 15, margin: "0 0 24px" }}>Thank you {form.fullName}! We'll contact you on {form.phone} to confirm.</p>
         <div style={{ background: "#fff", borderRadius: 12, padding: "14px 20px", marginBottom: 24, textAlign: "left" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}><span style={{ color: "#888", fontSize: 13 }}>Subtotal</span><span style={{ fontWeight: 600 }}>{subtotal} EGP</span></div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}><span style={{ color: "#888", fontSize: 13 }}>Shipping to {form.governorate}</span><span style={{ fontWeight: 600 }}>{shippingCost === 0 ? "FREE 🎉" : `${shippingCost} EGP`}</span></div>
-          <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #eee", paddingTop: 8, marginTop: 8 }}><span style={{ fontWeight: 700 }}>Total</span><span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 18 }}>{finalTotal} EGP</span></div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}><span style={{ color: "#888", fontSize: 13 }}>Subtotal</span><span style={{ fontWeight: 600 }}>{confirmedSubtotal} EGP</span></div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}><span style={{ color: "#888", fontSize: 13 }}>Shipping to {form.governorate}</span><span style={{ fontWeight: 600 }}>{confirmedShipping === 0 ? "FREE 🎉" : `${confirmedShipping} EGP`}</span></div>
+          <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #eee", paddingTop: 8, marginTop: 8 }}><span style={{ fontWeight: 700 }}>Total</span><span style={{ fontWeight: 800, color: "#fda1b7", fontSize: 18 }}>{confirmedSubtotal + confirmedShipping} EGP</span></div>
         </div>
         <Link href="/" style={{ display: "block", padding: "14px 32px", borderRadius: 12, background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 700, textDecoration: "none", fontSize: 15 }}>
           Continue Shopping →
