@@ -284,10 +284,10 @@ export default function OrdersPage() {
   };
 
   const doPrint = (html: string) => {
-    const win = window.open("", "_blank");
-    if (!win) return;
-    win.document.write(html);
-    win.document.close();
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
   };
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
