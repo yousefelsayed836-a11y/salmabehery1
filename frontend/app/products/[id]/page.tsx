@@ -174,8 +174,9 @@ export default function ProductPage() {
   // Group variants by option_name
   const variantGroups: Record<string, Variant[]> = {};
   (product.variants || []).forEach(v => {
-    if (!variantGroups[v.option_name]) variantGroups[v.option_name] = [];
-    variantGroups[v.option_name].push(v);
+    const key = (v.option_name || "").trim();
+    if (!variantGroups[key]) variantGroups[key] = [];
+    variantGroups[key].push(v);
   });
 
   return (

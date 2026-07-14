@@ -284,19 +284,11 @@ export default function OrdersPage() {
   };
 
   const doPrint = (html: string) => {
-    const iframe = document.createElement("iframe");
-    iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:none;";
-    document.body.appendChild(iframe);
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!doc) { document.body.removeChild(iframe); return; }
-    doc.open();
-    doc.write(html);
-    doc.close();
-    setTimeout(() => {
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-      setTimeout(() => { try { document.body.removeChild(iframe); } catch {} }, 2000);
-    }, 600);
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    setTimeout(() => { win.focus(); win.print(); }, 1000);
   };
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
