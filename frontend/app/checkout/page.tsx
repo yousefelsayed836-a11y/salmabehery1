@@ -47,7 +47,7 @@ const DEFAULT_SHIPPING = 80;
 export default function CheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [form, setForm] = useState({
-    fullName: "", phone: "", phone2: "",
+    fullName: "", phone: "", phone2: "", email: "",
     governorate: "", city: "", address: "", notes: "",
   });
   const [submitting, setSubmitting] = useState(false);
@@ -157,6 +157,7 @@ export default function CheckoutPage() {
         governorate: form.governorate,
         address: form.address.trim(),
         notes: form.notes.trim() || null,
+        customer_email: form.email.trim() || null,
         shipping_cost: shippingCost,
         subtotal,
         total_amount: finalTotal,
@@ -297,6 +298,8 @@ export default function CheckoutPage() {
                 <div>
                   <label style={labelStyle}>WhatsApp Number * <span style={{ color: "#fda1b7", fontSize: 11 }}>(for deposit confirmation)</span></label>
                   <input value={form.phone2} onChange={e => setForm(p => ({ ...p, phone2: e.target.value.replace(/\D/g, "") }))} placeholder="01XXXXXXXXX" style={inputStyle} maxLength={11} required inputMode="numeric" />
+                  <label style={labelStyle}>Email <span style={{ color: "#aaa", fontSize: 11 }}>(اختياري — هيجيلك تأكيد الطلب)</span></label>
+                  <input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="example@email.com" style={inputStyle} type="email" inputMode="email" />
                 </div>
 
                 <div className="form-row">

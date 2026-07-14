@@ -5,6 +5,9 @@ const fetch = require('node-fetch');
 
 const ADMIN_EMAIL = 'salmabehery14@gmail.com';
 
+// Ensure customer_email column exists
+pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_email VARCHAR(255) DEFAULT ''`).catch(() => {});
+
 // Deduct or restore stock for a product and its specific variant (if size matches)
 async function adjustStock(productId, size, qty, direction /* 'deduct' | 'restore' */) {
   const sign = direction === 'deduct' ? '-' : '+';
@@ -91,6 +94,76 @@ async function sendOrderEmail(order, items) {
   console.log('[Email] Sent to', ADMIN_EMAIL, '| id:', data.id);
 }
 
+async function sendCustomerConfirmationEmail(order, items) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || !order.customer_email) return;
+
+  const itemsHtml = (items || []).map(i =>
+    `<tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px">${i.product_name || 'منتج'}${i.size && i.size !== 'One Size' ? ` <span style="color:#aaa">(${i.size})</span>` : ''}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-size:13px">${i.quantity}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:700;font-size:13px">${i.price} ج.م</td>
+    </tr>`
+  ).join('');
+
+  const html = `
+<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;border:1px solid #eee;border-radius:12px;overflow:hidden;direction:rtl">
+  <div style="background:#1a1a2e;padding:28px 24px;text-align:center">
+    <div style="font-size:28px;margin-bottom:8px">🎉</div>
+    <div style="color:#fda1b7;font-size:12px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">تأكيد الطلب</div>
+    <div style="color:#fff;font-size:22px;font-weight:800">Salma Behery ✦</div>
+  </div>
+
+  <div style="padding:24px;background:#fff">
+    <h2 style="margin:0 0 6px;font-size:18px;color:#1a1a2e">تم تأكيد طلبك! ✅</h2>
+    <p style="color:#555;font-size:14px;margin:0 0 20px">شكراً ${order.customer_name}، طلبك رقم <strong style="color:#fda1b7">#${String(order.id).slice(-6)}</strong> وصلنا وهنتواصل معاك قريباً.</p>
+
+    <div style="background:#f9f0f3;border-radius:10px;padding:14px;margin-bottom:20px">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tr><td style="padding:5px 0;color:#888;width:110px">رقم التليفون</td><td style="padding:5px 0;font-weight:700">${order.customer_phone}</td></tr>
+        <tr><td style="padding:5px 0;color:#888">العنوان</td><td style="padding:5px 0;font-weight:700">${order.shipping_address || order.address || '-'}</td></tr>
+        <tr><td style="padding:5px 0;color:#888">المدينة</td><td style="padding:5px 0;font-weight:700">${order.city || ''}${order.governorate ? ' / ' + order.governorate : ''}</td></tr>
+        <tr><td style="padding:5px 0;color:#888">الدفع</td><td style="padding:5px 0;font-weight:700">Cash on Delivery 💵</td></tr>
+      </table>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
+      <thead><tr style="background:#fdf0f3">
+        <th style="padding:10px 12px;text-align:right;font-size:12px;color:#888;font-weight:600">المنتج</th>
+        <th style="padding:10px 12px;text-align:center;font-size:12px;color:#888;font-weight:600">الكمية</th>
+        <th style="padding:10px 12px;text-align:right;font-size:12px;color:#888;font-weight:600">السعر</th>
+      </tr></thead>
+      <tbody>${itemsHtml}</tbody>
+    </table>
+
+    <div style="border-top:2px solid #f0f0f0;padding-top:14px">
+      ${order.shipping_cost ? `<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;color:#888"><span>الشحن</span><span>${order.shipping_cost} ج.م</span></div>` : ''}
+      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800;color:#1a1a2e"><span>الإجمالي</span><span>${order.total_amount} ج.م</span></div>
+    </div>
+  </div>
+
+  <div style="background:#fdf0f3;padding:16px 24px;text-align:center">
+    <p style="color:#888;font-size:12px;margin:0 0 8px">هتبعتلك إيميل تاني لما الأوردر يتشحن 📦</p>
+    <a href="https://salmabehery.com/shop" style="display:inline-block;background:#fda1b7;color:#fff;padding:10px 24px;border-radius:20px;text-decoration:none;font-weight:700;font-size:13px">تسوقي تاني →</a>
+    <p style="color:#ccc;font-size:11px;margin:12px 0 0">Salma Behery · salmabehery.com</p>
+  </div>
+</div>`;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: 'Salma Behery <onboarding@resend.dev>',
+      to: [order.customer_email],
+      subject: `✅ تم تأكيد طلبك #${String(order.id).slice(-6)} — Salma Behery`,
+      html,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || JSON.stringify(data));
+  console.log('[Email] Customer confirmation sent to', order.customer_email, '| id:', data.id);
+}
+
 // Add deposit column if it doesn't exist
 pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS deposit DECIMAL(10,2) DEFAULT 0`).catch(() => {});
 
@@ -115,7 +188,7 @@ router.post('/', async (req, res) => {
       shipping_address, customer_city, city,
       address, items, notes,
       governorate, shipping_cost: reqShipping,
-      subtotal, total_amount
+      subtotal, total_amount, customer_email
     } = req.body;
 
     const finalCustomerName = customer_name || req.body.fullName || '';
@@ -160,6 +233,7 @@ router.post('/', async (req, res) => {
     addField('notes', finalNotes);
     addField('status', 'pending');
     addField('payment_method', 'cash_on_delivery');
+    addField('customer_email', customer_email || '');
 
     const orderQuery = `
       INSERT INTO orders (${orderFields.join(', ')})
@@ -209,7 +283,8 @@ router.post('/', async (req, res) => {
       if (io) io.to('orders').emit('new_order', { id: newOrder.id, customer_name: finalCustomerName, total_amount: total });
     } catch (e) {}
 
-    sendOrderEmail(newOrder, items).catch(e => console.error('[Email] Failed:', e.message));
+    sendOrderEmail(newOrder, items).catch(e => console.error('[Email] Admin email failed:', e.message));
+    if (customer_email) sendCustomerConfirmationEmail({ ...newOrder, customer_email }, items).catch(e => console.error('[Email] Customer email failed:', e.message));
 
     res.status(201).json({
       message: 'Order created successfully',
