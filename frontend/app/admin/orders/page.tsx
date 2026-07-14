@@ -456,14 +456,6 @@ ${waybills.join("")}
                         style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                         عرض
                       </button>
-                      <button onClick={() => handlePrint(order)}
-                        style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        🖨️ طباعة
-                      </button>
-                      <button onClick={() => handlePrint(order)}
-                        style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        📄 PDF
-                      </button>
                     </div>
                   </div>
                 );
