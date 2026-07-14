@@ -61,35 +61,25 @@ async function fetchProductImage(productId: string): Promise<string | null> {
 function generateWaybillHtml(order: Order, deposit: number, productImages: Record<string, string>, translatedAddr?: string): string {
   const remaining = Math.max(0, (order.total_amount || 0) - deposit);
   const address = translatedAddr || order.shipping_address || order.address || "-";
-  const shipping = order.shipping_cost || 0;
-
+  const items = (order.items || []).map(item =>
+    `<tr><td>${item.product_name || "منتج"}${item.size && item.size !== "One Size" ? ` (${item.size})` : ""}</td><td style="text-align:left;direction:ltr">x${item.quantity}</td></tr>`
+  ).join("");
   return `
     <div class="waybill">
       <div class="wb-top">
-        <div class="wb-logo">Salma Behery ✦</div>
-        <div class="wb-order">#${order.id.slice(-6)} &nbsp;|&nbsp; ${new Date(order.created_at).toLocaleDateString("ar-EG")}</div>
+        <span>Salma Behery ✦</span>
+        <span>#${order.id.slice(-6)} | ${new Date(order.created_at).toLocaleDateString("ar-EG")}</span>
       </div>
-      <div class="wb-grid">
-        <div class="wb-col">
-          <div class="wb-row"><span class="wb-label">الاسم</span><span class="wb-val">${order.customer_name}</span></div>
-          <div class="wb-row"><span class="wb-label">التليفون</span><span class="wb-val">${order.customer_phone}${order.phone2 ? " / " + order.phone2 : ""}</span></div>
-          <div class="wb-row"><span class="wb-label">العنوان</span><span class="wb-val">${address}</span></div>
-          <div class="wb-row"><span class="wb-label">المدينة</span><span class="wb-val">${order.city || "-"}${order.governorate ? " / " + order.governorate : ""}</span></div>
-          ${order.notes ? `<div class="wb-row"><span class="wb-label">ملاحظات</span><span class="wb-val">${order.notes}</span></div>` : ""}
-        </div>
-        <div class="wb-col">
-          <div class="wb-items-title">المنتجات</div>
-          ${(order.items || []).map(item => `
-            <div class="wb-item">
-              <span class="wb-item-name">${item.product_name || "منتج"}</span>
-              ${item.size && item.size !== "One Size" ? `<span class="wb-item-size">مقاس: ${item.size}</span>` : ""}
-              <span class="wb-item-qty">x${item.quantity}</span>
-            </div>`).join("")}
-          <div class="wb-totals">
-            <div class="wb-total-final"><span>المتبقي للتحصيل</span><span>${remaining} ج.م</span></div>
-          </div>
-        </div>
-      </div>
+      <table>
+        <tr><td class="lbl">الاسم</td><td class="val">${order.customer_name}</td></tr>
+        <tr><td class="lbl">التليفون</td><td class="val">${order.customer_phone}${order.phone2 ? " / " + order.phone2 : ""}</td></tr>
+        <tr><td class="lbl">العنوان</td><td class="val">${address}</td></tr>
+        <tr><td class="lbl">المدينة</td><td class="val">${order.city || "-"}${order.governorate ? " / " + order.governorate : ""}</td></tr>
+        ${order.notes ? `<tr><td class="lbl">ملاحظات</td><td class="val">${order.notes}</td></tr>` : ""}
+        <tr><td colspan="2" style="padding-top:8px;font-weight:bold;font-size:11px;border-bottom:1px solid #000">المنتجات</td></tr>
+        ${items}
+      </table>
+      <div class="total-row"><span>المتبقي للتحصيل</span><span>${remaining} ج.م</span></div>
     </div>`;
 }
 
@@ -104,7 +94,6 @@ export default function OrdersPage() {
   const [selectedForPrint, setSelectedForPrint] = useState<Set<string>>(new Set());
   const [translatedAddresses, setTranslatedAddresses] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [printOverlay, setPrintOverlay] = useState<{ html: string; title: string } | null>(null);
 
   useEffect(() => {
     // Disable pinch-zoom on admin orders page (mobile dashboard)
@@ -183,114 +172,60 @@ export default function OrdersPage() {
   };
 
   const waybillCss = `
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      font-family: 'Cairo', Arial, sans-serif;
-      direction: rtl;
-      color: #000;
-      font-size: 13px;
-      background: #fff;
-    }
-    .page-pair {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .waybill {
-      width: 100%;
-      border: 2px solid #000;
-      border-radius: 4px;
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      background: #fff;
-    }
-    .cut-line {
-      height: 0;
-      border-top: 2px dashed #000;
-      text-align: center;
-      position: relative;
-    }
-    .cut-line::before {
-      content: '✂';
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fff;
-      padding: 0 6px;
-      font-size: 13px;
-      color: #000;
-    }
-    .wb-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 4px; }
-    .wb-logo { font-size: 16px; font-weight: 800; color: #000; }
-    .wb-order { font-size: 11px; color: #333; }
-    .wb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .wb-col { display: flex; flex-direction: column; gap: 2px; }
-    .wb-row { display: flex; gap: 6px; font-size: 11px; padding: 3px 0; border-bottom: 1px solid #ccc; }
-    .wb-label { color: #555; min-width: 58px; font-size: 10px; flex-shrink: 0; }
-    .wb-val { font-weight: 700; flex: 1; font-size: 11px; word-break: break-word; color: #000; }
-    .wb-items-title { font-size: 10px; color: #000; font-weight: 700; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 4px; }
-    .wb-item { display: grid; grid-template-columns: 1fr auto auto; gap: 4px; align-items: center; font-size: 10px; padding: 3px 0; border-bottom: 1px dotted #ccc; }
-    .wb-item-name { font-weight: 600; color: #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .wb-item-size { color: #555; font-size: 9px; text-align: center; white-space: nowrap; }
-    .wb-item-qty { color: #000; font-weight: 800; direction: ltr; text-align: left; white-space: nowrap; }
-    .wb-totals { border-top: 2px solid #000; padding-top: 6px; margin-top: 6px; }
-    .wb-total-final { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; color: #000; }
-    .mobile-share-bar { display: flex; gap: 10px; justify-content: center; padding: 20px; border-top: 1px solid #eee; margin-top: 10px; }
-    .mobile-share-btn { flex: 1; max-width: 200px; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: Cairo, Arial, sans-serif; }
-    .btn-print { background: #1a1a2e; color: #fff; }
-    .btn-pdf { background: #fda1b7; color: #fff; }
-    @media print {
-      @page { size: A4 portrait; margin: 10mm; }
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .mobile-share-bar { display: none !important; }
-      .page-pair { page-break-after: always; }
-      .page-pair:last-child { page-break-after: auto; }
-    }
+    body { font-family: Arial, sans-serif; direction: rtl; background: #fff; color: #000; padding: 16px; }
+    .waybill { border: 2px solid #000; padding: 12px; margin-bottom: 16px; }
+    .wb-top { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+    td { padding: 4px 6px; font-size: 12px; vertical-align: top; }
+    td.lbl { color: #555; width: 70px; font-size: 11px; }
+    td.val { font-weight: bold; }
+    .cut { border-top: 2px dashed #000; text-align: center; margin: 16px 0; font-size: 18px; line-height: 0; }
+    .cut span { background: #fff; padding: 0 8px; }
+    .total-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; border-top: 2px solid #000; padding-top: 6px; margin-top: 6px; }
+    .btns { text-align: center; padding: 20px; }
+    .btns button { margin: 0 8px; padding: 12px 32px; font-size: 15px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-p { background: #1a1a2e; color: #fff; }
+    .btn-d { background: #e91e8c; color: #fff; }
+    @media print { .btns { display: none; } }
   `;
 
-  const openPrintWindow = (html: string, title: string) => {
-    setPrintOverlay({ html, title });
+  const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
+    const waybills: string[] = [];
+    for (let i = 0; i < orderList.length; i++) {
+      if (i > 0) waybills.push(`<div class="cut"><span>✂</span></div>`);
+      waybills.push(generateWaybillHtml(orderList[i], deposits[orderList[i].id] || 0, productImages, translatedAddresses[orderList[i].id]));
+    }
+    return `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>${titleStr}</title>
+<style>${waybillCss}</style>
+</head><body>
+${waybills.join("")}
+<div class="btns">
+  <button class="btn-p" onclick="window.print()">🖨️ طباعة</button>
+  <button class="btn-d" onclick="window.print()">📄 حفظ PDF</button>
+</div>
+</body></html>`;
   };
 
-  const doPrint = (html: string) => {
+  const doPrint = (orderList: Order[], titleStr: string) => {
+    const html = buildWaybillHtml(orderList, titleStr);
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
-  };
-
-  const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
-    const pages: string[] = [];
-    for (let i = 0; i < orderList.length; i += 2) {
-      const a = generateWaybillHtml(orderList[i], deposits[orderList[i].id] || 0, productImages, translatedAddresses[orderList[i].id]);
-      const cutOrEmpty = i + 1 < orderList.length ? `<div class="cut-line"></div>` : `<div style="height:140mm"></div>`;
-      const b = i + 1 < orderList.length
-        ? generateWaybillHtml(orderList[i + 1], deposits[orderList[i + 1].id] || 0, productImages, translatedAddresses[orderList[i + 1].id])
-        : "";
-      pages.push(`<div class="page-pair">${a}${cutOrEmpty}${b}</div>`);
-    }
-    const printBar = `
-      <div class="mobile-share-bar">
-        <button class="mobile-share-btn btn-print" onclick="window.print()">🖨️ طباعة</button>
-        <button class="mobile-share-btn btn-pdf" onclick="window.print()">📄 حفظ PDF</button>
-      </div>`;
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titleStr}</title><style>${waybillCss}</style></head><body>${pages.join("")}${printBar}</body></html>`;
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   };
 
   const handlePrint = (order: Order) => {
-    const html = buildWaybillHtml([order], `بوليصة #${order.id.slice(-6)}`);
-    openPrintWindow(html, `بوليصة #${order.id.slice(-6)}`);
+    doPrint([order], `بوليصة #${order.id.slice(-6)}`);
   };
 
   const handleBatchPrint = () => {
     const toPrint = orders.filter(o => selectedForPrint.has(o.id));
     if (toPrint.length === 0) return;
-    openPrintWindow(buildWaybillHtml(toPrint, "طباعة بوليصات"), "طباعة بوليصات");
+    doPrint(toPrint, "طباعة بوليصات");
   };
 
   const getStatusColor = (s: string) => {
@@ -676,19 +611,6 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* ── PRINT OVERLAY ── */}
-      {printOverlay && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex", flexDirection: "column", background: "#222" }}>
-          <div className="wb-print-bar" style={{ background: "#1a1a2e", padding: "10px 14px", display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
-            <button onClick={() => setPrintOverlay(null)} style={{ background: "transparent", border: "none", color: "#fff", fontSize: 22, cursor: "pointer", padding: "0 6px", lineHeight: 1 }}>✕</button>
-            <span style={{ color: "#fda1b7", fontWeight: 700, fontSize: 13, flex: 1 }}>{printOverlay.title}</span>
-            <button onClick={() => doPrint(printOverlay.html)} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>🖨️ طباعة</button>
-            <button onClick={() => doPrint(printOverlay.html)} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "#fda1b7", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>📄 PDF</button>
-          </div>
-          <div className="wb-print-root" style={{ flex: 1, overflowY: "auto", background: "#f5f5f5", padding: 16 }}
-            dangerouslySetInnerHTML={{ __html: printOverlay.html }} />
-        </div>
-      )}
     </>
   );
 }
