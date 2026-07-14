@@ -288,7 +288,6 @@ export default function OrdersPage() {
     if (!win) return;
     win.document.write(html);
     win.document.close();
-    setTimeout(() => { win.focus(); win.print(); }, 1000);
   };
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
@@ -301,7 +300,12 @@ export default function OrdersPage() {
         : "";
       pages.push(`<div class="page-pair">${a}${cutOrEmpty}${b}</div>`);
     }
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titleStr}</title><style>${waybillCss}</style></head><body>${pages.join("")}</body></html>`;
+    const printBar = `
+      <div class="mobile-share-bar">
+        <button class="mobile-share-btn btn-print" onclick="window.print()">🖨️ طباعة</button>
+        <button class="mobile-share-btn btn-pdf" onclick="window.print()">📄 حفظ PDF</button>
+      </div>`;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titleStr}</title><style>${waybillCss}</style></head><body>${pages.join("")}${printBar}</body></html>`;
   };
 
   const handlePrint = (order: Order) => {
