@@ -298,7 +298,7 @@ export default function CheckoutPage() {
                 <div>
                   <label style={labelStyle}>WhatsApp Number * <span style={{ color: "#fda1b7", fontSize: 11 }}>(for deposit confirmation)</span></label>
                   <input value={form.phone2} onChange={e => setForm(p => ({ ...p, phone2: e.target.value.replace(/\D/g, "") }))} placeholder="01XXXXXXXXX" style={inputStyle} maxLength={11} required inputMode="numeric" />
-                  <label style={labelStyle}>Email <span style={{ color: "#aaa", fontSize: 11 }}>(اختياري — هيجيلك تأكيد الطلب)</span></label>
+                  <label style={labelStyle}>Email <span style={{ color: "#aaa", fontSize: 11 }}>(optional)</span></label>
                   <input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="example@email.com" style={inputStyle} type="email" inputMode="email" />
                 </div>
 

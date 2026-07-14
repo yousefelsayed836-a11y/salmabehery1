@@ -95,8 +95,7 @@ async function sendOrderEmail(order, items) {
 }
 
 async function sendCustomerConfirmationEmail(order, items) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || !order.customer_email) return;
+  if (!order.customer_email) return;
 
   const itemsHtml = (items || []).map(i =>
     `<tr>
@@ -149,19 +148,24 @@ async function sendCustomerConfirmationEmail(order, items) {
   </div>
 </div>`;
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: 'Salma Behery <onboarding@resend.dev>',
-      to: [order.customer_email],
-      subject: `✅ تم تأكيد طلبك #${String(order.id).slice(-6)} — Salma Behery`,
-      html,
-    }),
+  const nodemailer = require('nodemailer');
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+  if (!gmailUser || !gmailPass) {
+    console.log('[Email] GMAIL_USER or GMAIL_APP_PASSWORD not set, skipping customer email');
+    return;
+  }
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: gmailUser, pass: gmailPass },
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || JSON.stringify(data));
-  console.log('[Email] Customer confirmation sent to', order.customer_email, '| id:', data.id);
+  await transporter.sendMail({
+    from: `"Salma Behery" <${gmailUser}>`,
+    to: order.customer_email,
+    subject: `✅ تم تأكيد طلبك #${String(order.id).slice(-6)} — Salma Behery`,
+    html,
+  });
+  console.log('[Email] Customer confirmation sent to', order.customer_email);
 }
 
 // Add deposit column if it doesn't exist

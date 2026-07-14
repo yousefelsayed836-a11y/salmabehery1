@@ -283,17 +283,16 @@ export default function OrdersPage() {
     setPrintOverlay({ html, title });
   };
 
-  const downloadPdf = (html: string, _title: string) => {
-    // Inject auto-print script so the new tab triggers print dialog immediately
-    const htmlWithAutoPrint = html.replace(
-      "</head>",
-      `<script>window.onload=function(){setTimeout(function(){window.print();},400);};<\/script></head>`
-    );
-    const win = window.open("", "_blank");
-    if (!win) { alert("يرجى السماح بفتح نوافذ منبثقة ثم المحاولة مرة أخرى"); return; }
-    win.document.open();
-    win.document.write(htmlWithAutoPrint);
-    win.document.close();
+  const downloadPdf = (html: string, title: string) => {
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = title.replace(/[^\w؀-ۿ]/g, '_') + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
   };
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
