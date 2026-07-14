@@ -73,7 +73,7 @@ router.post('/migrate-to-github', async (req, res) => {
         const m = cat.image.match(/^data:([^;]+);base64,(.+)$/s);
         if (!m) { results.failed++; continue; }
         const buf = Buffer.from(m[2], 'base64');
-        const compressed = await sharp(buf).rotate().resize({ width: 800, height: 1100, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
+        const compressed = await sharp(buf).rotate().resize({ width: 1600, height: 2000, fit: 'inside', withoutEnlargement: true }).webp({ quality: 92 }).toBuffer();
         const filename = `cat-${cat.id}-${Date.now()}.webp`;
         const filePath = `images/${filename}`;
         const apiRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${filePath}`, {

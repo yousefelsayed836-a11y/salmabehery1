@@ -100,8 +100,8 @@ async function compressImage(buffer) {
   try {
     return await sharp(buffer)
       .rotate()
-      .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 85, effort: 4 })
+      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 92 })
       .toBuffer();
   } catch (e) {
     console.error('Image compression failed, using original:', e.message);
@@ -226,7 +226,7 @@ app.post('/api/admin/migrate-images-to-local', async (req, res) => {
         const m = cat.image.match(/^data:([^;]+);base64,(.+)$/s);
         if (!m) continue;
         const buf = Buffer.from(m[2], 'base64');
-        const compressed = await sharp(buf).rotate().resize({ width: 800, height: 1100, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
+        const compressed = await sharp(buf).rotate().resize({ width: 1600, height: 2000, fit: 'inside', withoutEnlargement: true }).webp({ quality: 92 }).toBuffer();
         const filename = `cat-${cat.id}-${Date.now()}.webp`;
         fs.writeFileSync(path.join(uploadsDir, filename), compressed);
         await db.query('UPDATE categories SET image = $1 WHERE id = $2', [`/uploads/${filename}`, cat.id]);
@@ -248,8 +248,8 @@ app.post('/api/admin/repair-images', async (req, res) => {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const buf = Buffer.from(await r.arrayBuffer());
     const compressed = await sharp(buf).rotate()
-      .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 85 }).toBuffer();
+      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 92 }).toBuffer();
     const filename = `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.webp`;
     fs.writeFileSync(path.join(uploadsDir, filename), compressed);
     return `/uploads/${filename}`;
@@ -261,7 +261,7 @@ app.post('/api/admin/repair-images', async (req, res) => {
     for (const img of dbImgs.rows) {
       try {
         const buf = Buffer.from(img.data, 'base64');
-        const compressed = await sharp(buf).rotate().webp({ quality: 85 }).toBuffer();
+        const compressed = await sharp(buf).rotate().webp({ quality: 92 }).toBuffer();
         const filename = `dbimg-${img.id}-${Date.now()}.webp`;
         fs.writeFileSync(path.join(uploadsDir, filename), compressed);
         const newUrl = `/uploads/${filename}`, oldUrl = `/api/images/${img.id}`;
