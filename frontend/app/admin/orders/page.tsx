@@ -71,15 +71,15 @@ function generateWaybillHtml(order: Order, deposit: number, productImages: Recor
         <span>#${order.id.slice(-6)} | ${new Date(order.created_at).toLocaleDateString("ar-EG")}</span>
       </div>
       <table>
-        <tr><td class="lbl">الاسم</td><td class="val">${order.customer_name}</td></tr>
-        <tr><td class="lbl">التليفون</td><td class="val">${order.customer_phone}${order.phone2 ? " / " + order.phone2 : ""}</td></tr>
-        <tr><td class="lbl">العنوان</td><td class="val">${address}</td></tr>
-        <tr><td class="lbl">المدينة</td><td class="val">${order.city || "-"}${order.governorate ? " / " + order.governorate : ""}</td></tr>
-        ${order.notes ? `<tr><td class="lbl">ملاحظات</td><td class="val">${order.notes}</td></tr>` : ""}
-        <tr><td colspan="2" style="padding-top:8px;font-weight:bold;font-size:11px;border-bottom:1px solid #000">المنتجات</td></tr>
+        <tr><td class="lbl">Name</td><td class="val">${order.customer_name}</td></tr>
+        <tr><td class="lbl">Phone</td><td class="val">${order.customer_phone}${order.phone2 ? " / " + order.phone2 : ""}</td></tr>
+        <tr><td class="lbl">Address</td><td class="val">${address}</td></tr>
+        <tr><td class="lbl">City</td><td class="val">${order.city || "-"}${order.governorate ? " / " + order.governorate : ""}</td></tr>
+        ${order.notes ? `<tr><td class="lbl">Notes</td><td class="val">${order.notes}</td></tr>` : ""}
+        <tr><td colspan="2" style="padding-top:8px;font-weight:bold;font-size:11px;border-bottom:1px solid #000">Items</td></tr>
         ${items}
       </table>
-      <div class="total-row"><span>المتبقي للتحصيل</span><span>${remaining} ج.م</span></div>
+      <div class="total-row"><span>Amount Due</span><span>${remaining} EGP</span></div>
     </div>`;
 }
 
@@ -204,8 +204,8 @@ export default function OrdersPage() {
 </head><body>
 ${waybills.join("")}
 <div class="btns">
-  <button class="btn-p" onclick="window.print()">🖨️ طباعة</button>
-  <button class="btn-d" onclick="window.print()">📄 حفظ PDF</button>
+  <button class="btn-p" onclick="window.print()">🖨️ Print</button>
+  <button class="btn-d" onclick="window.print()">📄 Save as PDF</button>
 </div>
 </body></html>`;
   };
@@ -219,13 +219,13 @@ ${waybills.join("")}
   };
 
   const handlePrint = (order: Order) => {
-    doPrint([order], `بوليصة #${order.id.slice(-6)}`);
+    doPrint([order], `Waybill #${order.id.slice(-6)}`);
   };
 
   const handleBatchPrint = () => {
     const toPrint = orders.filter(o => selectedForPrint.has(o.id));
     if (toPrint.length === 0) return;
-    doPrint(toPrint, "طباعة بوليصات");
+    doPrint(toPrint, "Print Waybills");
   };
 
   const getStatusColor = (s: string) => {
@@ -336,7 +336,7 @@ ${waybills.join("")}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {selectedForPrint.size > 0 && (
                 <button onClick={handleBatchPrint} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1a1a2e,#333)", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
-                  🖨️ طباعة / PDF ({selectedForPrint.size})
+                  🖨️ Print / PDF ({selectedForPrint.size})
                 </button>
               )}
               <button onClick={fetchOrders} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#fda1b7,#f78fa3)", color: "#fff", fontWeight: 600, cursor: "pointer" }}>🔄 Refresh</button>
@@ -396,7 +396,7 @@ ${waybills.join("")}
               </span>
               {selectedForPrint.size > 0 && (
                 <button onClick={handleBatchPrint} style={{ marginLeft: "auto", padding: "8px 16px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                  🖨️ طباعة / PDF ({selectedForPrint.size})
+                  🖨️ Print / PDF ({selectedForPrint.size})
                 </button>
               )}
             </div>
@@ -454,7 +454,7 @@ ${waybills.join("")}
                     <div style={{ display: "flex", gap: 6 }}>
                       <button onClick={() => openOrder(order)}
                         style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        عرض
+                        View
                       </button>
                     </div>
                   </div>
@@ -482,7 +482,7 @@ ${waybills.join("")}
                 </span>
                 <button onClick={() => handlePrint(selectedOrder)}
                   style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#fff", color: "#1a1a2e", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
-                  🖨️ طباعة
+                  🖨️ Print
                 </button>
                 <button onClick={() => handlePrint(selectedOrder)}
                   style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 11 }}>
