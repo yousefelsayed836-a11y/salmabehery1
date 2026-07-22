@@ -76,8 +76,6 @@ function generateWaybillHtml(order: Order, deposit: number, productImages: Recor
         <tr><td class="lbl">Address</td><td class="val">${address}</td></tr>
         <tr><td class="lbl">City</td><td class="val">${order.city || "-"}${order.governorate ? " / " + order.governorate : ""}</td></tr>
         ${order.notes ? `<tr><td class="lbl">Notes</td><td class="val">${order.notes}</td></tr>` : ""}
-        <tr><td colspan="2" style="padding-top:8px;font-weight:bold;font-size:11px;border-bottom:1px solid #000">Items</td></tr>
-        ${items}
       </table>
       <div class="total-row"><span>Amount Due</span><span>${remaining} EGP</span></div>
     </div>`;
