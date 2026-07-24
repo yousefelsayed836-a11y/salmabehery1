@@ -189,10 +189,15 @@ export default function OrdersPage() {
   `;
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
-    const waybills: string[] = [];
-    for (let i = 0; i < orderList.length; i++) {
-      if (i > 0) waybills.push(`<div class="cut"><span>✂</span></div>`);
-      waybills.push(generateWaybillHtml(orderList[i], deposits[orderList[i].id] || 0, productImages, translatedAddresses[orderList[i].id]));
+    const pages: string[] = [];
+    for (let i = 0; i < orderList.length; i += 4) {
+      const group = orderList.slice(i, i + 4);
+      const inner = group.map((order, j) =>
+        (j > 0 ? `<div class="cut"><span>✂</span></div>` : "") +
+        generateWaybillHtml(order, deposits[order.id] || 0, productImages, translatedAddresses[order.id])
+      ).join("");
+      const isLast = i + 4 >= orderList.length;
+      pages.push(`<div style="page-break-after:${isLast ? "auto" : "always"}">${inner}</div>`);
     }
     return `<!DOCTYPE html>
 <html><head>
@@ -200,7 +205,7 @@ export default function OrdersPage() {
 <title>${titleStr}</title>
 <style>${waybillCss}</style>
 </head><body>
-${waybills.join("")}
+${pages.join("")}
 <div class="btns">
   <button class="btn-p" onclick="window.print()">🖨️ Print</button>
   <button class="btn-d" onclick="window.print()">📄 Save as PDF</button>
