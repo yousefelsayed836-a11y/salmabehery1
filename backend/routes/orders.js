@@ -83,7 +83,7 @@ async function sendOrderEmail(order, items) {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'Salma Behery <onboarding@resend.dev>',
+      from: 'Salma Behery <noreply@salmabehery.com>',
       to: [ADMIN_EMAIL],
       subject: `🛍️ New Order #${String(order.id).slice(-6)} — ${order.customer_name}`,
       html: buildEmailHtml(order, items),
@@ -157,7 +157,7 @@ async function sendCustomerConfirmationEmail(order, items) {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'Salma Behery <onboarding@resend.dev>',
+      from: 'Salma Behery <noreply@salmabehery.com>',
       to: [order.customer_email],
       subject: `✅ تم تأكيد طلبك #${String(order.id).slice(-6)} — Salma Behery`,
       html,
