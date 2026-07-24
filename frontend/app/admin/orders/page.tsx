@@ -172,7 +172,7 @@ export default function OrdersPage() {
   const waybillCss = `
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; direction: rtl; background: #fff; color: #000; padding: 16px; }
-    .waybill { border: 2px solid #000; padding: 12px; margin-bottom: 16px; }
+    .waybill { border: 2px solid #000; padding: 12px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid; }
     .wb-top { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px; font-weight: bold; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
     td { padding: 4px 6px; font-size: 12px; vertical-align: top; }
