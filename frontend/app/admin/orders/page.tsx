@@ -171,21 +171,25 @@ export default function OrdersPage() {
 
   const waybillCss = `
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; direction: rtl; background: #fff; color: #000; padding: 16px; }
-    .waybill { border: 2px solid #000; padding: 12px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid; }
-    .wb-top { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px; font-weight: bold; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-    td { padding: 4px 6px; font-size: 12px; vertical-align: top; }
-    td.lbl { color: #555; width: 70px; font-size: 11px; }
-    td.val { font-weight: bold; }
-    .cut { border-top: 2px dashed #000; text-align: center; margin: 16px 0; font-size: 18px; line-height: 0; }
-    .cut span { background: #fff; padding: 0 8px; }
-    .total-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; border-top: 2px solid #000; padding-top: 6px; margin-top: 6px; }
-    .btns { text-align: center; padding: 20px; }
-    .btns button { margin: 0 8px; padding: 12px 32px; font-size: 15px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; direction: rtl; background: #fff; color: #000; padding: 8px; }
+    .waybill { border: 2px solid #000; padding: 10px; margin-bottom: 12px; page-break-inside: avoid; break-inside: avoid; }
+    .wb-top { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 6px; font-weight: bold; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+    td { padding: 3px 5px; font-size: 11px; vertical-align: top; }
+    td.lbl { color: #555; width: 60px; font-size: 10px; }
+    td.val { font-weight: bold; word-break: break-word; }
+    .cut { border-top: 2px dashed #000; text-align: center; margin: 10px 0; font-size: 16px; line-height: 0; }
+    .cut span { background: #fff; padding: 0 6px; }
+    .total-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; border-top: 2px solid #000; padding-top: 5px; margin-top: 5px; }
+    .btns { text-align: center; padding: 16px 8px; position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eee; }
+    .btns button { margin: 0 6px; padding: 14px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; touch-action: manipulation; }
     .btn-p { background: #1a1a2e; color: #fff; }
     .btn-d { background: #e91e8c; color: #fff; }
-    @media print { .btns { display: none; } }
+    @media print {
+      @page { size: A4; margin: 8mm; }
+      body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .btns { display: none !important; }
+    }
   `;
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
@@ -202,6 +206,7 @@ export default function OrdersPage() {
     return `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${titleStr}</title>
 <style>${waybillCss}</style>
 </head><body>
