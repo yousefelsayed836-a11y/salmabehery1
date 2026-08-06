@@ -190,13 +190,13 @@ export default function OrdersPage() {
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
     const pages: string[] = [];
-    for (let i = 0; i < orderList.length; i += 4) {
-      const group = orderList.slice(i, i + 4);
+    for (let i = 0; i < orderList.length; i += 3) {
+      const group = orderList.slice(i, i + 3);
       const inner = group.map((order, j) =>
         (j > 0 ? `<div class="cut"><span>✂</span></div>` : "") +
         generateWaybillHtml(order, deposits[order.id] || 0, productImages, translatedAddresses[order.id])
       ).join("");
-      const isLast = i + 4 >= orderList.length;
+      const isLast = i + 3 >= orderList.length;
       pages.push(`<div style="page-break-after:${isLast ? "auto" : "always"}">${inner}</div>`);
     }
     return `<!DOCTYPE html>
