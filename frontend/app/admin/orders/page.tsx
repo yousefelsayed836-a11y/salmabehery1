@@ -172,6 +172,9 @@ export default function OrdersPage() {
   const waybillCss = `
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; direction: rtl; background: #fff; color: #000; padding: 8px; }
+    a { color: inherit; text-decoration: none; }
+    .page-group { display: block; page-break-after: always; break-after: page; }
+    .page-group:last-of-type { page-break-after: auto; break-after: auto; }
     .waybill { border: 2px solid #000; padding: 10px; margin-bottom: 12px; page-break-inside: avoid; break-inside: avoid; }
     .wb-top { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 6px; font-weight: bold; font-size: 13px; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
@@ -200,13 +203,13 @@ export default function OrdersPage() {
         (j > 0 ? `<div class="cut"><span>✂</span></div>` : "") +
         generateWaybillHtml(order, deposits[order.id] || 0, productImages, translatedAddresses[order.id])
       ).join("");
-      const isLast = i + 3 >= orderList.length;
-      pages.push(`<div style="page-break-after:${isLast ? "auto" : "always"}">${inner}</div>`);
+      pages.push(`<div class="page-group">${inner}</div>`);
     }
     return `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no, address=no">
 <title>${titleStr}</title>
 <style>${waybillCss}</style>
 </head><body>
