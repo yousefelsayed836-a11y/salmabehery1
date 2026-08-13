@@ -189,7 +189,11 @@ export default function CheckoutPage() {
         setSuccess(true);
       } else {
         const err = await res.json().catch(() => ({}));
-        setErrorMsg(err.error || err.message || "Failed to place order");
+        if (err.outOfStock) {
+          setErrorMsg(`عذراً، "${err.product}" غير متاح حالياً أو نفد من المخزون. برجاء حذفه من السلة وتحديث الصفحة.`);
+        } else {
+          setErrorMsg(err.error || err.message || "Failed to place order");
+        }
       }
     } catch (err: any) {
       setErrorMsg("Network error: " + err.message);

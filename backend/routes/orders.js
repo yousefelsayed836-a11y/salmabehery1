@@ -215,6 +215,47 @@ router.post('/', async (req, res) => {
     const shipping_cost = reqShipping !== undefined ? reqShipping : (itemsTotal >= 900 ? 0 : 100);
     const total = total_amount || (itemsTotal + shipping_cost);
 
+    // Stock validation — reject order if any item is out of stock
+    if (items && Array.isArray(items)) {
+      for (const item of items) {
+        const qty = item.quantity || 1;
+        const size = item.size || '';
+
+        if (size && size.includes(': ')) {
+          const colonIdx = size.indexOf(': ');
+          const optionName = size.substring(0, colonIdx).trim();
+          const optionValue = size.substring(colonIdx + 2).trim();
+          const variantResult = await pool.query(
+            `SELECT quantity FROM product_variants WHERE product_id = $1 AND option_name = $2 AND option_value = $3`,
+            [item.product_id, optionName, optionValue]
+          );
+          const available = variantResult.rows[0]?.quantity ?? null;
+          if (available !== null && available < qty) {
+            const name = item.product_name || 'Product';
+            return res.status(400).json({
+              error: `"${name} (${optionValue})" is out of stock. Only ${available} available.`,
+              outOfStock: true,
+              product: name,
+            });
+          }
+        } else {
+          const productResult = await pool.query(
+            `SELECT stock FROM products WHERE id = $1`,
+            [item.product_id]
+          );
+          const available = productResult.rows[0]?.stock ?? null;
+          if (available !== null && available < qty) {
+            const name = item.product_name || 'Product';
+            return res.status(400).json({
+              error: `"${name}" is out of stock. Only ${available} available.`,
+              outOfStock: true,
+              product: name,
+            });
+          }
+        }
+      }
+    }
+
     const orderColumns = await getTableColumns('orders');
     const orderFields = [];
     const orderValues = [];
