@@ -58,14 +58,10 @@ async function fetchProductImage(productId: string): Promise<string | null> {
   } catch { return null; }
 }
 
-function generateWaybillHtml(order: Order, deposit: number, productImages: Record<string, string>, translatedAddr?: string): string {
+function generateWaybillInner(order: Order, deposit: number, translatedAddr?: string): string {
   const remaining = Math.max(0, (order.total_amount || 0) - deposit);
   const address = translatedAddr || order.shipping_address || order.address || "-";
-  const items = (order.items || []).map(item =>
-    `<tr><td>${item.product_name || "منتج"}${item.size && item.size !== "One Size" ? ` (${item.size})` : ""}</td><td style="text-align:left;direction:ltr">x${item.quantity}</td></tr>`
-  ).join("");
   return `
-    <div class="waybill">
       <div class="wb-top">
         <span>Salma Behery ✦</span>
         <span>#${order.id.slice(-6)} | ${new Date(order.created_at).toLocaleDateString("ar-EG")}</span>
@@ -77,8 +73,7 @@ function generateWaybillHtml(order: Order, deposit: number, productImages: Recor
         <tr><td class="lbl">City</td><td class="val">${order.city || "-"}${order.governorate ? " / " + order.governorate : ""}</td></tr>
         ${order.notes ? `<tr><td class="lbl">Notes</td><td class="val">${order.notes}</td></tr>` : ""}
       </table>
-      <div class="total-row"><span>Amount Due</span><span>${remaining} EGP</span></div>
-    </div>`;
+      <div class="total-row"><span>Amount Due</span><span>${remaining} EGP</span></div>`;
 }
 
 export default function OrdersPage() {
@@ -173,15 +168,14 @@ export default function OrdersPage() {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; direction: rtl; background: #fff; color: #000; padding: 8px; }
     a { color: inherit; text-decoration: none; }
-    .page-group { display: block; page-break-after: always; break-after: page; }
-    .page-group:last-of-type { page-break-after: auto; break-after: auto; }
-    .waybill { border: 2px solid #000; padding: 10px; margin-bottom: 12px; page-break-inside: avoid; break-inside: avoid; }
+    .waybill { border: 2px solid #000; padding: 10px; margin-bottom: 0; page-break-inside: avoid; break-inside: avoid; display: block; }
+    .waybill.after-break { page-break-after: always; break-after: page; }
     .wb-top { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 6px; font-weight: bold; font-size: 13px; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
     td { padding: 3px 5px; font-size: 11px; vertical-align: top; }
     td.lbl { color: #555; width: 60px; font-size: 10px; }
     td.val { font-weight: bold; word-break: break-word; }
-    .cut { border-top: 2px dashed #000; text-align: center; margin: 10px 0; font-size: 16px; line-height: 0; }
+    .cut { border-top: 2px dashed #000; text-align: center; margin: 8px 0; font-size: 16px; line-height: 0; page-break-inside: avoid; break-inside: avoid; }
     .cut span { background: #fff; padding: 0 6px; }
     .total-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; border-top: 2px solid #000; padding-top: 5px; margin-top: 5px; }
     .btns { text-align: center; padding: 16px 8px; position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eee; }
@@ -196,15 +190,14 @@ export default function OrdersPage() {
   `;
 
   const buildWaybillHtml = (orderList: Order[], titleStr: string) => {
-    const pages: string[] = [];
-    for (let i = 0; i < orderList.length; i += 3) {
-      const group = orderList.slice(i, i + 3);
-      const inner = group.map((order, j) =>
-        (j > 0 ? `<div class="cut"><span>✂</span></div>` : "") +
-        generateWaybillHtml(order, deposits[order.id] || 0, productImages, translatedAddresses[order.id])
-      ).join("");
-      pages.push(`<div class="page-group">${inner}</div>`);
-    }
+    const parts: string[] = [];
+    orderList.forEach((order, idx) => {
+      const posInPage = idx % 3;          // 0, 1, or 2 within current page
+      const isLastOnPage = posInPage === 2 && idx < orderList.length - 1;
+      const inner = generateWaybillInner(order, deposits[order.id] || 0, translatedAddresses[order.id]);
+      if (posInPage > 0) parts.push(`<div class="cut"><span>✂</span></div>`);
+      parts.push(`<div class="waybill${isLastOnPage ? " after-break" : ""}">${inner}</div>`);
+    });
     return `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
@@ -213,7 +206,7 @@ export default function OrdersPage() {
 <title>${titleStr}</title>
 <style>${waybillCss}</style>
 </head><body>
-${pages.join("")}
+${parts.join("")}
 <div class="btns">
   <button class="btn-p" onclick="window.print()">🖨️ Print</button>
   <button class="btn-d" onclick="window.print()">📄 Save as PDF</button>
