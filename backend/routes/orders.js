@@ -215,12 +215,27 @@ router.post('/', async (req, res) => {
     const shipping_cost = reqShipping !== undefined ? reqShipping : (itemsTotal >= 900 ? 0 : 100);
     const total = total_amount || (itemsTotal + shipping_cost);
 
-    // Stock validation — reject order if any item is out of stock
+    // Validate each item: reject if product deleted or out of stock
     if (items && Array.isArray(items)) {
       for (const item of items) {
         const qty = item.quantity || 1;
+        const name = item.product_name || 'Product';
         const size = item.size || '';
 
+        // Check product still exists
+        const productResult = await pool.query(
+          `SELECT stock FROM products WHERE id = $1`,
+          [item.product_id]
+        );
+        if (productResult.rows.length === 0) {
+          return res.status(400).json({
+            error: `"${name}" is no longer available.`,
+            outOfStock: true,
+            product: name,
+          });
+        }
+
+        // Check variant stock if size provided
         if (size && size.includes(': ')) {
           const colonIdx = size.indexOf(': ');
           const optionName = size.substring(0, colonIdx).trim();
@@ -229,25 +244,19 @@ router.post('/', async (req, res) => {
             `SELECT quantity FROM product_variants WHERE product_id = $1 AND option_name = $2 AND option_value = $3`,
             [item.product_id, optionName, optionValue]
           );
-          const available = variantResult.rows[0]?.quantity ?? null;
-          if (available !== null && available < qty) {
-            const name = item.product_name || 'Product';
+          const available = variantResult.rows[0]?.quantity ?? productResult.rows[0].stock;
+          if (available < qty) {
             return res.status(400).json({
-              error: `"${name} (${optionValue})" is out of stock. Only ${available} available.`,
+              error: `"${name} (${optionValue})" is out of stock.`,
               outOfStock: true,
               product: name,
             });
           }
         } else {
-          const productResult = await pool.query(
-            `SELECT stock FROM products WHERE id = $1`,
-            [item.product_id]
-          );
-          const available = productResult.rows[0]?.stock ?? null;
-          if (available !== null && available < qty) {
-            const name = item.product_name || 'Product';
+          const available = productResult.rows[0].stock;
+          if (available < qty) {
             return res.status(400).json({
-              error: `"${name}" is out of stock. Only ${available} available.`,
+              error: `"${name}" is out of stock.`,
               outOfStock: true,
               product: name,
             });

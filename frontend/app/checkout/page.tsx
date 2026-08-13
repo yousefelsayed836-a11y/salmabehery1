@@ -190,7 +190,7 @@ export default function CheckoutPage() {
       } else {
         const err = await res.json().catch(() => ({}));
         if (err.outOfStock) {
-          setErrorMsg(`عذراً، "${err.product}" غير متاح حالياً أو نفد من المخزون. برجاء حذفه من السلة وتحديث الصفحة.`);
+          setErrorMsg(`عذراً، "${err.product}" غير متاح حالياً أو تم حذفه. برجاء إزالته من السلة ومتابعة الطلب.`);
         } else {
           setErrorMsg(err.error || err.message || "Failed to place order");
         }
