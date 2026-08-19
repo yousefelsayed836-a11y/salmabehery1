@@ -12,8 +12,16 @@ pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_email VARCHAR(2
 async function adjustStock(productId, size, qty, direction /* 'deduct' | 'restore' */) {
   const sign = direction === 'deduct' ? '-' : '+';
 
+  // Always deduct from main product stock
+  try {
+    await pool.query(
+      `UPDATE products SET stock = GREATEST(0, stock ${sign} $1) WHERE id = $2`,
+      [qty, productId]
+    );
+  } catch (e) { console.error('Product stock adjust error:', e.message); }
+
+  // Also deduct from variant if size provided
   if (size && size.includes(': ')) {
-    // Variant product: deduct from variant quantity only
     const colonIdx = size.indexOf(': ');
     const optionName = size.substring(0, colonIdx).trim();
     const optionValue = size.substring(colonIdx + 2).trim();
@@ -24,14 +32,6 @@ async function adjustStock(productId, size, qty, direction /* 'deduct' | 'restor
         [qty, productId, optionName, optionValue]
       );
     } catch (e) { console.error('Variant stock adjust error:', e.message); }
-  } else {
-    // No variant: deduct from main product stock only
-    try {
-      await pool.query(
-        `UPDATE products SET stock = GREATEST(0, stock ${sign} $1) WHERE id = $2`,
-        [qty, productId]
-      );
-    } catch (e) { console.error('Product stock adjust error:', e.message); }
   }
 }
 function buildEmailHtml(order, items) {
