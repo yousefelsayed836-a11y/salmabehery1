@@ -234,7 +234,8 @@ router.post('/', async (req, res) => {
       images || [], main_image || (images && images.length > 0 ? images[0] : null),
       resolvedPrimaryId,
       material || null, water_resistance || null, size_info || null,
-      stock || 0, is_active !== undefined ? is_active : true, is_featured || false
+      (variants && variants.length > 0 ? variants.reduce((s, v) => s + (Number(v.quantity) || 0), 0) : stock || 0),
+      is_active !== undefined ? is_active : true, is_featured || false
     ]);
 
     const productId = result.rows[0].id;
@@ -317,7 +318,10 @@ router.put('/:id', async (req, res) => {
       images, main_image,
       resolvedPrimaryId !== undefined ? resolvedPrimaryId : null,
       material, water_resistance, size_info,
-      stock, is_active, is_featured, id
+      (variants && Array.isArray(variants) && variants.length > 0
+        ? variants.reduce((s, v) => s + (Number(v.quantity) || 0), 0)
+        : stock),
+      is_active, is_featured, id
     ]);
 
     // Update product_categories junction if category_ids provided

@@ -133,7 +133,10 @@ export default function ProductsPage() {
           name_en: addForm.name_en.trim(), name_ar: addForm.name_ar || undefined,
           description_en: addForm.description_en || undefined, description_ar: addForm.description_ar || undefined,
           price: Number(addForm.price), old_price: addForm.old_price ? Number(addForm.old_price) : undefined,
-          stock: Number(addForm.stock) || 0, material: addForm.material || undefined,
+          stock: addForm.variants && addForm.variants.length > 0
+            ? addForm.variants.reduce((s: number, v: Variant) => s + (Number(v.quantity) || 0), 0)
+            : Number(addForm.stock) || 0,
+          material: addForm.material || undefined,
           main_image: addForm.images?.[0] || addForm.main_image || undefined,
           images: addForm.images?.length > 0 ? addForm.images : (addForm.main_image ? [addForm.main_image] : []),
           category_id: addForm.category_ids[0] || addForm.category_id || undefined,
@@ -166,7 +169,10 @@ export default function ProductsPage() {
           name_en: fullEditForm.name_en.trim(), name_ar: fullEditForm.name_ar || undefined,
           description_en: fullEditForm.description_en || undefined, description_ar: fullEditForm.description_ar || undefined,
           price: Number(fullEditForm.price), old_price: fullEditForm.old_price ? Number(fullEditForm.old_price) : null,
-          stock: Number(fullEditForm.stock) || 0, material: fullEditForm.material || undefined,
+          stock: fullEditForm.variants && fullEditForm.variants.length > 0
+            ? fullEditForm.variants.reduce((s: number, v: Variant) => s + (Number(v.quantity) || 0), 0)
+            : Number(fullEditForm.stock) || 0,
+          material: fullEditForm.material || undefined,
           main_image: fullEditForm.images?.[0] || fullEditForm.main_image || undefined,
           images: fullEditForm.images?.length > 0 ? fullEditForm.images : (fullEditForm.main_image ? [fullEditForm.main_image] : undefined),
           category_id: fullEditForm.category_ids[0] || fullEditForm.category_id || undefined,
@@ -336,8 +342,10 @@ export default function ProductsPage() {
                           <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
                             <input type="number" value={editPrice} onChange={e => setEditPrice(e.target.value)} placeholder="Price" autoFocus
                               style={{ width: 80, padding: "4px 8px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 13, outline: "none" }} />
-                            <input type="number" value={editStock} onChange={e => setEditStock(e.target.value)} placeholder="Stock"
-                              style={{ width: 60, padding: "4px 8px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 13, outline: "none" }} />
+                            {!(p.variants && p.variants.length > 0) && (
+                              <input type="number" value={editStock} onChange={e => setEditStock(e.target.value)} placeholder="Stock"
+                                style={{ width: 60, padding: "4px 8px", borderRadius: 7, border: "1.5px solid #fda1b7", fontSize: 13, outline: "none" }} />
+                            )}
                           </div>
                         ) : (
                           <div className="prod-row-meta" style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3, flexWrap: "wrap" }}>

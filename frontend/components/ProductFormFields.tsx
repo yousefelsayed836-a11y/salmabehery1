@@ -39,6 +39,9 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
 
   const [newVariant, setNewVariant] = useState<Variant>(emptyVariant());
 
+  const hasVariants = variants.length > 0;
+  const variantTotalStock = variants.reduce((s, v) => s + (Number(v.quantity) || 0), 0);
+
   const toggleCategory = (id: string) => {
     const next = selectedIds.includes(id)
       ? selectedIds.filter(x => x !== id)
@@ -47,19 +50,29 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
     onChange("category_id", next[0] || "");
   };
 
+  const syncStock = (updatedVariants: Variant[]) => {
+    const total = updatedVariants.reduce((s, v) => s + (Number(v.quantity) || 0), 0);
+    onChange("stock", String(total));
+  };
+
   const addVariant = () => {
     if (!newVariant.option_value.trim()) return;
-    onChange("variants", [...variants, { ...newVariant }]);
+    const updated = [...variants, { ...newVariant }];
+    onChange("variants", updated);
+    syncStock(updated);
     setNewVariant(emptyVariant());
   };
 
   const removeVariant = (i: number) => {
-    onChange("variants", variants.filter((_, idx) => idx !== i));
+    const updated = variants.filter((_, idx) => idx !== i);
+    onChange("variants", updated);
+    syncStock(updated);
   };
 
   const updateVariant = (i: number, field: keyof Variant, value: any) => {
     const updated = variants.map((v, idx) => idx === i ? { ...v, [field]: value } : v);
     onChange("variants", updated);
+    if (field === "quantity") syncStock(updated);
   };
 
   return (
@@ -90,10 +103,20 @@ export default function ProductFormFields({ form, onChange, formId, categories, 
         <input type="number" value={form.old_price} onChange={e => onChange("old_price", e.target.value)} style={inputStyle} />
       </div>
 
-      <div>
-        <label style={labelStyle}>Stock *</label>
-        <input type="number" value={form.stock} onChange={e => onChange("stock", e.target.value)} style={inputStyle} />
-      </div>
+      {hasVariants ? (
+        <div>
+          <label style={labelStyle}>Stock (auto-calculated)</label>
+          <div style={{ ...inputStyle, background: "#f3f4f6", color: "#6b7280", display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontWeight: 700, color: "#1a1a2e" }}>{variantTotalStock}</span>
+            <span style={{ fontSize: 12 }}>— sum of variant quantities</span>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <label style={labelStyle}>Stock *</label>
+          <input type="number" value={form.stock} onChange={e => onChange("stock", e.target.value)} style={inputStyle} />
+        </div>
+      )}
 
       <div>
         <label style={labelStyle}>Material</label>
