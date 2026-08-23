@@ -99,10 +99,13 @@ export default function ProductPage() {
             .then(r => r.json())
             .then(data => {
               const all: Product[] = data.products || data.data || [];
-              const sim = all.filter((x: Product) =>
-                x.id !== productId && x.is_active !== false &&
-                (x.stock === undefined || x.stock === null || x.stock > 0)
-              ).slice(0, 4);
+              const sim = all.filter((x: Product) => {
+                if (x.id === productId || x.is_active === false) return false;
+                const eff = (x.variants && x.variants.length > 0)
+                  ? x.variants.reduce((s: number, v: Variant) => s + (Number(v.quantity) || 0), 0)
+                  : (x.stock ?? 0);
+                return eff === undefined || eff === null || eff > 0;
+              }).slice(0, 4);
               setSimilar(sim);
               preloadImages(sim.map((x: Product) => x.main_image || (x.images && x.images[0]) || "").filter(Boolean));
               productCache.set(productId, { product: p, similar: sim });

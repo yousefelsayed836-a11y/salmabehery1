@@ -12,16 +12,14 @@ pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_email VARCHAR(2
 async function adjustStock(productId, size, qty, direction /* 'deduct' | 'restore' */) {
   const sign = direction === 'deduct' ? '-' : '+';
 
-  // Always deduct from main product stock
-  try {
-    await pool.query(
-      `UPDATE products SET stock = GREATEST(0, stock ${sign} $1) WHERE id = $2`,
-      [qty, productId]
-    );
-  } catch (e) { console.error('Product stock adjust error:', e.message); }
+  // Check if product has variants
+  const variantCheck = await pool.query(
+    `SELECT COUNT(*) as cnt FROM product_variants WHERE product_id = $1`, [productId]
+  );
+  const hasVariants = parseInt(variantCheck.rows[0]?.cnt || '0') > 0;
 
-  // Also deduct from variant if size provided
-  if (size && size.includes(': ')) {
+  if (hasVariants && size && size.includes(': ')) {
+    // Deduct from specific variant
     const colonIdx = size.indexOf(': ');
     const optionName = size.substring(0, colonIdx).trim();
     const optionValue = size.substring(colonIdx + 2).trim();
@@ -32,6 +30,24 @@ async function adjustStock(productId, size, qty, direction /* 'deduct' | 'restor
         [qty, productId, optionName, optionValue]
       );
     } catch (e) { console.error('Variant stock adjust error:', e.message); }
+
+    // Sync products.stock = sum of all variant quantities
+    try {
+      await pool.query(
+        `UPDATE products SET stock = (
+          SELECT COALESCE(SUM(quantity), 0) FROM product_variants WHERE product_id = $1
+        ) WHERE id = $1`,
+        [productId]
+      );
+    } catch (e) { console.error('Product stock sync error:', e.message); }
+  } else {
+    // No variants — deduct from main product stock directly
+    try {
+      await pool.query(
+        `UPDATE products SET stock = GREATEST(0, stock ${sign} $1) WHERE id = $2`,
+        [qty, productId]
+      );
+    } catch (e) { console.error('Product stock adjust error:', e.message); }
   }
 }
 function buildEmailHtml(order, items) {
