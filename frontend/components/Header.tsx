@@ -11,8 +11,7 @@ const NAV_LINKS = [
   { label: "Bracelets",     href: "/shop/bracelet" },
   { label: "Earrings",      href: "/shop/earrings" },
   { label: "Hand Chains",   href: "/shop/hand-chains" },
-  { label: "Sets",          href: "/shop/sets" },
-  { label: "Extra Things",  href: "/shop/extra-things" },
+  { label: "Sets & Extra Things", href: "/shop/sets-and-extra-things" },
 ];
 
 const BagIcon = () => (
