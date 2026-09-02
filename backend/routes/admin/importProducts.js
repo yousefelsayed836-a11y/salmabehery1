@@ -125,6 +125,12 @@ async function importHandler(req, res) {
     const catMap = {};
     catResult.rows.forEach(c => { catMap[c.slug] = c.id; });
 
+    // Require explicit confirmation before wiping all products
+    const confirmed = req.body?.confirm === 'yes' || req.query?.confirm === 'yes';
+    if (!confirmed) {
+      return res.status(400).json({ error: 'Missing confirmation. Pass confirm=yes to proceed with full import (this deletes all products).' });
+    }
+
     // Delete existing products (preserve orders by nulling product_id)
     await pool.query('DELETE FROM product_categories WHERE true');
     await pool.query('UPDATE order_items SET product_id = NULL WHERE product_id IS NOT NULL');
@@ -205,7 +211,6 @@ async function importHandler(req, res) {
   }
 }
 
-router.get('/', importHandler);
 router.post('/', importHandler);
 
 module.exports = router;
