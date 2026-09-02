@@ -380,8 +380,12 @@ router.patch('/:id/toggle', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const existing = await db.query('SELECT id FROM products WHERE id = $1', [id]);
+    const existing = await db.query('SELECT id, name_en FROM products WHERE id = $1', [id]);
     if (existing.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
+    const name = existing.rows[0].name_en;
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    const ua = req.headers['user-agent'] || 'unknown';
+    console.log(`[PRODUCT DELETE] id=${id} name="${name}" ip=${ip} ua="${ua}" time=${new Date().toISOString()}`);
     await db.query('DELETE FROM product_categories WHERE product_id = $1', [id]);
     await db.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
     await db.query('DELETE FROM products WHERE id = $1', [id]);
