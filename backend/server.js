@@ -58,6 +58,30 @@ app.use('/api/shipping', require('./routes/shipping'));
 // ✅ One-time CSV import
 app.use('/api/admin/import-products', require('./routes/admin/importProducts'));
 
+// ✅ Inventory integrity: parent product stock always equals the sum of its variants
+db.query(`
+  CREATE OR REPLACE FUNCTION sync_product_stock_from_variants()
+  RETURNS TRIGGER AS $
+  BEGIN
+    UPDATE products
+    SET stock = (
+      SELECT COALESCE(SUM(quantity), 0)
+      FROM product_variants
+      WHERE product_id = COALESCE(NEW.product_id, OLD.product_id)
+    ),
+    updated_at = CURRENT_TIMESTAMP
+    WHERE id = COALESCE(NEW.product_id, OLD.product_id);
+    RETURN COALESCE(NEW, OLD);
+  END;
+  $ LANGUAGE plpgsql;
+
+  DROP TRIGGER IF EXISTS sync_product_stock_after_variant_change ON product_variants;
+  CREATE TRIGGER sync_product_stock_after_variant_change
+  AFTER INSERT OR UPDATE OF quantity OR DELETE ON product_variants
+  FOR EACH ROW
+  EXECUTE FUNCTION sync_product_stock_from_variants();
+`).catch(e => console.error('Inventory trigger init error:', e.message));
+
 // ✅ Ensure uploaded_images table exists
 db.query(`
   CREATE TABLE IF NOT EXISTS uploaded_images (
