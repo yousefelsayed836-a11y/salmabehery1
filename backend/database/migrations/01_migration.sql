@@ -57,7 +57,29 @@ CREATE TRIGGER update_variants_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- 6. Create view for products with variants
+-- 6. Keep products.stock synchronized with variant quantities at database level
+CREATE OR REPLACE FUNCTION sync_product_stock_from_variants()
+RETURNS TRIGGER AS $
+BEGIN
+    UPDATE products
+    SET stock = (
+        SELECT COALESCE(SUM(quantity), 0)
+        FROM product_variants
+        WHERE product_id = COALESCE(NEW.product_id, OLD.product_id)
+    ),
+    updated_at = CURRENT_TIMESTAMP
+    WHERE id = COALESCE(NEW.product_id, OLD.product_id);
+    RETURN COALESCE(NEW, OLD);
+END;
+$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS sync_product_stock_after_variant_change ON product_variants;
+CREATE TRIGGER sync_product_stock_after_variant_change
+AFTER INSERT OR UPDATE OF quantity OR DELETE ON product_variants
+FOR EACH ROW
+EXECUTE FUNCTION sync_product_stock_from_variants();
+
+-- 7. Create view for products with variants
 CREATE OR REPLACE VIEW products_with_variants AS
 SELECT 
     p.*,
