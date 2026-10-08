@@ -8,47 +8,38 @@ const ADMIN_EMAIL = 'salmabehery14@gmail.com';
 // Ensure customer_email column exists
 pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_email VARCHAR(255) DEFAULT ''`).catch(() => {});
 
-// Deduct or restore stock for a product and its specific variant (if size matches)
-async function adjustStock(productId, size, qty, direction /* 'deduct' | 'restore' */) {
-  const sign = direction === 'deduct' ? '-' : '+';
-
-  // Check if product has variants
-  const variantCheck = await pool.query(
-    `SELECT COUNT(*) as cnt FROM product_variants WHERE product_id = $1`, [productId]
-  );
-  const hasVariants = parseInt(variantCheck.rows[0]?.cnt || '0') > 0;
-
-  if (hasVariants && size && size.includes(': ')) {
-    // Deduct from specific variant
-    const colonIdx = size.indexOf(': ');
-    const optionName = size.substring(0, colonIdx).trim();
-    const optionValue = size.substring(colonIdx + 2).trim();
-    try {
-      await pool.query(
-        `UPDATE product_variants SET quantity = GREATEST(0, quantity ${sign} $1)
-         WHERE product_id = $2 AND option_name = $3 AND option_value = $4`,
-        [qty, productId, optionName, optionValue]
-      );
-    } catch (e) { console.error('Variant stock adjust error:', e.message); }
-
-    // Sync products.stock = sum of all variant quantities
-    try {
-      await pool.query(
-        `UPDATE products SET stock = (
-          SELECT COALESCE(SUM(quantity), 0) FROM product_variants WHERE product_id = $1
-        ) WHERE id = $1`,
-        [productId]
-      );
-    } catch (e) { console.error('Product stock sync error:', e.message); }
-  } else {
-    // No variants — deduct from main product stock directly
-    try {
-      await pool.query(
-        `UPDATE products SET stock = GREATEST(0, stock ${sign} $1) WHERE id = $2`,
-        [qty, productId]
-      );
-    } catch (e) { console.error('Product stock adjust error:', e.message); }
+// Stock / Variant inventory
+// For products with variants, products.stock is always SUM(variant.quantity).
+async function adjustStock(productId, size, qty, direction /* deduct | restore */) {
+  const amount = Math.max(0, Number(qty) || 0);
+  if (!amount) return;
+  const sign = direction === 'restore' ? 1 : -1;
+  const productResult = await pool.query('SELECT id, stock FROM products WHERE id = $1 FOR UPDATE', [productId]);
+  if (!productResult.rows.length) throw new Error('Product not found');
+  const variantResult = await pool.query(`SELECT id, option_name, option_value, quantity FROM product_variants WHERE product_id = $1 ORDER BY id FOR UPDATE`, [productId]);
+  const variants = variantResult.rows;
+  if (variants.length === 0) {
+    if (direction === 'deduct' && Number(productResult.rows[0].stock) < amount) throw new Error('Insufficient product stock');
+    await pool.query('UPDATE products SET stock = GREATEST(0, stock + $1), updated_at = CURRENT_TIMESTAMP WHERE id = $2', [sign * amount, productId]);
+    return;
   }
+  const rawSize = String(size || '').trim();
+  let optionName = ''; let optionValue = '';
+  if (rawSize.includes(':')) {
+    const parts = rawSize.split(':'); optionName = parts.shift().trim(); optionValue = parts.join(':').trim();
+  } else {
+    optionValue = rawSize;
+    const matches = variants.filter(v => String(v.option_value).trim().toLowerCase() === optionValue.toLowerCase());
+    if (matches.length === 1) optionName = String(matches[0].option_name).trim();
+    else if (!optionValue && variants.length === 1) { optionName = String(variants[0].option_name).trim(); optionValue = String(variants[0].option_value).trim(); }
+  }
+  if (!optionName || !optionValue) throw new Error('A variant must be selected for this product');
+  const variant = variants.find(v => String(v.option_name).trim().toLowerCase() === optionName.toLowerCase() && String(v.option_value).trim().toLowerCase() === optionValue.toLowerCase());
+  if (!variant) throw new Error(`Variant not found: ${optionName}: ${optionValue}`);
+  const currentQty = Number(variant.quantity) || 0;
+  if (direction === 'deduct' && currentQty < amount) throw new Error(`Insufficient stock for variant ${optionName}: ${optionValue}`);
+  await pool.query(`UPDATE product_variants SET quantity = GREATEST(0, quantity + $1) WHERE id = $2`, [sign * amount, variant.id]);
+  await pool.query(`UPDATE products SET stock = (SELECT COALESCE(SUM(quantity), 0) FROM product_variants WHERE product_id = $1), updated_at = CURRENT_TIMESTAMP WHERE id = $1`, [productId]);
 }
 function buildEmailHtml(order, items) {
   const itemsHtml = (items || []).map(i =>
