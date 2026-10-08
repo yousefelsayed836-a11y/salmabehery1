@@ -245,34 +245,36 @@ router.post('/', async (req, res) => {
           });
         }
 
-        // Check variant stock if size provided
-        if (size && size.includes(': ')) {
-          const colonIdx = size.indexOf(': ');
-          const optionName = size.substring(0, colonIdx).trim();
-          const optionValue = size.substring(colonIdx + 2).trim();
-          const variantResult = await pool.query(
-            `SELECT quantity FROM product_variants WHERE product_id = $1 AND option_name = $2 AND option_value = $3`,
-            [item.product_id, optionName, optionValue]
+        // Variant products: validate the exact selected variant.
+        const variantRows = await pool.query(
+          `SELECT option_name, option_value, quantity FROM product_variants WHERE product_id = $1 ORDER BY id`,
+          [item.product_id]
+        );
+        if (variantRows.rows.length > 0) {
+          const variants = variantRows.rows;
+          const rawSize = String(size || '').trim();
+          let optionName = '';
+          let optionValue = '';
+          if (rawSize.includes(':')) {
+            const parts = rawSize.split(':');
+            optionName = parts.shift().trim();
+            optionValue = parts.join(':').trim();
+          } else {
+            optionValue = rawSize;
+            const matches = variants.filter(v => String(v.option_value).trim().toLowerCase() === optionValue.toLowerCase());
+            if (matches.length === 1) optionName = String(matches[0].option_name).trim();
+            else if (!optionValue && variants.length === 1) { optionName = String(variants[0].option_name).trim(); optionValue = String(variants[0].option_value).trim(); }
+          }
+          const selected = variants.find(v =>
+            String(v.option_name).trim().toLowerCase() === optionName.toLowerCase() &&
+            String(v.option_value).trim().toLowerCase() === optionValue.toLowerCase()
           );
-          const available = variantResult.rows[0]?.quantity ?? productResult.rows[0].stock;
-          if (available < qty) {
-            return res.status(400).json({
-              error: `"${name} (${optionValue})" is out of stock.`,
-              outOfStock: true,
-              product: name,
-            });
-          }
+          if (!selected) return res.status(400).json({ error: `"${name}" requires a valid variant selection.`, outOfStock: true, product: name });
+          if (Number(selected.quantity) < qty) return res.status(400).json({ error: `"${name} (${selected.option_value})" is out of stock.`, outOfStock: true, product: name });
         } else {
-          const available = productResult.rows[0].stock;
-          if (available < qty) {
-            return res.status(400).json({
-              error: `"${name}" is out of stock.`,
-              outOfStock: true,
-              product: name,
-            });
-          }
-        }
-      }
+          const available = Number(productResult.rows[0].stock) || 0;
+          if (available < qty) return res.status(400).json({ error: `"${name}" is out of stock.`, outOfStock: true, product: name });
+        }      }
     }
 
     const orderColumns = await getTableColumns('orders');
